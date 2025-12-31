@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="description" content="NEWTOKEN provides crypto token creation, blockchain websites and Telegram bot development on BSC, Ethereum, Avalanche and Solana.">
+<meta name="description" content="NEWTOKEN provides crypto token creation, blockchain websites and Telegram bot development on BSC, Ethereum, Avalanche and Solana.">
 
 <meta name="keywords" content="token creation, crypto development, telegram bot, blockchain website, bsc token, ethereum token, solana token, avalanche token">
 
@@ -15,8 +15,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEWTOKEN | Crypto & Telegram Development</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/jpeg" href="https://i.ibb.co/JwnBqcg6/tokenolustur.jpg">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 *{
@@ -27,9 +27,57 @@
 }
 
 body{
-    background:linear-gradient(135deg,#0b0f1a,#0f172a);
+    background:#0a0e1a;
     color:#e5e7eb;
     overflow-x:hidden;
+}
+
+/* Animated Background */
+.bg-animation{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
+    background:linear-gradient(135deg,#0a0e1a,#0f172a,#1e1b4b);
+    background-size:400% 400%;
+    animation:gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift{
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+
+.bg-animation::before{
+    content:'';
+    position:absolute;
+    width:500px;
+    height:500px;
+    background:radial-gradient(circle,rgba(56,189,248,0.15),transparent);
+    border-radius:50%;
+    top:20%;
+    left:10%;
+    animation:float 20s ease-in-out infinite;
+}
+
+.bg-animation::after{
+    content:'';
+    position:absolute;
+    width:400px;
+    height:400px;
+    background:radial-gradient(circle,rgba(139,92,246,0.15),transparent);
+    border-radius:50%;
+    bottom:10%;
+    right:15%;
+    animation:float 15s ease-in-out infinite reverse;
+}
+
+@keyframes float{
+    0%,100%{transform:translate(0,0)}
+    50%{transform:translate(50px,50px)}
 }
 
 header{
@@ -37,12 +85,21 @@ header{
     justify-content:space-between;
     align-items:center;
     padding:25px 8%;
+    backdrop-filter:blur(10px);
+    background:rgba(10,14,26,0.8);
+    position:sticky;
+    top:0;
+    z-index:100;
+    border-bottom:1px solid rgba(56,189,248,0.1);
 }
 
 .logo{
-    font-size:26px;
-    font-weight:700;
-    color:#38bdf8;
+    font-size:28px;
+    font-weight:800;
+    background:linear-gradient(135deg,#38bdf8,#8b5cf6);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
     letter-spacing:1px;
 }
 
@@ -51,6 +108,23 @@ nav a{
     text-decoration:none;
     color:#cbd5f5;
     transition:.3s;
+    position:relative;
+    font-weight:500;
+}
+
+nav a::after{
+    content:'';
+    position:absolute;
+    bottom:-5px;
+    left:0;
+    width:0;
+    height:2px;
+    background:#38bdf8;
+    transition:.3s;
+}
+
+nav a:hover::after{
+    width:100%;
 }
 
 nav a:hover{
@@ -58,31 +132,49 @@ nav a:hover{
 }
 
 .hero{
-    min-height:85vh;
+    min-height:90vh;
     display:flex;
     align-items:center;
     padding:0 8%;
-    gap:50px;
+    gap:60px;
+    position:relative;
 }
 
 .hero-text{
     flex:1;
+    animation:fadeInUp 1s ease;
+}
+
+@keyframes fadeInUp{
+    from{
+        opacity:0;
+        transform:translateY(30px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
 }
 
 .hero-text h1{
-    font-size:48px;
+    font-size:56px;
     line-height:1.2;
     margin-bottom:20px;
+    font-weight:800;
 }
 
 .hero-text span{
-    color:#38bdf8;
+    background:linear-gradient(135deg,#38bdf8,#8b5cf6);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
 }
 
 .hero-text p{
-    font-size:18px;
+    font-size:20px;
     color:#9ca3af;
-    margin-bottom:35px;
+    margin-bottom:40px;
+    line-height:1.6;
 }
 
 .buttons{
@@ -91,22 +183,44 @@ nav a:hover{
 }
 
 .btn{
-    padding:14px 32px;
-    border-radius:8px;
+    padding:16px 36px;
+    border-radius:12px;
     border:none;
     cursor:pointer;
     font-size:16px;
     font-weight:600;
-    transition:.3s;
+    transition:all .3s;
+    position:relative;
+    overflow:hidden;
+}
+
+.btn::before{
+    content:'';
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:0;
+    height:0;
+    border-radius:50%;
+    background:rgba(255,255,255,0.2);
+    transition:.5s;
+    transform:translate(-50%,-50%);
+}
+
+.btn:hover::before{
+    width:300px;
+    height:300px;
 }
 
 .btn-primary{
-    background:#38bdf8;
-    color:#020617;
+    background:linear-gradient(135deg,#38bdf8,#0ea5e9);
+    color:#fff;
+    box-shadow:0 8px 24px rgba(56,189,248,0.3);
 }
 
 .btn-primary:hover{
-    background:#0ea5e9;
+    transform:translateY(-2px);
+    box-shadow:0 12px 32px rgba(56,189,248,0.4);
 }
 
 .btn-outline{
@@ -116,107 +230,299 @@ nav a:hover{
 }
 
 .btn-outline:hover{
-    background:#38bdf8;
-    color:#020617;
+    background:rgba(56,189,248,0.1);
+    transform:translateY(-2px);
 }
 
-.hero-logos{
+.hero-visual{
     flex:1;
     display:flex;
     justify-content:center;
     align-items:center;
+    position:relative;
 }
 
-.hero-logos img{
-    width:70px;
-    margin:0 15px;
-    filter:drop-shadow(0 0 25px rgba(56,189,248,.35));
+.hero-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+    animation:fadeIn 1.5s ease;
+}
+
+@keyframes fadeIn{
+    from{opacity:0}
+    to{opacity:1}
+}
+
+.hero-card{
+    width:180px;
+    height:180px;
+    border-radius:20px;
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(10px);
+    border:1px solid rgba(56,189,248,0.2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:.3s;
+    animation:floatCard 6s ease-in-out infinite;
+}
+
+.hero-card:nth-child(1){animation-delay:0s}
+.hero-card:nth-child(2){animation-delay:1.5s}
+.hero-card:nth-child(3){animation-delay:3s}
+.hero-card:nth-child(4){animation-delay:4.5s}
+
+@keyframes floatCard{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-15px)}
+}
+
+.hero-card:hover{
+    transform:translateY(-10px) scale(1.05);
+    border-color:#38bdf8;
+    box-shadow:0 20px 40px rgba(56,189,248,0.3);
+}
+
+.hero-card img{
+    width:80px;
+    filter:drop-shadow(0 0 30px rgba(56,189,248,0.5));
 }
 
 section{
-    padding:90px 8%;
+    padding:100px 8%;
+    position:relative;
 }
 
 .section-title{
-    font-size:36px;
+    font-size:42px;
     text-align:center;
     margin-bottom:60px;
+    font-weight:800;
+    background:linear-gradient(135deg,#fff,#38bdf8);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
 }
 
 .services{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:30px;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:35px;
 }
 
 .card{
-    background:rgba(255,255,255,.03);
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:18px;
-    padding:35px;
+    background:rgba(255,255,255,0.03);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:24px;
+    padding:40px;
+    transition:all .4s;
+    position:relative;
+    overflow:hidden;
+}
+
+.card-icon{
+    width:100%;
+    height:180px;
+    border-radius:16px;
+    overflow:hidden;
+    margin-bottom:25px;
+    position:relative;
+}
+
+.card-icon img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:.4s;
+    filter:brightness(0.7);
+}
+
+.card:hover .card-icon img{
+    transform:scale(1.1);
+    filter:brightness(0.9);
+}
+
+.feature-list{
+    list-style:none;
+    margin-top:20px;
+    padding:0;
+}
+
+.feature-list li{
+    color:#9ca3af;
+    margin:10px 0;
+    font-size:14px;
+    padding-left:5px;
+}
+
+.telegram-group{
+    margin-top:25px;
+    padding-top:20px;
+    border-top:1px solid rgba(56,189,248,0.2);
+}
+
+.group-link{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 20px;
+    background:rgba(56,189,248,0.1);
+    border:1px solid rgba(56,189,248,0.3);
+    border-radius:10px;
+    color:#38bdf8;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
     transition:.3s;
 }
 
-.card:hover{
-    transform:translateY(-8px);
+.group-link:hover{
+    background:rgba(56,189,248,0.2);
+    transform:translateX(5px);
     border-color:#38bdf8;
+}
+
+.tg-icon{
+    font-size:18px;
+}
+
+.card::before{
+    content:'';
+    position:absolute;
+    top:-50%;
+    left:-50%;
+    width:200%;
+    height:200%;
+    background:linear-gradient(45deg,transparent,rgba(56,189,248,0.1),transparent);
+    transform:rotate(45deg);
+    transition:.5s;
+}
+
+.card:hover::before{
+    left:100%;
+}
+
+.card:hover{
+    transform:translateY(-10px);
+    border-color:rgba(56,189,248,0.5);
+    box-shadow:0 20px 60px rgba(56,189,248,0.2);
+    background:rgba(255,255,255,0.05);
 }
 
 .card h3{
     margin-bottom:15px;
+    font-size:24px;
     color:#38bdf8;
+    font-weight:700;
 }
 
 .card p{
     color:#9ca3af;
-    line-height:1.6;
+    line-height:1.7;
+    font-size:16px;
 }
 
 .networks{
     display:flex;
     justify-content:center;
-    gap:35px;
+    gap:50px;
     flex-wrap:wrap;
-    margin-top:30px;
+    margin-top:40px;
 }
 
-.networks img{
-    width:60px;
-    filter:drop-shadow(0 0 20px rgba(56,189,248,.35));
+.network-logo{
+    width:80px;
+    transition:.3s;
+    filter:drop-shadow(0 0 25px rgba(56,189,248,0.4));
+    animation:pulse 3s ease-in-out infinite;
+}
+
+.network-logo:nth-child(1){animation-delay:0s}
+.network-logo:nth-child(2){animation-delay:0.5s}
+.network-logo:nth-child(3){animation-delay:1s}
+.network-logo:nth-child(4){animation-delay:1.5s}
+
+@keyframes pulse{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.1)}
+}
+
+.network-logo:hover{
+    transform:scale(1.2) rotate(5deg);
+    filter:drop-shadow(0 0 40px rgba(56,189,248,0.8));
 }
 
 .cta{
-    background:linear-gradient(135deg,#020617,#020617cc);
-    border-radius:25px;
+    background:linear-gradient(135deg,rgba(56,189,248,0.1),rgba(139,92,246,0.1));
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(56,189,248,0.2);
+    border-radius:30px;
     text-align:center;
-    padding:70px 20px;
+    padding:80px 40px;
+    position:relative;
+    overflow:hidden;
+}
+
+.cta::before{
+    content:'';
+    position:absolute;
+    top:0;
+    left:-100%;
+    width:100%;
+    height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);
+    animation:shine 3s infinite;
+}
+
+@keyframes shine{
+    0%{left:-100%}
+    100%{left:200%}
 }
 
 .cta h2{
-    font-size:40px;
+    font-size:44px;
     margin-bottom:20px;
+    font-weight:800;
 }
 
 .cta p{
-    font-size:18px;
+    font-size:20px;
     color:#9ca3af;
-    margin-bottom:35px;
+    margin-bottom:40px;
 }
 
 footer{
     text-align:center;
-    padding:30px;
+    padding:40px;
     color:#6b7280;
-    border-top:1px solid rgba(255,255,255,.08);
+    border-top:1px solid rgba(255,255,255,0.1);
+    background:rgba(10,14,26,0.8);
 }
 
 @media(max-width:900px){
     .hero{
         flex-direction:column;
         text-align:center;
+        padding-top:40px;
+    }
+    .hero-text h1{
+        font-size:42px;
     }
     .buttons{
         justify-content:center;
+    }
+    .hero-grid{
+        grid-template-columns:repeat(2,1fr);
+        gap:15px;
+    }
+    .hero-card{
+        width:140px;
+        height:140px;
+    }
+    .hero-card img{
+        width:60px;
     }
 }
 </style>
@@ -224,11 +530,14 @@ footer{
 
 <body>
 
+<div class="bg-animation"></div>
+
 <header>
     <div class="logo">NEWTOKEN</div>
     <nav>
         <a href="#services">Services</a>
         <a href="#networks">Networks</a>
+        <a href="https://t.me/tokenolusturma" target="_blank">Create Token</a>
         <a href="#contact">Contact</a>
     </nav>
 </header>
@@ -246,11 +555,21 @@ footer{
         </div>
     </div>
 
-    <div class="hero-logos">
-        <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BSC">
-        <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" alt="Ethereum">
-        <img src="https://cryptologos.cc/logos/avalanche-avax-logo.png" alt="Avalanche">
-        <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana">
+    <div class="hero-visual">
+        <div class="hero-grid">
+            <div class="hero-card">
+                <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BSC">
+            </div>
+            <div class="hero-card">
+                <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" alt="Ethereum">
+            </div>
+            <div class="hero-card">
+                <img src="https://cryptologos.cc/logos/avalanche-avax-logo.png" alt="Avalanche">
+            </div>
+            <div class="hero-card">
+                <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana">
+            </div>
+        </div>
     </div>
 </section>
 
@@ -258,32 +577,77 @@ footer{
     <h2 class="section-title">What I Do</h2>
     <div class="services">
         <div class="card">
+            <div class="card-icon">
+                <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=300&fit=crop" alt="Token">
+            </div>
             <h3>Token Creation</h3>
             <p>
                 Secure and optimized token contracts with custom tokenomics
-                on BSC, Ethereum, Avalanche and Solana.
+                on BSC, Ethereum, Avalanche and Solana. Features include anti-whale mechanisms, 
+                liquidity locks, buyback systems, reflection rewards, and comprehensive audit support.
             </p>
+            <ul class="feature-list">
+                <li>✓ Custom tokenomics design</li>
+                <li>✓ Smart contract development</li>
+                <li>✓ Security audits & testing</li>
+                <li>✓ Multi-chain deployment</li>
+            </ul>
+            <div class="telegram-group">
+                <a href="https://t.me/tokenolusturma" target="_blank" class="group-link">
+                    <span class="tg-icon">📱</span> Join our Token Creation Group
+                </a>
+            </div>
         </div>
         <div class="card">
+            <div class="card-icon">
+                <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop" alt="Website">
+            </div>
             <h3>Crypto Websites</h3>
             <p>
                 Clean, modern and fast websites designed specifically for
-                crypto and Web3 projects.
+                crypto and Web3 projects. Responsive designs with wallet integration, 
+                price charts, staking dashboards, and seamless user experience across all devices.
             </p>
+            <ul class="feature-list">
+                <li>✓ Modern UI/UX design</li>
+                <li>✓ Wallet connect integration</li>
+                <li>✓ Real-time data displays</li>
+                <li>✓ Mobile-first approach</li>
+            </ul>
         </div>
         <div class="card">
+            <div class="card-icon">
+                <img src="https://images.unsplash.com/photo-1611746872915-64382b5c76da?w=400&h=300&fit=crop" alt="Telegram">
+            </div>
             <h3>Telegram Bots</h3>
             <p>
                 Custom Telegram bots for community management, utilities,
-                automation and project growth.
+                automation and project growth. Trading bots, sniping tools, portfolio trackers, 
+                airdrop managers, and complete community engagement solutions.
             </p>
+            <ul class="feature-list">
+                <li>✓ Trading & sniping bots</li>
+                <li>✓ Community management</li>
+                <li>✓ Analytics & tracking</li>
+                <li>✓ Custom integrations</li>
+            </ul>
         </div>
         <div class="card">
+            <div class="card-icon">
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop" alt="Projects">
+            </div>
             <h3>Full Projects</h3>
             <p>
                 End-to-end crypto project development from idea to launch,
-                including smart contracts and infrastructure.
+                including smart contracts and infrastructure. Complete DeFi platforms, 
+                NFT marketplaces, launchpads, staking systems, and custom blockchain solutions.
             </p>
+            <ul class="feature-list">
+                <li>✓ Project consultation</li>
+                <li>✓ Full-stack development</li>
+                <li>✓ Launch strategy & support</li>
+                <li>✓ Ongoing maintenance</li>
+            </ul>
         </div>
     </div>
 </section>
@@ -291,16 +655,16 @@ footer{
 <section id="networks">
     <h2 class="section-title">Supported Networks</h2>
     <div class="networks">
-        <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png">
-        <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png">
-        <img src="https://cryptologos.cc/logos/avalanche-avax-logo.png">
-        <img src="https://cryptologos.cc/logos/solana-sol-logo.png">
+        <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" class="network-logo" alt="BNB">
+        <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" class="network-logo" alt="Ethereum">
+        <img src="https://cryptologos.cc/logos/avalanche-avax-logo.png" class="network-logo" alt="Avalanche">
+        <img src="https://cryptologos.cc/logos/solana-sol-logo.png" class="network-logo" alt="Solana">
     </div>
 </section>
 
 <section class="cta" id="contact">
     <h2>Ready to Launch?</h2>
-    <p>Let’s build your next crypto & Telegram project.</p>
+    <p>Let's build your next crypto & Telegram project.</p>
     <button class="btn btn-primary" onclick="goTelegram()">Message @creatorsc</button>
 </section>
 
