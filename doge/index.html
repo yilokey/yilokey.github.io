@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flappy Doge - Telegram Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        body {
+            font-family: 'Russo One', sans-serif;
+            background: #1a1a2e;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .ui-element {
+            pointer-events: auto;
+        }
+        
+        .menu-btn {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border: 3px solid #fff;
+            border-radius: 15px;
+            padding: 15px 40px;
+            font-size: 24px;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+            box-shadow: 0 6px 0 #d97706, 0 10px 20px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+            cursor: pointer;
+            margin: 10px;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .menu-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #d97706, 0 5px 10px rgba(0,0,0,0.3);
+        }
+        
+        .menu-btn.secondary {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            box-shadow: 0 6px 0 #2563eb, 0 10px 20px rgba(0,0,0,0.3);
+        }
+        
+        .menu-btn.secondary:active {
+            box-shadow: 0 2px 0 #2563eb, 0 5px 10px rgba(0,0,0,0.3);
+        }
+        
+        .menu-btn.danger {
+            background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+            box-shadow: 0 6px 0 #dc2626, 0 10px 20px rgba(0,0,0,0.3);
+        }
+        
+        .menu-btn.danger:active {
+            box-shadow: 0 2px 0 #dc2626, 0 5px 10px rgba(0,0,0,0.3);
+        }
+        
+        .score-display {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 48px;
+            color: #fff;
+            text-shadow: 3px 3px 0 #000, -1px -1px 0 #000;
+            z-index: 10;
+        }
+        
+        .pause-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.5);
+            border: 3px solid #fff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 10;
+        }
+        
+        .pause-btn::before {
+            content: '⏸';
+            font-size: 24px;
+            color: #fff;
+        }
+        
+        .pause-btn.paused::before {
+            content: '▶';
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .title-text {
+            font-size: 56px;
+            color: #fbbf24;
+            text-shadow: 
+                4px 4px 0 #000,
+                -2px -2px 0 #000,
+                4px -2px 0 #000,
+                -2px 4px 0 #000;
+            margin-bottom: 10px;
+            text-align: center;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .controls-hint {
+            position: absolute;
+            bottom: 30px;
+            color: #fff;
+            font-size: 14px;
+            text-shadow: 2px 2px 0 #000;
+            opacity: 0.8;
+            text-align: center;
+            width: 100%;
+        }
+        
+        /* Particle effects */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="scoreDisplay" class="score-display hidden">0</div>
+    
+    <button id="pauseBtn" class="pause-btn hidden ui-element"></button>
+    
+    <!-- Main Menu -->
+    <div id="mainMenu" class="ui-overlay">
+        <div class="title-text">FLAPPY<br>DOGE</div>
+        <div class="subtitle">Much Fly. Very Wow.</div>
+        <button class="menu-btn ui-element" onclick="game.start()">PLAY</button>
+        <button class="menu-btn secondary ui-element" onclick="game.showTutorial()">HOW TO PLAY</button>
+    </div>
+    
+    <!-- Pause Menu -->
+    <div id="pauseMenu" class="ui-overlay hidden">
+        <div class="title-text" style="font-size: 42px;">PAUSED</div>
+        <button class="menu-btn ui-element" onclick="game.resume()">RESUME</button>
+        <button class="menu-btn secondary ui-element" onclick="game.restart()">RESTART</button>
+        <button class="menu-btn danger ui-element" onclick="game.quit()">QUIT</button>
+    </div>
+    
+    <!-- Game Over Menu -->
+    <div id="gameOverMenu" class="ui-overlay hidden">
+        <div class="title-text" style="font-size: 42px; color: #ef4444;">GAME OVER</div>
+        <div style="background: rgba(0,0,0,0.6); padding: 20px 40px; border-radius: 15px; margin: 20px; text-align: center;">
+            <div style="color: #fbbf24; font-size: 20px; margin-bottom: 10px;">SCORE</div>
+            <div id="finalScore" style="color: #fff; font-size: 48px; text-shadow: 3px 3px 0 #000;">0</div>
+            <div style="color: #60a5fa; font-size: 16px; margin-top: 10px;">BEST: <span id="bestScore">0</span></div>
+        </div>
+        <button class="menu-btn ui-element" onclick="game.restart()">TRY AGAIN</button>
+        <button class="menu-btn secondary ui-element" onclick="game.quit()">MAIN MENU</button>
+    </div>
+    
+    <!-- Tutorial -->
+    <div id="tutorial" class="ui-overlay hidden">
+        <div style="background: rgba(0,0,0,0.8); padding: 30px; border-radius: 20px; max-width: 90%; text-align: center;">
+            <div class="title-text" style="font-size: 32px;">HOW TO PLAY</div>
+            <div style="color: #fff; font-size: 18px; line-height: 1.6; margin: 20px 0;">
+                Tap screen to fly<br>
+                Avoid green pipes<br>
+                Collect points<br>
+                Don't crash!
+            </div>
+            <button class="menu-btn ui-element" onclick="game.hideTutorial()">GOT IT!</button>
+        </div>
+    </div>
+    
+    <div class="controls-hint">Tap anywhere to fly</div>
+
+    <script>
+        // Audio Context for sound generation
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+        
+        const sounds = {
+            jump: () => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start(audioCtx.currentTime);
+                osc.stop(audioCtx.currentTime + 0.1);
+            },
+            score: () => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start(audioCtx.currentTime);
+                osc.stop(audioCtx.currentTime + 0.1);
+            },
+            crash: () => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start(audioCtx.currentTime);
+                osc.stop(audioCtx.currentTime + 0.3);
+            },
+            pause: () => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start(audioCtx.currentTime);
+                osc.stop(audioCtx.currentTime + 0.1);
+            }
+        };
+
+        // Game Constants - Adjusted for realism
+        const GRAVITY = 0.4; // Increased for more realistic fall
+        const JUMP_STRENGTH = 7; // Increased by ~30% from original
+        const PIPE_SPEED = 1.8; // Decreased by ~30% for slower gameplay
+        const PIPE_SPAWN_RATE = 140; // Frames between pipes
+        
+        class Game {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.state = 'MENU'; // MENU, PLAYING, PAUSED, GAMEOVER
+                this.score = 0;
+                this.highScore = localStorage.getItem('flappyDogeHighScore') || 0;
+                this.frames = 0;
+                this.particles = [];
+                
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                
+                // Input handling
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.handleInput();
+                }, {passive: false});
+                
+                this.canvas.addEventListener('mousedown', (e) => {
+                    this.handleInput();
+                });
+                
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space') this.handleInput();
+                    if (e.code === 'Escape') this.togglePause();
+                });
+                
+                document.getElementById('pauseBtn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.togglePause();
+                });
+                
+                // Initialize entities
+                this.doge = new Doge(this.canvas.width, this.canvas.height);
+                this.pipes = [];
+                this.background = new Background(this.canvas.width, this.canvas.height);
+                
+                this.loop();
+            }
+            
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                if (this.doge) {
+                    this.doge.groundY = this.canvas.height - 50;
+                }
+            }
+            
+            handleInput() {
+                if (this.state === 'PLAYING') {
+                    this.doge.jump();
+                    sounds.jump();
+                }
+            }
+            
+            togglePause() {
+                if (this.state === 'PLAYING') {
+                    this.pause();
+                } else if (this.state === 'PAUSED') {
+                    this.resume();
+                }
+            }
+            
+            start() {
+                this.state = 'PLAYING';
+                this.score = 0;
+                this.frames = 0;
+                this.pipes = [];
+                this.doge.reset();
+                this.particles = [];
+                
+                document.getElementById('mainMenu').classList.add('hidden');
+                document.getElementById('gameOverMenu').classList.add('hidden');
+                document.getElementById('scoreDisplay').classList.remove('hidden');
+                document.getElementById('pauseBtn').classList.remove('hidden');
+                document.getElementById('scoreDisplay').textContent = '0';
+                
+                // Resume audio context if suspended
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            }
+            
+            pause() {
+                this.state = 'PAUSED';
+                sounds.pause();
+                document.getElementById('pauseMenu').classList.remove('hidden');
+                document.getElementById('pauseBtn').classList.add('paused');
+            }
+            
+            resume() {
+                this.state = 'PLAYING';
+                document.getElementById('pauseMenu').classList.add('hidden');
+                document.getElementById('pauseBtn').classList.remove('paused');
+            }
+            
+            restart() {
+                document.getElementById('pauseMenu').classList.add('hidden');
+                document.getElementById('gameOverMenu').classList.add('hidden');
+                this.start();
+            }
+            
+            quit() {
+                this.state = 'MENU';
+                document.getElementById('pauseMenu').classList.add('hidden');
+                document.getElementById('gameOverMenu').classList.add('hidden');
+                document.getElementById('scoreDisplay').classList.add('hidden');
+                document.getElementById('pauseBtn').classList.add('hidden');
+                document.getElementById('mainMenu').classList.remove('hidden');
+            }
+            
+            gameOver() {
+                this.state = 'GAMEOVER';
+                sounds.crash();
+                
+                if (this.score > this.highScore) {
+                    this.highScore = this.score;
+                    localStorage.setItem('flappyDogeHighScore', this.highScore);
+                }
+                
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('bestScore').textContent = this.highScore;
+                document.getElementById('gameOverMenu').classList.remove('hidden');
+                document.getElementById('scoreDisplay').classList.add('hidden');
+                document.getElementById('pauseBtn').classList.add('hidden');
+            }
+            
+            showTutorial() {
+                document.getElementById('tutorial').classList.remove('hidden');
+            }
+            
+            hideTutorial() {
+                document.getElementById('tutorial').classList.add('hidden');
+            }
+            
+            update() {
+                if (this.state !== 'PLAYING') return;
+                
+                this.frames++;
+                this.doge.update();
+                this.background.update();
+                
+                // Spawn pipes
+                if (this.frames % PIPE_SPAWN_RATE === 0) {
+                    this.pipes.push(new Pipe(this.canvas.width, this.canvas.height));
+                }
+                
+                // Update pipes
+                for (let i = this.pipes.length - 1; i >= 0; i--) {
+                    const pipe = this.pipes[i];
+                    pipe.update();
+                    
+                    // Check collision
+                    if (pipe.checkCollision(this.doge)) {
+                        this.createExplosion(this.doge.x, this.doge.y);
+                        this.gameOver();
+                    }
+                    
+                    // Check score
+                    if (!pipe.passed && pipe.x + pipe.width < this.doge.x) {
+                        pipe.passed = true;
+                        this.score++;
+                        document.getElementById('scoreDisplay').textContent = this.score;
+                        sounds.score();
+                        this.createScoreEffect(pipe.x + pipe.width/2, this.canvas.height/2);
+                    }
+                    
+                    // Remove off-screen pipes
+                    if (pipe.x + pipe.width < 0) {
+                        this.pipes.splice(i, 1);
+                    }
+                }
+                
+                // Update particles
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    this.particles[i].update();
+                    if (this.particles[i].life <= 0) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+            }
+            
+            createExplosion(x, y) {
+                for (let i = 0; i < 20; i++) {
+                    this.particles.push(new Particle(x, y, 'explosion'));
+                }
+            }
+            
+            createScoreEffect(x, y) {
+                for (let i = 0; i < 10; i++) {
+                    this.particles.push(new Particle(x, y, 'score'));
+                }
+            }
+            
+            draw() {
+                // Clear canvas
+                this.ctx.fillStyle = '#70c5ce';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw background
+                this.background.draw(this.ctx);
+                
+                // Draw pipes
+                this.pipes.forEach(pipe => pipe.draw(this.ctx));
+                
+                // Draw particles
+                this.particles.forEach(p => p.draw(this.ctx));
+                
+                // Draw doge
+                this.doge.draw(this.ctx);
+            }
+            
+            loop() {
+                this.update();
+                this.draw();
+                requestAnimationFrame(() => this.loop());
+            }
+        }
+        
+        class Doge {
+            constructor(canvasWidth, canvasHeight) {
+                this.x = canvasWidth * 0.2;
+                this.y = canvasHeight / 2;
+                this.velocity = 0;
+                this.radius = 20;
+                this.rotation = 0;
+                this.groundY = canvasHeight - 50;
+            }
+            
+            reset() {
+                this.y = this.groundY / 2;
+                this.velocity = 0;
+                this.rotation = 0;
+            }
+            
+            jump() {
+                this.velocity = -JUMP_STRENGTH;
+            }
+            
+            update() {
+                this.velocity += GRAVITY;
+                this.y += this.velocity;
+                
+                // Rotation based on velocity
+                this.rotation = Math.min(Math.PI / 4, Math.max(-Math.PI / 4, this.velocity * 0.05));
+                
+                // Ground collision
+                if (this.y + this.radius >= this.groundY) {
+                    this.y = this.groundY - this.radius;
+                    game.gameOver();
+                }
+                
+                // Ceiling collision
+                if (this.y - this.radius < 0) {
+                    this.y = this.radius;
+                    this.velocity = 0;
+                }
+            }
+            
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                // Shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                ctx.beginPath();
+                ctx.ellipse(0, 25, 15, 5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // DogeCoin Body (Golden circle)
+                const gradient = ctx.createRadialGradient(-5, -5, 0, 0, 0, this.radius);
+                gradient.addColorStop(0, '#ffd700');
+                gradient.addColorStop(0.7, '#ffb700');
+                gradient.addColorStop(1, '#cc8400');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Outer ring
+                ctx.strokeStyle = '#b8860b';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                // Inner ring
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius - 6, 0, Math.PI * 2);
+                ctx.strokeStyle = '#daa520';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Dog face (Shiba Inu style)
+                ctx.fillStyle = '#f4e4c1';
+                ctx.beginPath();
+                ctx.ellipse(0, 2, 12, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Snout
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.ellipse(0, 6, 6, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Nose
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.ellipse(0, 4, 2.5, 1.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Eyes
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(-5, -2, 2.5, 0, Math.PI * 2);
+                ctx.arc(5, -2, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Eye shine
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(-4, -3, 1, 0, Math.PI * 2);
+                ctx.arc(6, -3, 1, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Eyebrows
+                ctx.strokeStyle = '#8b4513';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-8, -6);
+                ctx.lineTo(-2, -5);
+                ctx.moveTo(8, -6);
+                ctx.lineTo(2, -5);
+                ctx.stroke();
+                
+                // Ears
+                ctx.fillStyle = '#e6d5ac';
+                ctx.beginPath();
+                ctx.moveTo(-10, -8);
+                ctx.lineTo(-15, -18);
+                ctx.lineTo(-5, -10);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.moveTo(10, -8);
+                ctx.lineTo(15, -18);
+                ctx.lineTo(5, -10);
+                ctx.fill();
+                
+                // Ear inner
+                ctx.fillStyle = '#d4c4a0';
+                ctx.beginPath();
+                ctx.moveTo(-10, -9);
+                ctx.lineTo(-13, -15);
+                ctx.lineTo(-7, -10);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.moveTo(10, -9);
+                ctx.lineTo(13, -15);
+                ctx.lineTo(7, -10);
+                ctx.fill();
+                
+                // Mouth
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(0, 7, 3, 0.2, Math.PI - 0.2);
+                ctx.stroke();
+                
+                ctx.restore();
+            }
+        }
+        
+        class Pipe {
+            constructor(canvasWidth, canvasHeight) {
+                this.x = canvasWidth;
+                this.width = 60;
+                this.gap = 160;
+                this.topHeight = Math.random() * (canvasHeight - this.gap - 200) + 50;
+                this.bottomY = this.topHeight + this.gap;
+                this.height = canvasHeight - this.bottomY - 50; // 50 is ground height
+                this.passed = false;
+                this.canvasHeight = canvasHeight;
+            }
+            
+            update() {
+                this.x -= PIPE_SPEED;
+            }
+            
+            draw(ctx) {
+                // Pipe body gradient for 3D effect
+                const gradient = ctx.createLinearGradient(this.x, 0, this.x + this.width, 0);
+                gradient.addColorStop(0, '#2d5a27');
+                gradient.addColorStop(0.3, '#4a8f3c');
+                gradient.addColorStop(0.7, '#4a8f3c');
+                gradient.addColorStop(1, '#1e3d1a');
+                
+                // Top pipe
+                ctx.fillStyle = gradient;
+                ctx.fillRect(this.x, 0, this.width, this.topHeight);
+                
+                // Top pipe cap
+                const capGradient = ctx.createLinearGradient(this.x - 5, 0, this.x + this.width + 5, 0);
+                capGradient.addColorStop(0, '#2d5a27');
+                capGradient.addColorStop(0.3, '#5cb84a');
+                capGradient.addColorStop(0.7, '#5cb84a');
+                capGradient.addColorStop(1, '#1e3d1a');
+                
+                ctx.fillStyle = capGradient;
+                ctx.fillRect(this.x - 5, this.topHeight - 30, this.width + 10, 30);
+                
+                // Pipe highlight
+                ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                ctx.fillRect(this.x + 5, 0, 8, this.topHeight - 30);
+                
+                // Bottom pipe
+                ctx.fillStyle = gradient;
+                ctx.fillRect(this.x, this.bottomY, this.width, this.height);
+                
+                // Bottom pipe cap
+                ctx.fillStyle = capGradient;
+                ctx.fillRect(this.x - 5, this.bottomY, this.width + 10, 30);
+                
+                // Bottom pipe highlight
+                ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                ctx.fillRect(this.x + 5, this.bottomY + 30, 8, this.height);
+                
+                // Pipe border
+                ctx.strokeStyle = '#1e3d1a';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.x, 0, this.width, this.topHeight);
+                ctx.strokeRect(this.x, this.bottomY, this.width, this.height);
+            }
+            
+            checkCollision(doge) {
+                // Check if doge is within pipe x range
+                if (doge.x + doge.radius > this.x && doge.x - doge.radius < this.x + this.width) {
+                    // Check if doge hits top pipe or bottom pipe
+                    if (doge.y - doge.radius < this.topHeight || doge.y + doge.radius > this.bottomY) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+        
+        class Background {
+            constructor(width, height) {
+                this.width = width;
+                this.height = height;
+                this.clouds = [];
+                this.groundOffset = 0;
+                
+                // Initialize clouds
+                for (let i = 0; i < 5; i++) {
+                    this.clouds.push({
+                        x: Math.random() * width,
+                        y: Math.random() * (height / 2),
+                        speed: 0.2 + Math.random() * 0.3,
+                        size: 0.5 + Math.random() * 0.5
+                    });
+                }
+            }
+            
+            update() {
+                this.groundOffset = (this.groundOffset + PIPE_SPEED) % 20;
+                
+                this.clouds.forEach(cloud => {
+                    cloud.x -= cloud.speed;
+                    if (cloud.x < -100) {
+                        cloud.x = this.width + 100;
+                        cloud.y = Math.random() * (this.height / 2);
+                    }
+                });
+            }
+            
+            draw(ctx) {
+                // Sky gradient
+                const skyGradient = ctx.createLinearGradient(0, 0, 0, this.height);
+                skyGradient.addColorStop(0, '#87CEEB');
+                skyGradient.addColorStop(1, '#E0F6FF');
+                ctx.fillStyle = skyGradient;
+                ctx.fillRect(0, 0, this.width, this.height);
+                
+                // Sun
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(this.width - 80, 80, 40, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+                ctx.beginPath();
+                ctx.arc(this.width - 80, 80, 50, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Clouds
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                this.clouds.forEach(cloud => {
+                    ctx.save();
+                    ctx.translate(cloud.x, cloud.y);
+                    ctx.scale(cloud.size, cloud.size);
+                    
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 30, 0, Math.PI * 2);
+                    ctx.arc(25, -10, 35, 0, Math.PI * 2);
+                    ctx.arc(50, 0, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.restore();
+                });
+                
+                // City silhouette (far background)
+                ctx.fillStyle = '#b8d4e3';
+                ctx.beginPath();
+                ctx.moveTo(0, this.height - 50);
+                for (let i = 0; i < this.width; i += 30) {
+                    const h = 20 + Math.sin(i * 0.01) * 15;
+                    ctx.lineTo(i, this.height - 50 - h);
+                }
+                ctx.lineTo(this.width, this.height - 50);
+                ctx.lineTo(0, this.height - 50);
+                ctx.fill();
+                
+                // Ground
+                const groundGradient = ctx.createLinearGradient(0, this.height - 50, 0, this.height);
+                groundGradient.addColorStop(0, '#ded895');
+                groundGradient.addColorStop(1, '#d4c76a');
+                ctx.fillStyle = groundGradient;
+                ctx.fillRect(0, this.height - 50, this.width, 50);
+                
+                // Grass top
+                ctx.fillStyle = '#73bf2e';
+                ctx.fillRect(0, this.height - 50, this.width, 8);
+                
+                // Ground texture (moving stripes)
+                ctx.fillStyle = '#c9bc5f';
+                for (let i = -20; i < this.width; i += 20) {
+                    ctx.fillRect(i - this.groundOffset, this.height - 42, 10, 42);
+                }
+            }
+        }
+        
+        class Particle {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.life = 1.0;
+                
+                if (type === 'explosion') {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 2 + Math.random() * 4;
+                    this.vx = Math.cos(angle) * speed;
+                    this.vy = Math.sin(angle) * speed;
+                    this.size = 3 + Math.random() * 5;
+                    this.color = `hsl(${Math.random() * 60 + 30}, 100%, 50%)`;
+                } else if (type === 'score') {
+                    this.vx = (Math.random() - 0.5) * 2;
+                    this.vy = -2 - Math.random() * 2;
+                    this.size = 4;
+                    this.color = '#FFD700';
+                }
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= 0.02;
+                
+                if (this.type === 'explosion') {
+                    this.vy += 0.1; // Gravity
+                }
+            }
+            
+            draw(ctx) {
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                
+                if (this.type === 'score') {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+                }
+                
+                ctx.globalAlpha = 1.0;
+            }
+        }
+        
+        // Initialize game
+        const game = new Game();
+    </script>
+</body>
+</html>
