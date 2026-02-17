@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="HydroTherm - Ihr Experte für Gas, Wasser und Heizung. Professionelle Installationen und zuverlässiger Service.">
-    <title>HydroTherm | Gas · Wasser · Heizung · Installationen</title>
+    <meta name="description" content="HydroTherm Installateur - Ihr Experte für Heizung, Gas, Wasser, Wärmepumpen und Sanitärinstallationen. 24h Notdienst.">
+    <title>HydroTherm Installateur | Heizung · Gas · Wasser · Wärmepumpen</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="shortcut icon" type="image/png" href="logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -16,13 +18,11 @@
             --light-blue: #1EA7E1;
             --primary-red: #E53935;
             --orange: #FF6A00;
-            --bg-light: #F5F7FA;
-            --text-dark: #1a1a1a;
-            --text-gray: #666;
+            --bg-light: #F8FAFC;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
             --white: #ffffff;
-            --shadow: rgba(10, 79, 175, 0.1);
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.3);
+            --shadow: rgba(10, 79, 175, 0.08);
         }
 
         * {
@@ -37,29 +37,26 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-light);
+            background-color: var(--white);
             color: var(--text-dark);
-            line-height: 1.6;
+            line-height: 1.7;
             overflow-x: hidden;
         }
 
-        /* Header Styles */
+        /* Header */
         header {
             position: fixed;
             top: 0;
             width: 100%;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
+            background: var(--white);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
             z-index: 1000;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.04);
         }
 
         header.scrolled {
-            padding: 0.5rem 0;
-            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.08);
         }
 
         nav {
@@ -74,37 +71,52 @@
         .logo {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 1.5rem;
-            font-weight: 700;
+            gap: 0.75rem;
             text-decoration: none;
-            color: var(--primary-blue);
         }
 
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 50%, var(--orange) 100%);
-            border-radius: 8px;
+        .logo img {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .logo-text {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
+            flex-direction: column;
+        }
+
+        .logo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            line-height: 1.2;
+        }
+
+        .logo-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-gray);
+            letter-spacing: 1px;
         }
 
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 2.5rem;
             list-style: none;
+            align-items: center;
         }
 
         .nav-links a {
             text-decoration: none;
             color: var(--text-dark);
             font-weight: 500;
+            font-size: 0.95rem;
             transition: color 0.3s ease;
             position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-blue);
         }
 
         .nav-links a::after {
@@ -114,16 +126,31 @@
             left: 0;
             width: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--primary-blue), var(--orange));
+            background: var(--primary-blue);
             transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary-blue);
         }
 
         .nav-links a:hover::after {
             width: 100%;
+        }
+
+        .emergency-btn {
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--orange) 100%);
+            color: white !important;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+            box-shadow: 0 4px 15px rgba(229, 57, 53, 0.3);
+        }
+
+        .emergency-btn::after {
+            display: none !important;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 4px 15px rgba(229, 57, 53, 0.3); }
+            50% { box-shadow: 0 4px 25px rgba(229, 57, 53, 0.5); }
         }
 
         .mobile-menu {
@@ -136,116 +163,93 @@
         /* Hero Section */
         .hero {
             margin-top: 80px;
-            min-height: 90vh;
-            display: flex;
-            align-items: center;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+            padding: 4rem 2rem;
             position: relative;
             overflow: hidden;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
         }
 
-        .hero-bg {
+        .hero::before {
+            content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
-
-        .water-fire-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 200px;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%230A4FAF' fill-opacity='0.1' d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
-            background-size: cover;
-            animation: wave 10s linear infinite;
-        }
-
-        .wave:nth-child(2) {
-            bottom: 10px;
-            opacity: 0.5;
-            animation: wave 15s linear infinite reverse;
-        }
-
-        @keyframes wave {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        .fire-particles {
-            position: absolute;
-            top: 20%;
-            right: 10%;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(229,57,53,0.1) 0%, rgba(255,106,0,0.05) 50%, transparent 70%);
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(10, 79, 175, 0.08) 0%, transparent 70%);
             border-radius: 50%;
-            filter: blur(40px);
-            animation: pulse 4s ease-in-out infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.6; }
-            50% { transform: scale(1.2); opacity: 0.8; }
-        }
-
-        .hero-content {
+        .hero-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
-            position: relative;
-            z-index: 1;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 4rem;
             align-items: center;
+            position: relative;
+            z-index: 1;
         }
 
-        .hero-text h1 {
-            font-size: 3.5rem;
+        .hero-content h1 {
+            font-size: 3rem;
             font-weight: 700;
             line-height: 1.2;
             margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 0.8s ease forwards;
+            color: var(--text-dark);
         }
 
-        .hero-text p {
+        .hero-content h1 span {
+            color: var(--primary-blue);
+            position: relative;
+        }
+
+        .hero-content h1 span::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: rgba(10, 79, 175, 0.2);
+            z-index: -1;
+        }
+
+        .hero-subtitle {
             font-size: 1.25rem;
             color: var(--text-gray);
             margin-bottom: 2rem;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 0.8s ease 0.2s forwards;
+            line-height: 1.8;
+        }
+
+        .hero-features {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-feature {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+        }
+
+        .hero-feature i {
+            color: var(--primary-blue);
+            font-size: 1.2rem;
         }
 
         .hero-buttons {
             display: flex;
             gap: 1rem;
             flex-wrap: wrap;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 0.8s ease 0.4s forwards;
         }
 
         .btn {
             padding: 1rem 2rem;
-            border-radius: 50px;
+            border-radius: 8px;
             text-decoration: none;
             font-weight: 600;
             transition: all 0.3s ease;
@@ -258,78 +262,66 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+            background: var(--primary-blue);
             color: white;
-            box-shadow: 0 10px 30px rgba(10, 79, 175, 0.3);
+            box-shadow: 0 4px 15px rgba(10, 79, 175, 0.3);
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(10, 79, 175, 0.4);
+            background: #083d8a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(10, 79, 175, 0.4);
         }
 
-        .btn-emergency {
-            background: linear-gradient(135deg, var(--primary-red) 0%, var(--orange) 100%);
-            color: white;
-            box-shadow: 0 10px 30px rgba(229, 57, 53, 0.3);
-            animation: emergencyPulse 2s infinite;
-        }
-
-        @keyframes emergencyPulse {
-            0%, 100% { box-shadow: 0 10px 30px rgba(229, 57, 53, 0.3); }
-            50% { box-shadow: 0 10px 40px rgba(229, 57, 53, 0.5); }
-        }
-
-        .btn-emergency:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(229, 57, 53, 0.5);
-        }
-
-        .hero-visual {
-            position: relative;
-            height: 500px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .hero-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 2rem;
-            box-shadow: 0 20px 60px var(--shadow);
-            max-width: 400px;
-            transform: rotate(-5deg);
-            transition: transform 0.3s ease;
-        }
-
-        .hero-card:hover {
-            transform: rotate(0deg) scale(1.05);
-        }
-
-        .hero-card h3 {
+        .btn-outline {
+            background: transparent;
             color: var(--primary-blue);
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
+            border: 2px solid var(--primary-blue);
         }
 
-        .feature-list {
-            list-style: none;
-            space-y: 0.5rem;
+        .btn-outline:hover {
+            background: var(--primary-blue);
+            color: white;
         }
 
-        .feature-list li {
-            padding: 0.5rem 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .hero-image {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .experience-badge {
+            position: absolute;
+            bottom: 30px;
+            left: -30px;
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .experience-badge .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            display: block;
+            line-height: 1;
+        }
+
+        .experience-badge .text {
+            font-size: 0.9rem;
             color: var(--text-gray);
-        }
-
-        .feature-list i {
-            color: var(--orange);
+            font-weight: 500;
         }
 
         /* Section Styles */
@@ -339,204 +331,137 @@
             margin: 0 auto;
         }
 
-        .section-title {
+        .section-header {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 4rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .section-title h2 {
+        .section-header h2 {
             font-size: 2.5rem;
-            color: var(--primary-blue);
+            color: var(--text-dark);
             margin-bottom: 1rem;
-            position: relative;
-            display: inline-block;
+            font-weight: 700;
         }
 
-        .section-title h2::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-blue), var(--orange));
-            border-radius: 2px;
-        }
-
-        .section-title p {
+        .section-header p {
             color: var(--text-gray);
             font-size: 1.1rem;
-            max-width: 600px;
-            margin: 1.5rem auto 0;
+            line-height: 1.8;
         }
 
-        /* Services Section */
-        .services {
-            background: white;
-            border-radius: 40px;
-            margin: 2rem auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.05);
-        }
-
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-        }
-
-        .service-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 2.5rem;
-            text-align: center;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .service-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            z-index: 0;
-        }
-
-        .service-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(10, 79, 175, 0.2);
-        }
-
-        .service-card:hover::before {
-            opacity: 1;
-        }
-
-        .service-card:hover .service-icon,
-        .service-card:hover h3,
-        .service-card:hover p {
-            color: white;
-            position: relative;
-            z-index: 1;
-        }
-
-        .service-icon {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
+        .highlight {
             color: var(--primary-blue);
-            transition: color 0.4s ease;
-            position: relative;
-            z-index: 1;
+            font-weight: 600;
         }
 
-        .service-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--text-dark);
-            transition: color 0.4s ease;
-            position: relative;
-            z-index: 1;
+        /* Services Grid */
+        .services-detailed {
+            background: var(--bg-light);
+            border-radius: 30px;
+            padding: 4rem 2rem;
+            margin: 2rem auto;
         }
 
-        .service-card p {
-            color: var(--text-gray);
-            font-size: 0.95rem;
-            transition: color 0.4s ease;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* About Section */
-        .about {
+        .service-detailed-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 4rem;
             align-items: center;
+            transition: transform 0.3s ease;
         }
 
-        .about-image {
+        .service-detailed-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+        }
+
+        .service-detailed-card:nth-child(even) {
+            direction: rtl;
+        }
+
+        .service-detailed-card:nth-child(even) > * {
+            direction: ltr;
+        }
+
+        .service-content h3 {
+            font-size: 1.8rem;
+            color: var(--primary-blue);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .service-content h3 i {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .service-content p {
+            color: var(--text-gray);
+            margin-bottom: 1.5rem;
+            line-height: 1.9;
+            font-size: 1.05rem;
+        }
+
+        .service-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .service-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
             position: relative;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            color: var(--text-dark);
         }
 
-        .about-image img {
+        .service-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--primary-blue);
+            font-weight: 700;
+        }
+
+        .service-image {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+
+        .service-image img {
             width: 100%;
-            height: auto;
-            display: block;
+            height: 350px;
+            object-fit: cover;
             transition: transform 0.5s ease;
         }
 
-        .about-image:hover img {
+        .service-detailed-card:hover .service-image img {
             transform: scale(1.05);
-        }
-
-        .about-image::after {
-            content: '';
-            position: absolute;
-            top: -20px;
-            left: -20px;
-            right: 20px;
-            bottom: 20px;
-            border: 3px solid var(--primary-blue);
-            border-radius: 24px;
-            z-index: -1;
-            opacity: 0.3;
-        }
-
-        .about-content h2 {
-            font-size: 2.5rem;
-            color: var(--primary-blue);
-            margin-bottom: 1.5rem;
-        }
-
-        .about-content p {
-            color: var(--text-gray);
-            margin-bottom: 1.5rem;
-            font-size: 1.1rem;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 1.5rem;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-blue);
-            display: block;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: var(--text-gray);
         }
 
         /* Why Us Section */
         .why-us {
             background: linear-gradient(135deg, var(--primary-blue) 0%, #0a2f6f 100%);
-            border-radius: 40px;
+            border-radius: 30px;
             color: white;
+            padding: 4rem;
             position: relative;
             overflow: hidden;
         }
@@ -549,7 +474,7 @@
             width: 100%;
             height: 100%;
             background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
+            animation: rotate 30s linear infinite;
         }
 
         @keyframes rotate {
@@ -557,42 +482,31 @@
             to { transform: rotate(360deg); }
         }
 
-        .why-us .section-title h2 {
-            color: white;
-        }
-
-        .why-us .section-title h2::after {
-            background: var(--orange);
-        }
-
-        .why-us .section-title p {
-            color: rgba(255,255,255,0.8);
-        }
-
-        .features-grid {
+        .why-us-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 2rem;
             position: relative;
             z-index: 1;
+            margin-top: 3rem;
         }
 
-        .feature-card {
+        .why-us-card {
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 2rem;
             text-align: center;
             transition: all 0.3s ease;
         }
 
-        .feature-card:hover {
+        .why-us-card:hover {
             background: rgba(255,255,255,0.2);
             transform: translateY(-5px);
         }
 
-        .feature-icon {
+        .why-us-icon {
             width: 70px;
             height: 70px;
             background: white;
@@ -606,71 +520,122 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        .feature-card h3 {
-            font-size: 1.3rem;
+        .why-us-card h4 {
+            font-size: 1.2rem;
             margin-bottom: 0.5rem;
         }
 
-        .feature-card p {
+        .why-us-card p {
             font-size: 0.95rem;
             opacity: 0.9;
         }
 
-        /* References Section */
-        .references-grid {
+        /* Process Section */
+        .process-steps {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
         }
 
-        .reference-item {
+        .process-step {
+            text-align: center;
             position: relative;
-            border-radius: 16px;
-            overflow: hidden;
-            aspect-ratio: 4/3;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
-        .reference-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .reference-overlay {
+        .process-step:not(:last-child)::after {
+            content: '→';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to top, rgba(10, 79, 175, 0.9), transparent);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 1.5rem;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            top: 40px;
+            right: -20px;
+            color: var(--primary-blue);
+            font-size: 1.5rem;
+            font-weight: 700;
         }
 
-        .reference-item:hover img {
-            transform: scale(1.1);
-        }
-
-        .reference-item:hover .reference-overlay {
-            opacity: 1;
-        }
-
-        .reference-overlay h4 {
+        .step-number {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
             color: white;
-            font-size: 1.2rem;
-            margin-bottom: 0.3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 30px rgba(10, 79, 175, 0.3);
         }
 
-        .reference-overlay p {
-            color: rgba(255,255,255,0.8);
-            font-size: 0.9rem;
+        .process-step h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .process-step p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+        }
+
+        /* Emergency Banner */
+        .emergency-banner {
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--orange) 100%);
+            border-radius: 20px;
+            padding: 3rem;
+            color: white;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            margin: 4rem auto;
+            box-shadow: 0 20px 60px rgba(229, 57, 53, 0.3);
+        }
+
+        .emergency-content h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .emergency-content p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            margin-bottom: 1.5rem;
+        }
+
+        .emergency-features {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .emergency-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .emergency-btn-large {
+            background: white;
+            color: var(--primary-red);
+            padding: 1.25rem 2.5rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            justify-self: end;
+        }
+
+        .emergency-btn-large:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
         }
 
         /* Contact Section */
@@ -678,70 +643,41 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 4rem;
+            align-items: start;
         }
 
-        .contact-info {
+        .contact-info-detailed {
             display: flex;
             flex-direction: column;
             gap: 2rem;
         }
 
-        .contact-card {
+        .contact-block {
             background: white;
             padding: 2rem;
-            border-radius: 20px;
+            border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: flex-start;
-            gap: 1.5rem;
-            transition: transform 0.3s ease;
+            border-left: 4px solid var(--primary-blue);
         }
 
-        .contact-card:hover {
-            transform: translateX(10px);
-        }
-
-        .contact-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
-            border-radius: 15px;
+        .contact-block h4 {
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            flex-shrink: 0;
-        }
-
-        .contact-details h4 {
-            color: var(--primary-blue);
-            margin-bottom: 0.5rem;
+            gap: 0.75rem;
             font-size: 1.2rem;
         }
 
-        .contact-details p, .contact-details a {
+        .contact-block p, .contact-block a {
             color: var(--text-gray);
             text-decoration: none;
+            line-height: 1.8;
             transition: color 0.3s ease;
         }
 
-        .contact-details a:hover {
+        .contact-block a:hover {
             color: var(--primary-blue);
-        }
-
-        .map-container {
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            height: 300px;
-            margin-top: 2rem;
-        }
-
-        .map-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
         }
 
         .contact-form {
@@ -749,6 +685,8 @@
             padding: 3rem;
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 100px;
         }
 
         .form-group {
@@ -760,23 +698,28 @@
             margin-bottom: 0.5rem;
             color: var(--text-dark);
             font-weight: 500;
+            font-size: 0.95rem;
         }
 
         .form-group input,
-        .form-group textarea {
+        .form-group textarea,
+        .form-group select {
             width: 100%;
             padding: 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
             font-family: 'Poppins', sans-serif;
             transition: all 0.3s ease;
             font-size: 1rem;
+            background: #f8fafc;
         }
 
         .form-group input:focus,
-        .form-group textarea:focus {
+        .form-group textarea:focus,
+        .form-group select:focus {
             outline: none;
             border-color: var(--primary-blue);
+            background: white;
             box-shadow: 0 0 0 4px rgba(10, 79, 175, 0.1);
         }
 
@@ -787,15 +730,19 @@
 
         .submit-btn {
             width: 100%;
-            padding: 1rem;
+            padding: 1.25rem;
             background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .submit-btn:hover {
@@ -803,53 +750,48 @@
             box-shadow: 0 10px 30px rgba(10, 79, 175, 0.3);
         }
 
-        /* WhatsApp Button */
-        .whatsapp-float {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background: #25D366;
-            border-radius: 50%;
+        /* Trust Badges */
+        .trust-badges {
             display: flex;
-            align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 2rem;
-            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4);
-            cursor: pointer;
-            z-index: 999;
-            transition: all 0.3s ease;
-            text-decoration: none;
+            gap: 3rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
         }
 
-        .whatsapp-float:hover {
-            transform: scale(1.1) rotate(10deg);
-            box-shadow: 0 15px 40px rgba(37, 211, 102, 0.5);
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-gray);
+            font-weight: 500;
+        }
+
+        .trust-badge i {
+            color: var(--primary-blue);
+            font-size: 1.5rem;
         }
 
         /* Footer */
         footer {
             background: var(--text-dark);
             color: white;
-            padding: 3rem 2rem 1rem;
-            text-align: center;
+            padding: 4rem 2rem 1rem;
+            margin-top: 4rem;
         }
 
         .footer-content {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 3rem;
-            text-align: left;
-            margin-bottom: 2rem;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 4rem;
+            margin-bottom: 3rem;
         }
 
         .footer-section h4 {
             color: var(--light-blue);
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             font-size: 1.2rem;
         }
 
@@ -858,17 +800,71 @@
             text-decoration: none;
             line-height: 2;
             transition: color 0.3s ease;
+            display: block;
         }
 
         .footer-section a:hover {
             color: var(--orange);
         }
 
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-logo img {
+            height: 50px;
+            background: white;
+            padding: 5px;
+            border-radius: 8px;
+        }
+
         .footer-bottom {
-            border-top: 1px solid rgba(255,255,255,0.1);
+            max-width: 1200px;
+            margin: 0 auto;
             padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
             color: rgba(255,255,255,0.5);
             font-size: 0.9rem;
+        }
+
+        /* WhatsApp Float */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 65px;
+            height: 65px;
+            background: #25D366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.2rem;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4);
+            cursor: pointer;
+            z-index: 999;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(37, 211, 102, 0.5);
         }
 
         /* Animations */
@@ -883,34 +879,62 @@
             transform: translateY(0);
         }
 
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         /* Responsive */
         @media (max-width: 968px) {
-            .hero-content {
+            .hero-container {
                 grid-template-columns: 1fr;
                 text-align: center;
             }
 
-            .hero-text h1 {
-                font-size: 2.5rem;
+            .hero-content h1 {
+                font-size: 2.2rem;
             }
 
-            .hero-visual {
+            .hero-image {
                 display: none;
             }
 
-            .about {
+            .service-detailed-card,
+            .service-detailed-card:nth-child(even) {
                 grid-template-columns: 1fr;
+                direction: ltr;
+            }
+
+            .service-detailed-card:nth-child(even) > * {
+                direction: ltr;
+            }
+
+            .why-us-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .process-steps {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .process-step:not(:last-child)::after {
+                display: none;
+            }
+
+            .emergency-banner {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .emergency-btn-large {
+                justify-self: center;
             }
 
             .contact-wrapper {
                 grid-template-columns: 1fr;
+            }
+
+            .contact-form {
+                position: static;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
             }
 
             .nav-links {
@@ -920,29 +944,23 @@
             .mobile-menu {
                 display: block;
             }
-
-            .stats {
-                grid-template-columns: 1fr;
-            }
         }
 
         @media (max-width: 640px) {
-            .hero-text h1 {
-                font-size: 2rem;
-            }
-
-            .section-title h2 {
-                font-size: 1.8rem;
-            }
-
-            .services-grid,
-            .features-grid {
+            .why-us-grid,
+            .process-steps {
                 grid-template-columns: 1fr;
             }
 
-            .btn {
-                width: 100%;
-                justify-content: center;
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .trust-badges {
+                flex-direction: column;
+                align-items: center;
+                gap: 1.5rem;
             }
         }
     </style>
@@ -953,18 +971,20 @@
     <header id="header">
         <nav>
             <a href="#" class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-fire-extinguisher"></i>
+                <img src="logo.png" alt="HydroTherm Logo">
+                <div class="logo-text">
+                    <span class="logo-title">HydroTherm</span>
+                    <span class="logo-subtitle">HEIZUNG · GAS · WASSER</span>
                 </div>
-                <span>HydroTherm</span>
             </a>
             <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#services">Leistungen</a></li>
-                <li><a href="#about">Über uns</a></li>
-                <li><a href="#why-us">Warum wir</a></li>
-                <li><a href="#references">Referenzen</a></li>
-                <li><a href="#contact">Kontakt</a></li>
+                <li><a href="#heizung">Heizung</a></li>
+                <li><a href="#waermepumpe">Wärmepumpen</a></li>
+                <li><a href="#gas">Gasinstallation</a></li>
+                <li><a href="#wasser">Wasser</a></li>
+                <li><a href="#notdienst" class="emergency-btn">
+                    <i class="fas fa-phone-alt"></i> 24h Notdienst
+                </a></li>
             </ul>
             <div class="mobile-menu">
                 <i class="fas fa-bars"></i>
@@ -974,242 +994,392 @@
 
     <!-- Hero Section -->
     <section class="hero" id="home">
-        <div class="hero-bg">
-            <div class="water-fire-container">
-                <div class="wave"></div>
-                <div class="wave"></div>
-                <div class="fire-particles"></div>
-            </div>
-        </div>
-        <div class="hero-content">
-            <div class="hero-text">
-                <h1>Ihr Experte für Gas, Wasser und Heizung</h1>
-                <p>Professionelle Installationen und zuverlässiger Service für Ihr Zuhause und Unternehmen. Qualität, die Sie spüren können.</p>
+        <div class="hero-container">
+            <div class="hero-content fade-in">
+                <h1>Ihr Meisterbetrieb für <span>Heizung & Sanitär</span></h1>
+                <p class="hero-subtitle">
+                    Professionelle Installation und Wartung von Heizungsanlagen, Wärmepumpen, 
+                    Gas- und Wasserleitungen. Für Gewerbe und Privatkunden in der Region.
+                </p>
+                <div class="hero-features">
+                    <div class="hero-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Fachgerechte Heizungsinstallation & Wartung</span>
+                    </div>
+                    <div class="hero-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Wärmepumpen & erneuerbare Energien</span>
+                    </div>
+                    <div class="hero-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Gas- und Wasserinstallation nach DIN-Norm</span>
+                    </div>
+                </div>
                 <div class="hero-buttons">
                     <a href="#contact" class="btn btn-primary">
-                        <i class="fas fa-clipboard-list"></i>
-                        Angebot anfordern
+                        <i class="fas fa-calculator"></i> Angebot anfordern
                     </a>
-                    <a href="tel:+491234567890" class="btn btn-emergency">
-                        <i class="fas fa-phone-alt"></i>
-                        Notdienst 24/7
+                    <a href="tel:+491234567890" class="btn btn-outline">
+                        <i class="fas fa-phone-alt"></i> Direkt anrufen
                     </a>
                 </div>
             </div>
-            <div class="hero-visual">
-                <div class="hero-card">
-                    <h3>HydroTherm Vorteile</h3>
-                    <ul class="feature-list">
-                        <li><i class="fas fa-check-circle"></i> Meisterbetrieb seit 2005</li>
-                        <li><i class="fas fa-check-circle"></i> 24h Notdienst verfügbar</li>
-                        <li><i class="fas fa-check-circle"></i> Festpreis-Garantie</li>
-                        <li><i class="fas fa-check-circle"></i> Modernste Technik</li>
-                        <li><i class="fas fa-check-circle"></i> Umweltfreundliche Lösungen</li>
-                    </ul>
+            <div class="hero-image fade-in">
+                <img src="https://kimi-web-img.moonshot.cn/img/l450v.alamy.com/d340a7631e947a0c5321bc70db17acce406147d7.jpg" alt="Heizungstechniker bei der Arbeit">
+                <div class="experience-badge">
+                    <span class="number">15+</span>
+                    <span class="text">Jahre Erfahrung</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Services Section -->
-    <section class="services" id="services">
-        <div class="section-title fade-in">
-            <h2>Unsere Leistungen</h2>
-            <p>Von der Planung bis zur Installation – wir bieten Ihnen komplette Lösungen aus einer Hand</p>
+    <!-- Services Detailed Section -->
+    <section class="services-detailed" id="services">
+        <div class="section-header fade-in">
+            <h2>Unsere Fachgebiete</h2>
+            <p>
+                Von der <span class="highlight">Heizungsmodernisierung</span> bis zur <span class="highlight">Wärmepumpen-Installation</span> – 
+                wir sind Ihr kompetenter Partner für alle technischen Installationen im Bereich Heizung, Gas und Wasser.
+            </p>
         </div>
-        <div class="services-grid">
-            <div class="service-card fade-in">
-                <div class="service-icon">
-                    <i class="fas fa-fire"></i>
-                </div>
-                <h3>Heizungsinstallation</h3>
-                <p>Moderne Heizsysteme, Wärmepumpen und erneuerbare Energien für optimale Effizienz und Komfort in Ihrem Zuhause.</p>
+
+        <!-- Heizungsinstallation -->
+        <div class="service-detailed-card fade-in" id="heizung">
+            <div class="service-content">
+                <h3><i class="fas fa-fire"></i> Heizungsinstallation & -wartung</h3>
+                <p>
+                    Als Ihr Heizungsinstallateur kümmern wir uns um die fachgerechte Installation und Wartung aller Heizsysteme. 
+                    Von der klassischen <strong>Gasheizung</strong> über moderne <strong>Brennwertthermen</strong> bis hin zu 
+                    <strong>Hydraulischen Abgleich</strong> – wir garantieren optimale Effizienz und Sicherheit.
+                </p>
+                <p>
+                    Eine regelmäßige Wartung verlängert die Lebensdauer Ihrer Anlage, reduziert Energiekosten und 
+                    minimiert Sicherheitsrisiken. Wir führen alle Arbeiten nach den aktuellen DIN-Normen und 
+                    Herstellervorgaben durch.
+                </p>
+                <ul class="service-list">
+                    <li>Installation von Gas- und Ölheizungen</li>
+                    <li>Brennwertthermen aller Marken (Vaillant, Junkers, Wolf)</li>
+                    <li>Hydraulischer Abgleich und Optimierung</li>
+                    <li>Radiatoren- und Fußbodenheizungsinstallation</li>
+                    <li>Jährliche Wartung mit Prüfprotokoll</li>
+                </ul>
+                <a href="#contact" class="btn btn-primary">Heizungsservice anfragen</a>
             </div>
-            <div class="service-card fade-in">
-                <div class="service-icon">
-                    <i class="fas fa-tint"></i>
-                </div>
-                <h3>Sanitär & Wasserinstallation</h3>
-                <p>Professionelle Wasserinstallationen, Badsanierungen und Rohrleitungsarbeiten nach höchsten Qualitätsstandards.</p>
+            <div class="service-image">
+                <img src="https://kimi-web-img.moonshot.cn/img/static.wixstatic.com/6ff4609953d917c238c128ef1043d0f2354aaa12.jpg" alt="Heizungsinstallation">
             </div>
-            <div class="service-card fade-in">
-                <div class="service-icon">
-                    <i class="fas fa-gas-pump"></i>
-                </div>
-                <h3>Gasinstallation</h3>
-                <p>Sichere Gasleitungsinstallationen, Anschlüsse und Wartungsarbeiten durch zertifizierte Fachkräfte.</p>
+        </div>
+
+        <!-- Wärmepumpen -->
+        <div class="service-detailed-card fade-in" id="waermepumpe">
+            <div class="service-content">
+                <h3><i class="fas fa-fan"></i> Wärmepumpen & erneuerbare Energien</h3>
+                <p>
+                    Die Zukunft der Heiztechnik ist nachhaltig. Mit einer <strong>Wärmepumpe</strong> nutzen Sie 
+                    kostenlose Umweltenergie aus Luft, Erde oder Grundwasser. Wir beraten Sie umfassend über 
+                    Fördermöglichkeiten (BAFA) und die passende Technologie für Ihr Gebäude.
+                </p>
+                <p>
+                    Ob <strong>Luft-Wasser-Wärmepumpe</strong> für den einfachen Austausch Ihrer alten Heizung oder 
+                    <strong>Geothermie</strong> für maximale Effizienz – wir planen und installieren Ihr 
+                    zukunftssicheres Heizsystem.
+                </p>
+                <ul class="service-list">
+                    <li>Luft-Wasser-Wärmepumpen Installation</li>
+                    <li>Sole-Wasser-Wärmepumpen (Erdwärme)</li>
+                    <li>Hybridheizungen (Wärmepumpe + Gas)</li>
+                    <li>Integration von Photovoltaik</li>
+                    <li>BAFA-Förderung Beratung & Beantragung</li>
+                </ul>
+                <a href="#contact" class="btn btn-primary">Wärmepumpen-Beratung</a>
             </div>
-            <div class="service-card fade-in">
-                <div class="service-icon">
-                    <i class="fas fa-home"></i>
-                </div>
-                <h3>Komplettsanierung</h3>
-                <p>Umfassende Renovierungsarbeiten für Bad und Küche – von der Planung bis zur fertigen Umsetzung.</p>
+            <div class="service-image">
+                <img src="https://kimi-web-img.moonshot.cn/img/kmpcorp.com/bdefb163b5d33b286592818e2c8578582a87a351.jpg" alt="Wärmepumpen Installation">
+            </div>
+        </div>
+
+        <!-- Gasinstallation -->
+        <div class="service-detailed-card fade-in" id="gas">
+            <div class="service-content">
+                <h3><i class="fas fa-gas-pump"></i> Gasinstallation & Leitungsbau</h3>
+                <p>
+                    Gasinstallationen erfordern höchste Präzision und Sicherheit. Als zertifizierter Fachbetrieb 
+                    führen wir alle Arbeiten an <strong>Gasleitungen</strong>, <strong>Gasthermen</strong> und 
+                    <strong>Gasgeräten</strong> nach den strengen Vorgaben der DVGW durch.
+                </p>
+                <p>
+                    Von der Neuinstallation in Ihrem Eigenheim bis zum Anschluss von Gewerbeküchen – 
+                    wir garantieren dichte Verbindungen und sicheren Betrieb. Bei Verdacht auf Gasgeruch 
+                    steht unser <strong>24h-Notdienst</strong> sofort zur Verfügung.
+                </p>
+                <ul class="service-list">
+                    <li>Gasleitungsinstallation nach DVGW</li>
+                    <li>Gasthermen-Anschluss und Inbetriebnahme</li>
+                    <li>Dichtheitsprüfungen und Wartung</li>
+                    <li>Gewerbliche Gasinstallationen</li>
+                    <li>Notdienst bei Gasgeruch und Leckagen</li>
+                </ul>
+                <a href="#contact" class="btn btn-primary">Gas-Service buchen</a>
+            </div>
+            <div class="service-image">
+                <img src="https://kimi-web-img.moonshot.cn/img/www.ssihvac.com/9098d90ffdb0befab4056f84e9337702b0558951.jpg" alt="Gasinstallation">
+            </div>
+        </div>
+
+        <!-- Wasserinstallation -->
+        <div class="service-detailed-card fade-in" id="wasser">
+            <div class="service-content">
+                <h3><i class="fas fa-tint"></i> Wasserinstallation & Sanitär</h3>
+                <p>
+                    Eine einwandfreie <strong>Wasserinstallation</strong> ist die Basis für Komfort und Hygiene. 
+                    Wir installieren Trinkwasserleitungen, Abwassersysteme und Sanitärobjekte nach den 
+                    aktuellen Trinkwasserverordnungen.
+                </p>
+                <p>
+                    Bei <strong>Rohrbrüchen</strong>, <strong>undichten Leitungen</strong> oder 
+                    <strong>Wasserschäden</strong> sind wir schnell vor Ort. Mit modernen Ortungstechniken 
+                    finden wir Leckagen präzise und beheben sie fachgerecht – oft ohne aufwändige Aufbrucharbeiten.
+                </p>
+                <ul class="service-list">
+                    <li>Trinkwasserleitungen Neuinstallation</li>
+                    <li>Schadensortung und Rohrbruch-Reparatur</li>
+                    <li>Austausch von Armaturen und Mischbatterien</li>
+                    <li>Abwasserinstallation und Kanalanschluss</li>
+                    <li>Wasserenthärtungsanlagen</li>
+                </ul>
+                <a href="#contact" class="btn btn-primary">Sanitär-Service anfragen</a>
+            </div>
+            <div class="service-image">
+                <img src="https://kimi-web-img.moonshot.cn/img/c8.alamy.com/1cde24481ebc684020e221d60d472aa6d5ee4a66.jpg" alt="Wasserinstallation">
+            </div>
+        </div>
+
+        <!-- Fußbodenheizung -->
+        <div class="service-detailed-card fade-in">
+            <div class="service-content">
+                <h3><i class="fas fa-water"></i> Fußbodenheizung & Flächenheizung</h3>
+                <p>
+                    Behagliche Wärme von unten – die <strong>Fußbodenheizung</strong> bietet höchsten 
+                    Komfort und beste Energieeffizienz. Wir planen und installieren Nass- und Trockensysteme 
+                    für Neubau und Bestand.
+                </p>
+                <p>
+                    Kombiniert mit einer Wärmepumpe ist die Fußbodenheizung die effizienteste Art zu heizen. 
+                    Wir beraten Sie über die passende Regelungstechnik und optimieren Ihr System für 
+                    maximale Energieeinsparung.
+                </p>
+                <ul class="service-list">
+                    <li>Nass- und Trockenbau-Systeme</li>
+                    <li>Renovierungssysteme für Bestand</li>
+                    <li>Regelungstechnik und Thermostate</li>
+                    <li>Spachtel- und Estricharbeiten</li>
+                    <li>Kombination mit Wärmepumpen</li>
+                </ul>
+                <a href="#contact" class="btn btn-primary">Fußbodenheizung planen</a>
+            </div>
+            <div class="service-image">
+                <img src="https://kimi-web-img.moonshot.cn/img/www.warmup.com/889e5071149a8e822c8b5f37f346ec8c60817447.jpg" alt="Fußbodenheizung Installation">
+            </div>
+        </div>
+
+        <!-- Rohrleitungen -->
+        <div class="service-detailed-card fade-in">
+            <div class="service-content">
+                <h3><i class="fas fa-network-wired"></i> Rohrleitungsbau & Heizungsverteiler</h3>
+                <p>
+                    Professioneller <strong>Rohrleitungsbau</strong> ist das Herzstück jeder Heizungs- und 
+                    Sanitäranlage. Wir verlegen Kupfer-, Kunststoff- und Mehrschichtverbundrohre präzise 
+                    und dauerhaft dicht.
+                </p>
+                <p>
+                    Der <strong>Heizungsverteiler</strong> ist das Zentrum Ihrer Heizung. Wir installieren 
+                    und warten Verteiler mit Durchflussmessern, Stellantrieben und Entlüftungseinrichtungen 
+                    für optimale Regelung.
+                </p>
+                <ul class="service-list">
+                    <li>Kupfer- und Kunststoffrohr-Installation</li>
+                    <li>Heizungsverteiler mit Hydraulikmodul</li>
+                    <li>Isolierung und Wärmedämmung</li>
+                    <li>Druckprüfung und Spülung</li>
+                    <li>Altbausanierung und Leitungstausch</li>
+                </ul>
+                <a href="#contact" class="btn btn-primary">Rohrleitungsbau anfragen</a>
+            </div>
+            <div class="service-image">
+                <img src="https://kimi-web-img.moonshot.cn/img/as1.ftcdn.net/d363b7bab6f57435d1ab79e58b95289fe6b0b86e.jpg" alt="Rohrleitungsbau">
             </div>
         </div>
     </section>
 
-    <!-- About Section -->
-    <section class="about" id="about">
-        <div class="about-image fade-in">
-            <img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&h=600&fit=crop" alt="HydroTherm Team">
+    <!-- Why Us -->
+    <section class="why-us fade-in">
+        <div class="section-header" style="color: white;">
+            <h2 style="color: white;">Warum HydroTherm?</h2>
+            <p style="color: rgba(255,255,255,0.9);">
+                Als Meisterbetrieb mit über 15 Jahren Erfahrung garantieren wir höchste Qualität 
+                bei allen Installationen. Vertrauen Sie auf zertifizierte Fachkräfte.
+            </p>
         </div>
-        <div class="about-content fade-in">
-            <h2>Über HydroTherm</h2>
-            <p>HydroTherm steht für Qualität, Präzision und zuverlässige Arbeit im Bereich Gas, Wasser und Heizung. Seit über 15 Jahren sind wir Ihr vertrauensvoller Partner für alle Installationen.</p>
-            <p>Unser Team aus erfahrenen Fachkräften garantiert höchste Qualitätsstandards und termingerechte Ausführung. Wir setzen auf moderne Technologien und nachhaltige Lösungen, die Ihre Energiekosten senken und den Wert Ihrer Immobilie steigern.</p>
-            <div class="stats">
-                <div class="stat-item">
-                    <span class="stat-number">15+</span>
-                    <span class="stat-label">Jahre Erfahrung</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">2000+</span>
-                    <span class="stat-label">Zufriedene Kunden</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">24/7</span>
-                    <span class="stat-label">Notdienst</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Why Us Section -->
-    <section class="why-us" id="why-us">
-        <div class="section-title fade-in">
-            <h2>Warum HydroTherm?</h2>
-            <p>Ihre Vorteile mit einem erfahrenen Meisterbetrieb</p>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card fade-in">
-                <div class="feature-icon">
+        <div class="why-us-grid">
+            <div class="why-us-card">
+                <div class="why-us-icon">
                     <i class="fas fa-certificate"></i>
                 </div>
-                <h3>Zertifizierte Fachkräfte</h3>
-                <p>Alle Mitarbeiter sind geprüfte Fachkräfte mit regelmäßiger Weiterbildung</p>
+                <h4>DVGW-Zertifiziert</h4>
+                <p>Zugelassener Fachbetrieb für Gas- und Wasserinstallationen</p>
             </div>
-            <div class="feature-card fade-in">
-                <div class="feature-icon">
-                    <i class="fas fa-bolt"></i>
+            <div class="why-us-card">
+                <div class="why-us-icon">
+                    <i class="fas fa-award"></i>
                 </div>
-                <h3>Schneller Service</h3>
-                <p>Termintreue und schnelle Reaktionszeiten bei allen Anfragen</p>
+                <h4>Meisterbetrieb</h4>
+                <p>Staatlich geprüfte Installateure mit kontinuierlicher Weiterbildung</p>
             </div>
-            <div class="feature-card fade-in">
-                <div class="feature-icon">
-                    <i class="fas fa-euro-sign"></i>
+            <div class="why-us-card">
+                <div class="why-us-icon">
+                    <i class="fas fa-shield-alt"></i>
                 </div>
-                <h3>Faire Preise</h3>
-                <p>Transparente Kostenvoranschläge ohne versteckte Gebühren</p>
+                <h4>Gewährleistung</h4>
+                <p>5 Jahre Garantie auf Installationen nach VOB</p>
             </div>
-            <div class="feature-card fade-in">
-                <div class="feature-icon">
-                    <i class="fas fa-clock"></i>
+            <div class="why-us-card">
+                <div class="why-us-icon">
+                    <i class="fas fa-leaf"></i>
                 </div>
-                <h3>24/7 Notdienst</h3>
-                <p>Rund um die Uhr erreichbar bei Wasser- und Heizungsnotfällen</p>
+                <h4>BAFA-Partner</h4>
+                <p>Fördermittelberatung für Wärmepumpen und erneuerbare Energien</p>
             </div>
         </div>
     </section>
 
-    <!-- References Section -->
-    <section id="references">
-        <div class="section-title fade-in">
-            <h2>Referenzen</h2>
-            <p>Eine Auswahl unserer erfolgreich abgeschlossenen Projekte</p>
+    <!-- Process -->
+    <section>
+        <div class="section-header fade-in">
+            <h2>Unser Arbeitsablauf</h2>
+            <p>
+                Von der Erstberatung bis zur finalen Inbetriebnahme – wir begleiten Sie professionell 
+                durch Ihr Heizungs- oder Sanitärprojekt.
+            </p>
         </div>
-        <div class="references-grid">
-            <div class="reference-item fade-in">
-                <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop" alt="Badsanierung">
-                <div class="reference-overlay">
-                    <h4>Luxus Badsanierung</h4>
-                    <p>Moderne Wellness-Oase mit Fußbodenheizung</p>
-                </div>
+        <div class="process-steps fade-in">
+            <div class="process-step">
+                <div class="step-number">1</div>
+                <h4>Beratung</h4>
+                <p>Vor-Ort-Termin, Bedarfsanalyse, Konzeptentwicklung</p>
             </div>
-            <div class="reference-item fade-in">
-                <img src="https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=600&h=400&fit=crop" alt="Heizungsanlage">
-                <div class="reference-overlay">
-                    <h4>Heizungsmodernisierung</h4>
-                    <p>Energieeffiziente Gas-Brennwerttherme</p>
-                </div>
+            <div class="process-step">
+                <div class="step-number">2</div>
+                <h4>Planung</h4>
+                <p>Auslegung, Materialauswahl, Festpreisangebot</p>
             </div>
-            <div class="reference-item fade-in">
-                <img src="https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&h=400&fit=crop" alt="Kücheninstallation">
-                <div class="reference-overlay">
-                    <h4>Kücheninstallation</h4>
-                    <p>Komplette Sanitärinstallation für Gewerbeküche</p>
-                </div>
+            <div class="process-step">
+                <div class="step-number">3</div>
+                <h4>Installation</h4>
+                <p>Fachgerechte Umsetzung durch erfahrene Techniker</p>
             </div>
-            <div class="reference-item fade-in">
-                <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&h=400&fit=crop" alt="Wärmepumpe">
-                <div class="reference-overlay">
-                    <h4>Wärmepumpen-Installation</h4>
-                    <p>Nachhaltige Heizlösung für Einfamilienhaus</p>
-                </div>
-            </div>
-            <div class="reference-item fade-in">
-                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop" alt="Rohrleitungen">
-                <div class="reference-overlay">
-                    <h4>Rohrleitungsneubau</h4>
-                    <p>Komplette Haustechnik für Neubauwohnung</p>
-                </div>
-            </div>
-            <div class="reference-item fade-in">
-                <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&h=400&fit=crop" alt="Gäste WC">
-                <div class="reference-overlay">
-                    <h4>Gäste WC Renovierung</h4>
-                    <p>Kompakte Lösung mit modernster Technik</p>
-                </div>
+            <div class="process-step">
+                <div class="step-number">4</div>
+                <h4>Inbetriebnahme</h4>
+                <p>Prüfung, Übergabe, Einweisung, Wartungsvertrag</p>
             </div>
         </div>
+        
+        <div class="trust-badges fade-in">
+            <div class="trust-badge">
+                <i class="fas fa-check-double"></i>
+                <span>DIN-Norm konform</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-handshake"></i>
+                <span>Festpreis-Garantie</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-star"></i>
+                <span>4.9/5 Kundenbewertung</span>
+            </div>
+            <div class="trust-badge">
+                <i class="fas fa-tools"></i>
+                <span>24h Notfallservice</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Emergency Banner -->
+    <section class="emergency-banner fade-in" id="notdienst">
+        <div class="emergency-content">
+            <h3><i class="fas fa-exclamation-triangle"></i> 24h Notdienst für Heizung & Sanitär</h3>
+            <p>
+                Rohrbruch, Heizungsausfall oder Gasgeruch? Unser Notdienst-Team ist rund um die Uhr für Sie da. 
+                Schnelle Reaktionszeit, ausgestattete Servicewagen, sofortige Hilfe – auch an Wochenenden und Feiertagen.
+            </p>
+            <div class="emergency-features">
+                <div class="emergency-feature">
+                    <i class="fas fa-clock"></i> Ø 30 Min. Anfahrtszeit
+                </div>
+                <div class="emergency-feature">
+                    <i class="fas fa-truck"></i> Voll ausgestattete Fahrzeuge
+                </div>
+                <div class="emergency-feature">
+                    <i class="fas fa-check-circle"></i> Soforthilfe garantiert
+                </div>
+            </div>
+        </div>
+        <a href="tel:+491234567890" class="emergency-btn-large">
+            <i class="fas fa-phone-alt"></i> +49 123 456 7890
+        </a>
     </section>
 
     <!-- Contact Section -->
     <section id="contact">
-        <div class="section-title fade-in">
+        <div class="section-header fade-in">
             <h2>Kontaktieren Sie uns</h2>
-            <p>Jetzt unverbindlich beraten lassen!</p>
+            <p>
+                Vereinbaren Sie einen kostenlosen Beratungstermin vor Ort. Wir analysieren Ihre 
+                Ist-Situation und erstellen Ihnen ein unverbindliches Angebot.
+            </p>
         </div>
         <div class="contact-wrapper">
-            <div class="contact-info fade-in">
-                <div class="contact-card">
-                    <div class="contact-icon">
-                        <i class="fas fa-phone-alt"></i>
-                    </div>
-                    <div class="contact-details">
-                        <h4>Telefon</h4>
-                        <p><a href="tel:+491234567890">+49 123 456 7890</a></p>
-                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">Notdienst rund um die Uhr erreichbar</p>
-                    </div>
+            <div class="contact-info-detailed fade-in">
+                <div class="contact-block">
+                    <h4><i class="fas fa-phone-alt"></i> Telefon</h4>
+                    <p>
+                        <strong>Hauptnummer:</strong> <a href="tel:+491234567890">+49 123 456 7890</a><br>
+                        <strong>Notdienst:</strong> <a href="tel:+491234567890">+49 123 456 7890</a> (24h)<br>
+                        <em>Mo-Fr: 07:00 - 18:00 Uhr</em>
+                    </p>
                 </div>
-                <div class="contact-card">
-                    <div class="contact-icon">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <div class="contact-details">
-                        <h4>E-Mail</h4>
-                        <p><a href="mailto:info@hydrotherm.de">info@hydrotherm.de</a></p>
-                    </div>
+                <div class="contact-block">
+                    <h4><i class="fas fa-envelope"></i> E-Mail</h4>
+                    <p>
+                        <a href="mailto:info@hydrotherm.de">info@hydrotherm.de</a><br>
+                        <a href="mailto:service@hydrotherm.de">service@hydrotherm.de</a>
+                    </p>
                 </div>
-                <div class="contact-card">
-                    <div class="contact-icon">
-                        <i class="fas fa-map-marker-alt"></i>
-                    </div>
-                    <div class="contact-details">
-                        <h4>Adresse</h4>
-                        <p>Musterstraße 123<br>12345 Musterstadt</p>
-                    </div>
+                <div class="contact-block">
+                    <h4><i class="fas fa-map-marker-alt"></i> Adresse</h4>
+                    <p>
+                        <strong>HydroTherm GmbH</strong><br>
+                        Industriestraße 45<br>
+                        12345 Musterstadt<br>
+                        <em>Einzugsgebiet: 50km Umkreis</em>
+                    </p>
                 </div>
-                <div class="map-container">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2426.1234567890123!2d13.4050!3d52.5200!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNTLCsDMxJzEyLjAiTiAxM8KwMjQnMTguMCJF!5e0!3m2!1sde!2sde!4v1234567890" allowfullscreen="" loading="lazy"></iframe>
+                <div class="contact-block">
+                    <h4><i class="fas fa-clock"></i> Bürozeiten</h4>
+                    <p>
+                        Montag - Freitag: 07:00 - 18:00<br>
+                        Samstag: 08:00 - 14:00<br>
+                        Sonntag: Nur Notdienst
+                    </p>
                 </div>
             </div>
             <div class="contact-form fade-in">
                 <form id="contactForm">
                     <div class="form-group">
                         <label for="name">Name *</label>
-                        <input type="text" id="name" name="name" required placeholder="Ihr vollständiger Name">
+                        <input type="text" id="name" name="name" required placeholder="Ihr Name">
                     </div>
                     <div class="form-group">
                         <label for="phone">Telefon *</label>
@@ -1217,14 +1387,27 @@
                     </div>
                     <div class="form-group">
                         <label for="email">E-Mail</label>
-                        <input type="email" id="email" name="email" placeholder="Ihre E-Mail-Adresse">
+                        <input type="email" id="email" name="email" placeholder="Ihre E-Mail">
+                    </div>
+                    <div class="form-group">
+                        <label for="service">Leistung *</label>
+                        <select id="service" name="service" required>
+                            <option value="">Bitte wählen...</option>
+                            <option value="heizung">Heizung / Therme</option>
+                            <option value="waermepumpe">Wärmepumpe</option>
+                            <option value="gas">Gasinstallation</option>
+                            <option value="wasser">Wasser / Sanitär</option>
+                            <option value="fussboden">Fußbodenheizung</option>
+                            <option value="rohr">Rohrleitungen</option>
+                            <option value="notfall">Notfall (akut)</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="message">Nachricht *</label>
                         <textarea id="message" name="message" required placeholder="Beschreiben Sie Ihr Anliegen..."></textarea>
                     </div>
                     <button type="submit" class="submit-btn">
-                        <i class="fas fa-paper-plane"></i> Nachricht senden
+                        <i class="fas fa-paper-plane"></i> Anfrage senden
                     </button>
                 </form>
             </div>
@@ -1235,42 +1418,51 @@
     <footer>
         <div class="footer-content">
             <div class="footer-section">
-                <h4>HydroTherm</h4>
-                <p>Ihr Experte für Gas, Wasser und Heizung.<br>Qualität und Zuverlässigkeit seit 2005.</p>
+                <div class="footer-logo">
+                    <img src="logo.png" alt="HydroTherm Logo">
+                    <div>
+                        <h4 style="margin: 0; color: white;">HydroTherm</h4>
+                        <p style="margin: 0; font-size: 0.85rem;">Meisterbetrieb</p>
+                    </div>
+                </div>
+                <p style="color: rgba(255,255,255,0.7); line-height: 1.8;">
+                    Ihr Fachbetrieb für Heizung, Gas und Wasserinstallationen. 
+                    Qualität, Zuverlässigkeit und kompetente Beratung seit 2008.
+                </p>
             </div>
             <div class="footer-section">
-                <h4>Quick Links</h4>
-                <p>
-                    <a href="#services">Leistungen</a><br>
-                    <a href="#about">Über uns</a><br>
-                    <a href="#references">Referenzen</a><br>
-                    <a href="#contact">Kontakt</a>
-                </p>
+                <h4>Leistungen</h4>
+                <a href="#heizung">Heizungsinstallation</a>
+                <a href="#waermepumpe">Wärmepumpen</a>
+                <a href="#gas">Gasinstallation</a>
+                <a href="#wasser">Wasserinstallation</a>
+                <a href="#notdienst">24h Notdienst</a>
             </div>
             <div class="footer-section">
                 <h4>Rechtliches</h4>
-                <p>
-                    <a href="#">Impressum</a><br>
-                    <a href="#">Datenschutz</a><br>
-                    <a href="#">AGB</a>
-                </p>
+                <a href="#">Impressum</a>
+                <a href="#">Datenschutz</a>
+                <a href="#">AGB</a>
+                <a href="#">Widerrufsrecht</a>
             </div>
             <div class="footer-section">
-                <h4>Öffnungszeiten</h4>
-                <p>
-                    Mo - Fr: 08:00 - 18:00<br>
-                    Sa: 09:00 - 14:00<br>
-                    Notdienst: 24/7
+                <h4>Kontakt</h4>
+                <p style="color: rgba(255,255,255,0.7);">
+                    Industriestraße 45<br>
+                    12345 Musterstadt<br>
+                    <a href="tel:+491234567890">+49 123 456 7890</a><br>
+                    <a href="mailto:info@hydrotherm.de">info@hydrotherm.de</a>
                 </p>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2024 HydroTherm. Alle Rechte vorbehalten.</p>
+            <p>&copy; 2024 HydroTherm GmbH. Alle Rechte vorbehalten.</p>
+            <p>Meisterbetrieb für Heizung · Gas · Wasser</p>
         </div>
     </footer>
 
-    <!-- WhatsApp Float Button -->
-    <a href="https://wa.me/491234567890" class="whatsapp-float" target="_blank">
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/491234567890" class="whatsapp-float" target="_blank" title="WhatsApp">
         <i class="fab fa-whatsapp"></i>
     </a>
 
@@ -1285,7 +1477,7 @@
             }
         });
 
-        // Intersection Observer for fade-in animations
+        // Intersection Observer
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '0px 0px -50px 0px'
@@ -1306,11 +1498,9 @@
         // Form submission
         document.getElementById('contactForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            
-            // Create success message
             const btn = e.target.querySelector('.submit-btn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-check"></i> Nachricht gesendet!';
+            btn.innerHTML = '<i class="fas fa-check"></i> Gesendet!';
             btn.style.background = '#25D366';
             
             setTimeout(() => {
@@ -1320,7 +1510,7 @@
             }, 3000);
         });
 
-        // Smooth scroll for navigation links
+        // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -1331,21 +1521,6 @@
                         block: 'start'
                     });
                 }
-            });
-        });
-
-        // Mobile menu toggle (simplified)
-        document.querySelector('.mobile-menu').addEventListener('click', () => {
-            alert('Mobile Menü Funktion würde hier implementiert werden');
-        });
-
-        // Parallax effect for hero waves
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const waves = document.querySelectorAll('.wave');
-            waves.forEach((wave, index) => {
-                const speed = 0.5 + (index * 0.2);
-                wave.style.transform = `translateY(${scrolled * speed}px)`;
             });
         });
     </script>
