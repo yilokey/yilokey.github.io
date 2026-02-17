@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="HydroTherm - Ihr Experte für Gas, Wasser und Heizung. Professionelle Installationen und zuverlässiger Service.">
+    <title>HydroTherm | Gas · Wasser · Heizung · Installationen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-blue: #0A4FAF;
+            --light-blue: #1EA7E1;
+            --primary-red: #E53935;
+            --orange: #FF6A00;
+            --bg-light: #F5F7FA;
+            --text-dark: #1a1a1a;
+            --text-gray: #666;
+            --white: #ffffff;
+            --shadow: rgba(10, 79, 175, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        header.scrolled {
+            padding: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--primary-blue);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 50%, var(--orange) 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--orange));
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-blue);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .mobile-menu {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary-blue);
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 80px;
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .water-fire-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%230A4FAF' fill-opacity='0.1' d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+            background-size: cover;
+            animation: wave 10s linear infinite;
+        }
+
+        .wave:nth-child(2) {
+            bottom: 10px;
+            opacity: 0.5;
+            animation: wave 15s linear infinite reverse;
+        }
+
+        @keyframes wave {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .fire-particles {
+            position: absolute;
+            top: 20%;
+            right: 10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(229,57,53,0.1) 0%, rgba(255,106,0,0.05) 50%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(40px);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .hero-text p {
+            font-size: 1.25rem;
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease 0.2s forwards;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease 0.4s forwards;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(10, 79, 175, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(10, 79, 175, 0.4);
+        }
+
+        .btn-emergency {
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--orange) 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(229, 57, 53, 0.3);
+            animation: emergencyPulse 2s infinite;
+        }
+
+        @keyframes emergencyPulse {
+            0%, 100% { box-shadow: 0 10px 30px rgba(229, 57, 53, 0.3); }
+            50% { box-shadow: 0 10px 40px rgba(229, 57, 53, 0.5); }
+        }
+
+        .btn-emergency:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(229, 57, 53, 0.5);
+        }
+
+        .hero-visual {
+            position: relative;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px var(--shadow);
+            max-width: 400px;
+            transform: rotate(-5deg);
+            transition: transform 0.3s ease;
+        }
+
+        .hero-card:hover {
+            transform: rotate(0deg) scale(1.05);
+        }
+
+        .hero-card h3 {
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            space-y: 0.5rem;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-gray);
+        }
+
+        .feature-list i {
+            color: var(--orange);
+        }
+
+        /* Section Styles */
+        section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--orange));
+            border-radius: 2px;
+        }
+
+        .section-title p {
+            color: var(--text-gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 1.5rem auto 0;
+        }
+
+        /* Services Section */
+        .services {
+            background: white;
+            border-radius: 40px;
+            margin: 2rem auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.05);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .service-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 0;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(10, 79, 175, 0.2);
+        }
+
+        .service-card:hover::before {
+            opacity: 1;
+        }
+
+        .service-card:hover .service-icon,
+        .service-card:hover h3,
+        .service-card:hover p {
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-blue);
+            transition: color 0.4s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .service-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            transition: color 0.4s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .service-card p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            transition: color 0.4s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* About Section */
+        .about {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-image {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .about-image:hover img {
+            transform: scale(1.05);
+        }
+
+        .about-image::after {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: 20px;
+            bottom: 20px;
+            border: 3px solid var(--primary-blue);
+            border-radius: 24px;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .about-content h2 {
+            font-size: 2.5rem;
+            color: var(--primary-blue);
+            margin-bottom: 1.5rem;
+        }
+
+        .about-content p {
+            color: var(--text-gray);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        /* Why Us Section */
+        .why-us {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #0a2f6f 100%);
+            border-radius: 40px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .why-us::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .why-us .section-title h2 {
+            color: white;
+        }
+
+        .why-us .section-title h2::after {
+            background: var(--orange);
+        }
+
+        .why-us .section-title p {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.8rem;
+            color: var(--primary-blue);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        /* References Section */
+        .references-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .reference-item {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .reference-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .reference-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(10, 79, 175, 0.9), transparent);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .reference-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .reference-item:hover .reference-overlay {
+            opacity: 1;
+        }
+
+        .reference-overlay h4 {
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .reference-overlay p {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+        }
+
+        /* Contact Section */
+        .contact-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .contact-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .contact-card:hover {
+            transform: translateX(10px);
+        }
+
+        .contact-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .contact-details h4 {
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .contact-details p, .contact-details a {
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-details a:hover {
+            color: var(--primary-blue);
+        }
+
+        .map-container {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            height: 300px;
+            margin-top: 2rem;
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .contact-form {
+            background: white;
+            padding: 3rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 4px rgba(10, 79, 175, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(10, 79, 175, 0.3);
+        }
+
+        /* WhatsApp Button */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: #25D366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4);
+            cursor: pointer;
+            z-index: 999;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 15px 40px rgba(37, 211, 102, 0.5);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--text-dark);
+            color: white;
+            padding: 3rem 2rem 1rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            color: var(--light-blue);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-section p, .footer-section a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            line-height: 2;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--orange);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-visual {
+                display: none;
+            }
+
+            .about {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .hero-text h1 {
+                font-size: 2rem;
+            }
+
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+
+            .services-grid,
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header id="header">
+        <nav>
+            <a href="#" class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-fire-extinguisher"></i>
+                </div>
+                <span>HydroTherm</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#services">Leistungen</a></li>
+                <li><a href="#about">Über uns</a></li>
+                <li><a href="#why-us">Warum wir</a></li>
+                <li><a href="#references">Referenzen</a></li>
+                <li><a href="#contact">Kontakt</a></li>
+            </ul>
+            <div class="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-bg">
+            <div class="water-fire-container">
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <div class="fire-particles"></div>
+            </div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Ihr Experte für Gas, Wasser und Heizung</h1>
+                <p>Professionelle Installationen und zuverlässiger Service für Ihr Zuhause und Unternehmen. Qualität, die Sie spüren können.</p>
+                <div class="hero-buttons">
+                    <a href="#contact" class="btn btn-primary">
+                        <i class="fas fa-clipboard-list"></i>
+                        Angebot anfordern
+                    </a>
+                    <a href="tel:+491234567890" class="btn btn-emergency">
+                        <i class="fas fa-phone-alt"></i>
+                        Notdienst 24/7
+                    </a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-card">
+                    <h3>HydroTherm Vorteile</h3>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> Meisterbetrieb seit 2005</li>
+                        <li><i class="fas fa-check-circle"></i> 24h Notdienst verfügbar</li>
+                        <li><i class="fas fa-check-circle"></i> Festpreis-Garantie</li>
+                        <li><i class="fas fa-check-circle"></i> Modernste Technik</li>
+                        <li><i class="fas fa-check-circle"></i> Umweltfreundliche Lösungen</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services" id="services">
+        <div class="section-title fade-in">
+            <h2>Unsere Leistungen</h2>
+            <p>Von der Planung bis zur Installation – wir bieten Ihnen komplette Lösungen aus einer Hand</p>
+        </div>
+        <div class="services-grid">
+            <div class="service-card fade-in">
+                <div class="service-icon">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <h3>Heizungsinstallation</h3>
+                <p>Moderne Heizsysteme, Wärmepumpen und erneuerbare Energien für optimale Effizienz und Komfort in Ihrem Zuhause.</p>
+            </div>
+            <div class="service-card fade-in">
+                <div class="service-icon">
+                    <i class="fas fa-tint"></i>
+                </div>
+                <h3>Sanitär & Wasserinstallation</h3>
+                <p>Professionelle Wasserinstallationen, Badsanierungen und Rohrleitungsarbeiten nach höchsten Qualitätsstandards.</p>
+            </div>
+            <div class="service-card fade-in">
+                <div class="service-icon">
+                    <i class="fas fa-gas-pump"></i>
+                </div>
+                <h3>Gasinstallation</h3>
+                <p>Sichere Gasleitungsinstallationen, Anschlüsse und Wartungsarbeiten durch zertifizierte Fachkräfte.</p>
+            </div>
+            <div class="service-card fade-in">
+                <div class="service-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <h3>Komplettsanierung</h3>
+                <p>Umfassende Renovierungsarbeiten für Bad und Küche – von der Planung bis zur fertigen Umsetzung.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="about-image fade-in">
+            <img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&h=600&fit=crop" alt="HydroTherm Team">
+        </div>
+        <div class="about-content fade-in">
+            <h2>Über HydroTherm</h2>
+            <p>HydroTherm steht für Qualität, Präzision und zuverlässige Arbeit im Bereich Gas, Wasser und Heizung. Seit über 15 Jahren sind wir Ihr vertrauensvoller Partner für alle Installationen.</p>
+            <p>Unser Team aus erfahrenen Fachkräften garantiert höchste Qualitätsstandards und termingerechte Ausführung. Wir setzen auf moderne Technologien und nachhaltige Lösungen, die Ihre Energiekosten senken und den Wert Ihrer Immobilie steigern.</p>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number">15+</span>
+                    <span class="stat-label">Jahre Erfahrung</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">2000+</span>
+                    <span class="stat-label">Zufriedene Kunden</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">24/7</span>
+                    <span class="stat-label">Notdienst</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Us Section -->
+    <section class="why-us" id="why-us">
+        <div class="section-title fade-in">
+            <h2>Warum HydroTherm?</h2>
+            <p>Ihre Vorteile mit einem erfahrenen Meisterbetrieb</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card fade-in">
+                <div class="feature-icon">
+                    <i class="fas fa-certificate"></i>
+                </div>
+                <h3>Zertifizierte Fachkräfte</h3>
+                <p>Alle Mitarbeiter sind geprüfte Fachkräfte mit regelmäßiger Weiterbildung</p>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3>Schneller Service</h3>
+                <p>Termintreue und schnelle Reaktionszeiten bei allen Anfragen</p>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-icon">
+                    <i class="fas fa-euro-sign"></i>
+                </div>
+                <h3>Faire Preise</h3>
+                <p>Transparente Kostenvoranschläge ohne versteckte Gebühren</p>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3>24/7 Notdienst</h3>
+                <p>Rund um die Uhr erreichbar bei Wasser- und Heizungsnotfällen</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- References Section -->
+    <section id="references">
+        <div class="section-title fade-in">
+            <h2>Referenzen</h2>
+            <p>Eine Auswahl unserer erfolgreich abgeschlossenen Projekte</p>
+        </div>
+        <div class="references-grid">
+            <div class="reference-item fade-in">
+                <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop" alt="Badsanierung">
+                <div class="reference-overlay">
+                    <h4>Luxus Badsanierung</h4>
+                    <p>Moderne Wellness-Oase mit Fußbodenheizung</p>
+                </div>
+            </div>
+            <div class="reference-item fade-in">
+                <img src="https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=600&h=400&fit=crop" alt="Heizungsanlage">
+                <div class="reference-overlay">
+                    <h4>Heizungsmodernisierung</h4>
+                    <p>Energieeffiziente Gas-Brennwerttherme</p>
+                </div>
+            </div>
+            <div class="reference-item fade-in">
+                <img src="https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&h=400&fit=crop" alt="Kücheninstallation">
+                <div class="reference-overlay">
+                    <h4>Kücheninstallation</h4>
+                    <p>Komplette Sanitärinstallation für Gewerbeküche</p>
+                </div>
+            </div>
+            <div class="reference-item fade-in">
+                <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&h=400&fit=crop" alt="Wärmepumpe">
+                <div class="reference-overlay">
+                    <h4>Wärmepumpen-Installation</h4>
+                    <p>Nachhaltige Heizlösung für Einfamilienhaus</p>
+                </div>
+            </div>
+            <div class="reference-item fade-in">
+                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop" alt="Rohrleitungen">
+                <div class="reference-overlay">
+                    <h4>Rohrleitungsneubau</h4>
+                    <p>Komplette Haustechnik für Neubauwohnung</p>
+                </div>
+            </div>
+            <div class="reference-item fade-in">
+                <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&h=400&fit=crop" alt="Gäste WC">
+                <div class="reference-overlay">
+                    <h4>Gäste WC Renovierung</h4>
+                    <p>Kompakte Lösung mit modernster Technik</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact">
+        <div class="section-title fade-in">
+            <h2>Kontaktieren Sie uns</h2>
+            <p>Jetzt unverbindlich beraten lassen!</p>
+        </div>
+        <div class="contact-wrapper">
+            <div class="contact-info fade-in">
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h4>Telefon</h4>
+                        <p><a href="tel:+491234567890">+49 123 456 7890</a></p>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">Notdienst rund um die Uhr erreichbar</p>
+                    </div>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h4>E-Mail</h4>
+                        <p><a href="mailto:info@hydrotherm.de">info@hydrotherm.de</a></p>
+                    </div>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h4>Adresse</h4>
+                        <p>Musterstraße 123<br>12345 Musterstadt</p>
+                    </div>
+                </div>
+                <div class="map-container">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2426.1234567890123!2d13.4050!3d52.5200!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNTLCsDMxJzEyLjAiTiAxM8KwMjQnMTguMCJF!5e0!3m2!1sde!2sde!4v1234567890" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+            </div>
+            <div class="contact-form fade-in">
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Name *</label>
+                        <input type="text" id="name" name="name" required placeholder="Ihr vollständiger Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Telefon *</label>
+                        <input type="tel" id="phone" name="phone" required placeholder="Ihre Telefonnummer">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">E-Mail</label>
+                        <input type="email" id="email" name="email" placeholder="Ihre E-Mail-Adresse">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Nachricht *</label>
+                        <textarea id="message" name="message" required placeholder="Beschreiben Sie Ihr Anliegen..."></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Nachricht senden
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>HydroTherm</h4>
+                <p>Ihr Experte für Gas, Wasser und Heizung.<br>Qualität und Zuverlässigkeit seit 2005.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <p>
+                    <a href="#services">Leistungen</a><br>
+                    <a href="#about">Über uns</a><br>
+                    <a href="#references">Referenzen</a><br>
+                    <a href="#contact">Kontakt</a>
+                </p>
+            </div>
+            <div class="footer-section">
+                <h4>Rechtliches</h4>
+                <p>
+                    <a href="#">Impressum</a><br>
+                    <a href="#">Datenschutz</a><br>
+                    <a href="#">AGB</a>
+                </p>
+            </div>
+            <div class="footer-section">
+                <h4>Öffnungszeiten</h4>
+                <p>
+                    Mo - Fr: 08:00 - 18:00<br>
+                    Sa: 09:00 - 14:00<br>
+                    Notdienst: 24/7
+                </p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 HydroTherm. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Float Button -->
+    <a href="https://wa.me/491234567890" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script>
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Form submission
+        document.getElementById('contactForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Create success message
+            const btn = e.target.querySelector('.submit-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Nachricht gesendet!';
+            btn.style.background = '#25D366';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = '';
+                e.target.reset();
+            }, 3000);
+        });
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Mobile menu toggle (simplified)
+        document.querySelector('.mobile-menu').addEventListener('click', () => {
+            alert('Mobile Menü Funktion würde hier implementiert werden');
+        });
+
+        // Parallax effect for hero waves
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const waves = document.querySelectorAll('.wave');
+            waves.forEach((wave, index) => {
+                const speed = 0.5 + (index * 0.2);
+                wave.style.transform = `translateY(${scrolled * speed}px)`;
+            });
+        });
+    </script>
+</body>
+</html>
