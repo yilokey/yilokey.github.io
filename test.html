@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dust2 Web Arena</title>
+<style>
+  :root { color-scheme: dark; --gold:#d8a84e; --gold2:#f0c876; --panel:rgba(16,15,13,.96); --line:rgba(255,215,140,.22);
+    --blue:#4a9eff; --red:#ff5a4a; --green:#6dff9c; }
+  * { box-sizing: border-box; }
+  html,body{margin:0;height:100%;overflow:hidden;background:#0d0f12;font-family:"Segoe UI",Tahoma,Arial,sans-serif;color:#ece5d8;overscroll-behavior:none;user-select:none}
+  #app{position:fixed;inset:0}
+  canvas{display:block}
+  .hud{position:fixed;z-index:5;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.8)}
+  #topleft{left:14px;top:12px;font-size:13px;line-height:1.5;opacity:.92}
+  #area{font-size:16px;font-weight:600;letter-spacing:.4px;color:var(--gold2)}
+  .teambadge{display:inline-block;margin-top:4px;font-size:10px;font-weight:800;letter-spacing:1.4px;padding:2px 8px;border-radius:20px}
+  .teambadge.blue{background:rgba(50,120,210,.28);border:1px solid rgba(90,170,255,.6);color:#a9d4ff}
+  .teambadge.red{background:rgba(190,60,45,.28);border:1px solid rgba(255,110,90,.6);color:#ffb3a8}
+  #mapbox{right:14px;top:12px;background:rgba(12,14,18,.6);border:1px solid rgba(255,255,255,.18);border-radius:6px;padding:6px;line-height:0}
+  #minimap{display:block;width:auto;height:auto;max-width:160px;max-height:160px;image-rendering:pixelated}
+  #bottombar{left:50%;bottom:12px;transform:translateX(-50%);font-size:11.5px;background:rgba(12,14,18,.55);padding:6px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.12);white-space:nowrap}
+  #crosshair{position:fixed;left:50%;top:50%;z-index:6;pointer-events:none}
+  .ch{position:absolute;background:#4dff88;box-shadow:0 0 2px rgba(0,0,0,.9)}
+  #ch-dot{position:absolute;display:none;left:0;top:0;transform:translate(-50%,-50%);border-radius:50%;background:#4dff88;width:3px;height:3px}
+  #scope{position:fixed;inset:0;z-index:3;display:none;pointer-events:none;background:radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0 33%, rgba(0,0,0,.985) 34%)}
+  #scope .vline{position:absolute;left:50%;top:0;width:2px;height:100%;margin-left:-1px;background:rgba(8,8,8,.85)}
+  #scope .hline{position:absolute;top:50%;left:0;height:2px;width:100%;margin-top:-1px;background:rgba(8,8,8,.85)}
+  #hitmarker{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:700;color:#e8e8e8;opacity:0;z-index:6;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.9)}
+  #protecthint{position:fixed;left:50%;top:61%;transform:translateX(-50%);z-index:6;display:none;pointer-events:none;font-size:12px;font-weight:700;letter-spacing:1px;color:#9feaff;background:rgba(8,22,28,.7);border:1px solid rgba(120,220,255,.35);padding:4px 12px;border-radius:20px;text-shadow:0 1px 3px rgba(0,0,0,.8)}
+  #ammobox{right:14px;bottom:14px;text-align:right;font-size:13px;line-height:1.5}
+  #wepname{color:var(--gold2);font-weight:600;font-size:15px}
+  #ammo{font-size:22px;font-weight:700;letter-spacing:1px}
+  #score{opacity:.75;font-size:12px}
+  #error{display:none;margin-top:10px;color:#ff9c8a;font-size:13px}
+
+  /* ---------- CAN / ARMOR / HASAR ---------- */
+  #healthbox{left:14px;bottom:14px;width:210px}
+  .hbar-row{display:flex;align-items:center;gap:8px;margin-top:5px}
+  .hbar-ico{width:16px;text-align:center;font-size:12px;opacity:.85}
+  .hbar-bg{flex:1;height:14px;background:rgba(8,10,12,.72);border:1px solid rgba(255,255,255,.2);border-radius:4px;overflow:hidden;position:relative}
+  .hbar-fill{height:100%;width:100%;transition:width .18s ease-out;border-radius:3px}
+  #hpbar{background:#57c04b}
+  #armorbar{background:#5b9fd4}
+  .hbar-num{width:34px;text-align:right;font-size:13px;font-weight:700}
+  #dmgflash{position:fixed;inset:0;z-index:8;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 50%, rgba(160,20,10,0) 35%, rgba(150,18,8,.85) 100%);transition:opacity .1s linear}
+  #deathmsg{position:fixed;inset:0;z-index:9;display:none;pointer-events:none;background:rgba(30,4,2,.45)}
+  #deathmsg div{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);text-align:center}
+  #deathmsg h2{margin:0;font-size:34px;letter-spacing:4px;color:#ff8f78;text-shadow:0 2px 14px rgba(0,0,0,.9)}
+  #deathmsg p{margin:8px 0 0;font-size:13px;opacity:.85}
+  #deathcount{margin-top:6px;font-size:15px;font-weight:700;color:#ffd8a8}
+
+  /* ---------- MENÜ ---------- */
+  #overlay{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 20%, rgba(42,34,22,.72), rgba(7,7,9,.96));backdrop-filter:blur(4px)}
+  .mode-pause .lobbyOnly, .mode-lobby .pauseOnly { display:none !important; }
+  #card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;width:min(1060px,96vw);max-height:95vh;overflow:auto;box-shadow:0 24px 70px rgba(0,0,0,.7)}
+  .brand{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid rgba(255,255,255,.09);padding-bottom:10px;margin-bottom:14px}
+  .brand h1{margin:0;font-size:27px;letter-spacing:2px;color:var(--gold2)}
+  .brand h1 span{color:#b8823a}
+  .brand .sub{font-size:11px;letter-spacing:3px;opacity:.6}
+  .brand .ver{margin-left:auto;font-size:11px;opacity:.45}
+  .cols{display:grid;grid-template-columns:1.08fr 1fr;gap:20px}
+  @media (max-width:820px){ .cols{grid-template-columns:1fr} }
+  .section-title{font-size:11px;letter-spacing:2.5px;color:#b9a97f;margin:2px 0 8px;display:flex;justify-content:space-between;align-items:baseline}
+  #card p{margin:6px 0;font-size:12.5px;line-height:1.6;opacity:.9}
+  kbd{background:#2b2a26;border:1px solid #4a463c;border-bottom-width:2px;border-radius:4px;padding:1px 5px;font-size:11px;font-family:inherit}
+
+  /* harita kartları */
+  .maps{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .mcard{position:relative;display:flex;flex-direction:column;gap:2px;text-align:left;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 10px 8px 58px;min-height:58px;color:#ece5d8;cursor:pointer;transition:border-color .15s,background .15s;overflow:hidden}
+  .mcard:hover{background:rgba(255,215,140,.07);border-color:rgba(255,215,140,.4)}
+  .mcard.sel{border-color:var(--gold);background:rgba(255,215,140,.1);box-shadow:0 0 0 1px rgba(255,215,140,.25) inset}
+  .mcard .mthumb{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:7px;border:1px solid rgba(255,255,255,.16)}
+  .mthumb.dust{background:linear-gradient(135deg,#c8a86a 0 40%,#8f7548 40% 55%,#d8b980 55%)}
+  .mthumb.aim{background:linear-gradient(135deg,#6f7a83 0 48%,#c94a3c 48% 56%,#3d444c 56%)}
+  .mthumb.lego{background:linear-gradient(135deg,#3f7fd6 0 33%,#f0c33a 33% 66%,#d23c3c 66%)}
+  .mthumb.village{background:linear-gradient(135deg,#7c8a5b 0 45%,#b08a55 45% 70%,#4c7f9a 70%)}
+  .mcard .mname{font-size:13.5px;font-weight:800;letter-spacing:.3px}
+  .mcard .mdesc{font-size:10px;opacity:.6;line-height:1.25}
+  .mapnote{font-size:11px;opacity:.65;line-height:1.45;margin-top:8px;min-height:30px}
+
+  /* takım */
+  .teams{display:flex;gap:8px}
+  .tsel{flex:1;padding:9px 10px;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.035);color:#ece5d8;cursor:pointer;font-weight:800;letter-spacing:.8px;font-size:12px;text-align:left}
+  .tsel small{display:block;font-weight:500;font-size:10px;opacity:.6;letter-spacing:0;margin-top:2px}
+  .tsel[data-team=blue]:hover,.tsel[data-team=blue].sel{border-color:rgba(90,170,255,.8);background:rgba(50,120,210,.2)}
+  .tsel[data-team=red]:hover,.tsel[data-team=red].sel{border-color:rgba(255,120,100,.8);background:rgba(190,60,45,.2)}
+  .tsel.sel{box-shadow:0 0 0 1px rgba(255,255,255,.12) inset}
+
+  /* botlar */
+  .botrow{display:grid;grid-template-columns:92px 1fr 34px;align-items:center;gap:8px;margin-top:7px;font-size:11.5px}
+  .botrow .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:1px}
+  .botrow.blue .dot{background:var(--blue)}
+  .botrow.red .dot{background:var(--red)}
+  .botrow b{text-align:right;font-size:12px;color:var(--gold2)}
+  .teamtotals{font-size:10.5px;opacity:.65;margin-top:7px;line-height:1.4}
+
+  /* silahlar */
+  .weapons{display:flex;flex-direction:column;gap:7px}
+  .wcard{display:grid;grid-template-columns:1fr auto;gap:1px 10px;text-align:left;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:8px 11px;color:#ece5d8;cursor:pointer;transition:border-color .15s, background .15s}
+  .wcard:hover{background:rgba(255,215,140,.07);border-color:rgba(255,215,140,.4)}
+  .wcard.sel{border-color:var(--gold);background:rgba(255,215,140,.1);box-shadow:0 0 0 1px rgba(255,215,140,.25) inset}
+  .wcard.disabled{opacity:.35;cursor:not-allowed}
+  .wcard .wname{grid-column:1;grid-row:1;font-size:13.5px;font-weight:800;letter-spacing:.5px}
+  .wcard .wtag{grid-column:1;grid-row:2;font-size:10px;opacity:.6}
+  .wcard .wkey{grid-column:2;grid-row:1/3;align-self:center;font-size:10px;opacity:.55;border:1px solid rgba(255,255,255,.18);border-radius:5px;padding:2px 6px}
+  .wstat{grid-column:1/-1;display:grid;grid-template-columns:66px 1fr;align-items:center;gap:8px;font-size:10px;opacity:.8}
+  .wstat i{display:block;height:4px;border-radius:3px;background:linear-gradient(90deg,#8f6a2c,#e8b95f);width:var(--v,50%)}
+
+  /* butonlar */
+  .actions{display:flex;gap:8px;margin-top:12px}
+  .btn{padding:11px 14px;border:0;border-radius:9px;font-size:13px;font-weight:800;letter-spacing:1.2px;cursor:pointer}
+  .btn.primary{flex:1;background:linear-gradient(180deg,#e0b25c,#c99b4a);color:#191510}
+  .btn.primary:hover{background:linear-gradient(180deg,#f0c876,#d8a84e)}
+  .btn.ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:#ece5d8}
+  .btn.ghost:hover{border-color:rgba(255,215,140,.5);background:rgba(255,215,140,.08)}
+  .btn:active{transform:translateY(1px)}
+
+  /* ayarlar */
+  .row{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;margin:8px 0 1px;opacity:.9}
+  .row b{color:var(--gold2);font-weight:600}
+  input[type=range]{width:100%;accent-color:var(--gold);height:19px;margin:0}
+  .subgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+  .keys{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:10.5px;opacity:.82;margin-top:4px}
+  .keys span{white-space:nowrap}
+  .hint{opacity:.62;font-size:10.5px;line-height:1.5;margin-top:10px}
+  .toggles{margin-top:9px;display:flex;flex-direction:column;gap:6px}
+  .tgl{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:7px 9px;font-size:11.5px;cursor:pointer}
+  .tgl:hover{border-color:rgba(255,215,140,.35)}
+  .tgl small{display:block;opacity:.55;font-size:10px;margin-top:1px}
+  .switch{position:relative;width:36px;height:19px;flex:none}
+  .switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+  .switch i{position:absolute;inset:0;background:#3a3a38;border-radius:20px;transition:background .15s;pointer-events:none}
+  .switch i::after{content:"";position:absolute;left:2px;top:2px;width:15px;height:15px;border-radius:50%;background:#d9d4c8;transition:transform .15s}
+  .switch input:checked + i{background:#8f6a2c}
+  .switch input:checked + i::after{transform:translateX(17px)}
+  .chgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
+  .chin{display:flex;align-items:center;gap:6px;font-size:10.5px}
+  .chin input[type=color]{width:34px;height:22px;padding:0;border:1px solid rgba(255,255,255,.25);border-radius:5px;background:none}
+  .chin input[type=range]{flex:1}
+  .chin b{width:26px;text-align:right;color:var(--gold2);font-size:10.5px}
+  .chchecks{display:flex;gap:14px;font-size:11px;margin-top:5px;opacity:.9}
+  .chchecks label{display:flex;align-items:center;gap:5px;cursor:pointer}
+
+  /* geliştirici konsolu */
+  #devpanel{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;justify-content:flex-end;padding:14px 18px 18px;background:rgba(3,8,5,.78);font:12.5px/1.45 Consolas,"Courier New",monospace;color:#b8ffc8;backdrop-filter:blur(2px)}
+  #devpanel .dcbar{display:flex;align-items:center;gap:8px;font-family:"Segoe UI",Arial,sans-serif;font-size:11px;letter-spacing:1px;color:#8fd8a5;margin-bottom:6px}
+  #devpanel .dcbar b{color:#d6ffe2;letter-spacing:2px}
+  #devpanel .dcbar span{margin-left:auto;opacity:.6}
+  #dcOut{max-height:56vh;overflow:auto;background:rgba(5,12,7,.96);border:1px solid rgba(90,255,150,.3);border-bottom:0;border-radius:8px 8px 0 0;padding:9px 12px;white-space:pre-wrap;word-break:break-word}
+  #dcRow{display:flex;align-items:center;gap:8px;background:rgba(5,12,7,.98);border:1px solid rgba(90,255,150,.3);border-top:1px solid rgba(90,255,150,.14);border-radius:0 0 8px 8px;padding:8px 12px}
+  #dcRow .prompt{color:#5dff96;font-weight:800}
+  #dcIn{flex:1;background:none;border:0;outline:0;color:#d8ffe2;font:13px Consolas,"Courier New",monospace}
+  #devpanel .dchint{font-family:"Segoe UI",Arial,sans-serif;font-size:10.5px;opacity:.55;margin-top:6px;letter-spacing:.3px}
+  .dcline{min-height:16px}
+  .dcline.cmd{color:#d8ffe2}
+  .dcline.ok{color:#7dffa9}
+  .dcline.err{color:#ff9a8a}
+  .dcline.dim{color:#6f9d7e}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<div id="crosshair">
+  <div class="ch" id="ch-up" style="left:-1px;top:-13px;width:2px;height:8px"></div>
+  <div class="ch" id="ch-down" style="left:-1px;top:5px;width:2px;height:8px"></div>
+  <div class="ch" id="ch-left" style="left:-13px;top:-1px;width:8px;height:2px"></div>
+  <div class="ch" id="ch-right" style="left:5px;top:-1px;width:8px;height:2px"></div>
+  <div id="ch-dot"></div>
+</div>
+<div id="scope"><div class="vline"></div><div class="hline"></div></div>
+<div id="hitmarker">✕</div>
+<div id="protecthint"></div>
+<div id="dmgflash"></div>
+<div id="deathmsg"><div><h2>ÖLDÜN</h2><p>Takımının doğuş noktasında yeniden doğacaksın.</p><div id="deathcount">Yeniden doğuş: 10 sn</div></div></div>
+
+<div class="hud" id="topleft"><div id="area">Dust II</div><div id="stats">—</div><div id="teambadge" class="teambadge blue">MAVİ TAKIM</div></div>
+<div class="hud" id="mapbox"><canvas id="minimap"></canvas></div>
+<div class="hud" id="healthbox">
+  <div class="hbar-row"><span class="hbar-ico">❤</span><div class="hbar-bg"><div class="hbar-fill" id="hpbar"></div></div><span class="hbar-num" id="hpnum">100</span></div>
+  <div class="hbar-row"><span class="hbar-ico">🛡</span><div class="hbar-bg"><div class="hbar-fill" id="armorbar"></div></div><span class="hbar-num" id="armornum">100</span></div>
+</div>
+<div class="hud" id="ammobox"><div id="wepname">AK-47</div><div id="ammo">30 / 90</div><div id="score">Dust II · 0 öldürme · 0 kafa</div></div>
+<div class="hud" id="bottombar">Sol tık ateş · 1/2/3 silah · R şarjör · G sis · Ctrl eğil · Sağ tık dürbün · Shift sessiz · Space zıpla · Esc menü · " konsol</div>
+
+<div id="overlay" class="mode-lobby">
+  <div id="card">
+    <div class="brand">
+      <h1>DUST<span>2</span> WEB</h1>
+      <div class="sub">TAKIM ARENASI</div>
+      <div class="ver">r5 · 4 harita · 15v15 · konsol</div>
+    </div>
+
+    <div class="cols">
+      <div>
+        <div class="lobbyOnly">
+          <div class="section-title"><span>HARİTA SEÇ</span><span id="mapnote" style="letter-spacing:0;font-size:10px"></span></div>
+          <div class="maps">
+            <button class="mcard" data-map="dust2">
+              <span class="mthumb dust"></span>
+              <span class="mname">Dust II</span>
+              <span class="mdesc">A/B bölgeleri · uzun, mid, tünel</span>
+            </button>
+            <button class="mcard" data-map="redline">
+              <span class="mthumb aim"></span>
+              <span class="mname">Aim Redline</span>
+              <span class="mdesc">Simetrik aim · iki hat · hızlı tempo</span>
+            </button>
+            <button class="mcard" data-map="lego2">
+              <span class="mthumb lego"></span>
+              <span class="mname">AWP Lego2</span>
+              <span class="mdesc">Renkli bloklar · uzun koridor · sadece AWP</span>
+            </button>
+            <button class="mcard" data-map="village">
+              <span class="mthumb village"></span>
+              <span class="mname">Meydan Köy</span>
+              <span class="mdesc">Özel tasarım · çeşme, pazar, iki avlu</span>
+            </button>
+          </div>
+          <div class="mapnote" id="mapdesc">Klasik çöl haritası. Mavi takım güneyden, kırmızı takım kuzeyden başlar.</div>
+
+          <div class="section-title" style="margin-top:12px">TAKIM SEÇ</div>
+          <div class="teams">
+            <button class="tsel" data-team="blue">MAVİ TAKIM<small>Güney doğuşu · saldırı</small></button>
+            <button class="tsel" data-team="red">KIRMIZI TAKIM<small>Kuzey doğuşu · savunma</small></button>
+          </div>
+          <div class="teamtotals" id="teamtotals">Mavi 5/15 · Kırmızı 4/15 · sen mavi</div>
+
+          <div class="section-title" style="margin-top:12px">BOT SAYISI</div>
+          <div class="botrow blue"><span><i class="dot"></i>Mavi bot</span><input id="botsBlue" type="range" min="0" max="15" step="1" value="4"><b id="botsBlueVal">4</b></div>
+          <div class="botrow red"><span><i class="dot"></i>Kırmızı bot</span><input id="botsRed" type="range" min="0" max="15" step="1" value="4"><b id="botsRedVal">4</b></div>
+          <div class="hint">Takım başına en fazla 15 oyuncu (sen dahil). Kendi takımında en fazla 14 bot seçebilirsin. Botlar 10 sn sonra kendi doğuş noktalarında yeniden doğar; doğuşta 3 sn koruma vardır.</div>
+        </div>
+
+        <div class="pauseOnly">
+          <div class="section-title"><span>DURAKLATILDI</span><span id="pausemap" style="font-size:10px;letter-spacing:0"></span></div>
+          <p>Maç devam ediyor. Devam ettiğinde fare kilidi yeniden istenir; kilit reddedilirse sağ tuşu basılı tutup sürükleyerek nişan alabilirsin.</p>
+          <p style="opacity:.65">Buradan lobiye dönerek harita, takım ve bot sayısını değiştirebilirsin. Lobiye dönünce maç sıfırlanır.</p>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary lobbyOnly" id="play">MAÇI BAŞLAT</button>
+          <button class="btn primary pauseOnly" id="resume">DEVAM ET</button>
+          <button class="btn ghost pauseOnly" id="toLobby">LOBİYE DÖN</button>
+        </div>
+        <div class="hint lobbyOnly">Oyun sırasında tarayıcı kısayolları engellenir. <kbd>Ctrl+W</kbd> gibi tarayıcı-seviyesi kısayollar gerçekten iptal edilemez; maç sırasında sayfadan ayrılmak istersen onay penceresi çıkar.</div>
+
+        <div class="section-title" style="margin-top:14px">KONTROLLER</div>
+        <div class="keys">
+          <span><kbd>Sol tık</kbd> ateş</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> silah</span>
+          <span><kbd>R</kbd> şarjör</span><span><kbd>G</kbd> sis bombası</span>
+          <span><kbd>Ctrl</kbd> eğil</span><span><kbd>Sağ tık</kbd> AWP 1x/2x</span>
+          <span><kbd>Shift</kbd> sessiz</span><span><kbd>Space</kbd> zıpla</span>
+          <span><kbd>Esc</kbd> menü</span><span><kbd>"</kbd> konsol (ayardan aç)</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">SİLAH SEÇ</div>
+        <div class="weapons">
+          <button class="wcard" data-w="0">
+            <div class="wname">AK-47</div><div class="wkey">1</div>
+            <div class="wtag">Tüfek · Tam otomatik</div>
+            <div class="wstat"><span>Hasar</span><i style="--v:74%"></i></div>
+            <div class="wstat"><span>Atış hızı</span><i style="--v:86%"></i></div>
+          </button>
+          <button class="wcard" data-w="1">
+            <div class="wname">USP</div><div class="wkey">2</div>
+            <div class="wtag">Tabanca · Tek tek</div>
+            <div class="wstat"><span>Hasar</span><i style="--v:45%"></i></div>
+            <div class="wstat"><span>Atış hızı</span><i style="--v:55%"></i></div>
+          </button>
+          <button class="wcard" data-w="2">
+            <div class="wname">AWP</div><div class="wkey">3</div>
+            <div class="wtag">Keskin nişancı · Dürbünlü</div>
+            <div class="wstat"><span>Hasar</span><i style="--v:100%"></i></div>
+            <div class="wstat"><span>Atış hızı</span><i style="--v:12%"></i></div>
+          </button>
+        </div>
+
+        <div class="section-title" style="margin-top:14px">AYARLAR</div>
+        <div class="subgrid">
+          <div>
+            <div class="row"><span>Fare hassasiyeti</span><b id="sensVal">1.00</b></div>
+            <input id="sens" type="range" min="0.3" max="2.5" step="0.05" value="1">
+            <div class="row"><span>Parlaklık</span><b id="brightVal">1.00</b></div>
+            <input id="bright" type="range" min="0.6" max="1.8" step="0.05" value="1">
+          </div>
+          <div>
+            <div class="row"><span>Ses</span><b id="volVal">50%</b></div>
+            <input id="vol" type="range" min="0" max="1" step="0.05" value="0.5">
+            <div class="row"><span>Görüş açısı</span><b id="fovVal">90</b></div>
+            <input id="fov" type="range" min="60" max="120" step="1" value="90">
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:12px">NİŞAN ÇİZGİSİ</div>
+        <div class="chgrid">
+          <div class="chin"><input id="chColor" type="color" value="#4dff88"><span>Renk</span></div>
+          <div class="chin"><span>Boyut</span><input id="chSize" type="range" min="2" max="14" step="1" value="7"><b id="chSizeVal">7</b></div>
+          <div class="chin"><span>Kalınlık</span><input id="chThick" type="range" min="1" max="5" step="1" value="2"><b id="chThickVal">2</b></div>
+          <div class="chin"><span>Boşluk</span><input id="chGap" type="range" min="0" max="12" step="1" value="4"><b id="chGapVal">4</b></div>
+        </div>
+        <div class="chchecks">
+          <label><input type="checkbox" id="chDot"> Nokta</label>
+          <label><input type="checkbox" id="chDyn" checked> Dinamik (harekette açılır)</label>
+        </div>
+
+        <div class="section-title" style="margin-top:12px">GELİŞTİRİCİ</div>
+        <div class="toggles">
+          <label class="tgl"><span>Geliştirici konsolu<small>Açınca oyun içinde " tuşuyla konsolu aç (oyunu duraklatır)</small></span><span class="switch"><input type="checkbox" id="devconsole"><i></i></span></label>
+          <label class="tgl"><span>Sınırsız şarjör<small>Mermi hiç bitmez (∞)</small></span><span class="switch"><input type="checkbox" id="inf"><i></i></span></label>
+          <label class="tgl"><span>Ölümsüzlük<small>Hasar almazsın (geliştirici)</small></span><span class="switch"><input type="checkbox" id="god"><i></i></span></label>
+        </div>
+
+        <div class="hint">Botlar birbirleriyle ve seninle çatışır. Dost ateşi kapalıdır: kendi takımına ateş etsen de hasar vermezsin. AWP hareket halinde neredeyse hiç isabet etmez; eğilerek ve durarak ateş isabeti artırır.</div>
+      </div>
+    </div>
+    <div id="error"></div>
+  </div>
+</div>
+
+<div id="devpanel">
+  <div class="dcbar"><b>GELİŞTİRİCİ KONSOLU</b><span>kapat: " veya Esc · geçmiş: ↑/↓</span></div>
+  <div id="dcOut"></div>
+  <div id="dcRow"><span class="prompt">&gt;</span><input id="dcIn" type="text" autocomplete="off" spellcheck="false" placeholder='komut yaz (örnek: help · map redline · bots blue 8 · sens 1.2)'></div>
+  <div class="dchint">Örnekler: help · sens 1.2 · brightness 1.1 · crosshair color #00ff66 · map village · team red · bots red 10 · god 1 · tp 0 0 · stats · exit</div>
+</div>
+
+<script src="libs/three.min.js"></script>
+<script>window.THREE || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');</script>
+<script src="game.js"></script>
+</body>
+</html>
