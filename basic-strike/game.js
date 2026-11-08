@@ -5113,7 +5113,15 @@
   });
   window.addEventListener('keydown', function (e) {
     if (!consoleOpen) return;
-    if (e.key === 'Escape' || e.key === '"' || e.key === "'" || e.code === 'Quote' || e.code === 'Backquote') {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      dcClose();
+      return;
+    }
+    var tag = (e.target && e.target.tagName) ? e.target.tagName : '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return; // komut yazarken kapatma
+    if (e.key === '"' || e.key === "'" || e.code === 'Quote' || e.code === 'Backquote') {
       e.preventDefault();
       e.stopImmediatePropagation();
       dcClose();
