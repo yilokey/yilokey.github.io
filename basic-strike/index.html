@@ -67,6 +67,24 @@
   #armorbar{background:#5b9fd4}
   .hbar-num{width:34px;text-align:right;font-size:13px;font-weight:700}
 
+  /* ---------- OYUN İÇİ SOHBET ---------- */
+  #chatlog{position:fixed;left:14px;bottom:134px;z-index:6;width:min(460px,54vw);display:flex;flex-direction:column;gap:3px;pointer-events:none}
+  .chatline{font-size:12px;line-height:1.35;background:rgba(8,10,13,.68);border-left:2px solid rgba(255,214,150,.35);padding:3px 8px;border-radius:2px;text-shadow:0 1px 2px rgba(0,0,0,.9);animation:chin .14s ease-out;transition:opacity .35s;word-break:break-word}
+  .chatline.out{opacity:0}
+  .chatline .chat-tag{font-size:8.5px;font-weight:800;letter-spacing:1px;padding:1px 4px;border:1px solid rgba(255,255,255,.14);border-radius:2px;margin-right:6px;color:#9aa29b;white-space:nowrap}
+  .chatline.team .chat-tag{color:#8ef0a8;border-color:rgba(110,240,150,.35);background:rgba(80,200,120,.1)}
+  .chatline .chat-name{font-weight:800}
+  .chatline .chat-name.blue{color:#8ec7ff}.chatline .chat-name.red{color:#ff9f92}.chatline .chat-name.you{color:var(--gold2)}
+  .chatline .chat-text{color:#e6dfd0}
+  @keyframes chin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  #chatbar{position:fixed;left:14px;bottom:96px;z-index:12;display:flex;align-items:center;gap:7px;width:min(520px,60vw);background:rgba(10,12,16,.97);border:1px solid rgba(255,214,150,.3);border-radius:4px;padding:5px 8px;box-shadow:0 6px 24px rgba(0,0,0,.55)}
+  #chatbar.hidden{display:none}
+  #chatmode{font-size:9px;font-weight:800;letter-spacing:1.2px;color:#8ef0a8;border:1px solid rgba(110,240,150,.35);background:rgba(80,200,120,.1);padding:2px 6px;border-radius:2px;white-space:nowrap}
+  #chatmode.all{color:#ffd88a;border-color:rgba(255,214,150,.4);background:rgba(255,200,100,.1)}
+  #chatinput{flex:1;min-width:0;background:transparent;border:0;outline:0;color:#f0ebe1;font-size:13px;letter-spacing:.3px;padding:2px 2px;user-select:text}
+  #chatinput::placeholder{color:#777c80}
+  #chathint{font-size:8.5px;letter-spacing:.8px;color:#8a8b84;white-space:nowrap}
+
   /* ---------- ANA MENÜ ---------- */
   #overlay{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:
     linear-gradient(rgba(6,8,10,.84),rgba(6,8,10,.94)),
@@ -495,7 +513,13 @@
   <div class="hbar-row"><span class="hbar-ico">🛡</span><div class="hbar-bg"><div class="hbar-fill" id="armorbar"></div></div><span class="hbar-num" id="armornum">100</span></div>
 </div>
 <div class="hud" id="ammobox"><div id="wepname">AK-47</div><div id="ammo">30 / 90</div><div id="nades">Sis 1 · Flaş 2 · HE 1</div><div id="score">Dust II · 0 öldürme · 0 kafa</div></div>
-<div class="hud" id="bottombar">Sol tık ateş · 1 tüfek · 2 tabanca · 3 bıçak · 4 sis · 5 flaş · 6 HE · G/F/H ele al · R şarjör · Tab skor · Ctrl eğil · Sağ tık dürbün · Shift sessiz · Space zıpla · Esc menü</div>
+<div class="hud" id="bottombar">Sol tık ateş · 1 tüfek · 2 tabanca · 3 bıçak · 4 sis · 5 flaş · 6 HE · G/F/H ele al · R şarjör · Tab skor · Ctrl eğil · Sağ tık dürbün · Shift sessiz · Space zıpla · U/Y sohbet · Esc menü</div>
+<div id="chatlog"></div>
+<div id="chatbar" class="hidden">
+  <span id="chatmode">TAKIM</span>
+  <input id="chatinput" type="text" maxlength="120" autocomplete="off" spellcheck="false" placeholder="Mesaj yaz…">
+  <span id="chathint">ENTER gönder · ESC iptal</span>
+</div>
 
 <div id="scoreboard">
   <div class="sb-card">
