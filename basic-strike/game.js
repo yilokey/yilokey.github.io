@@ -3633,7 +3633,7 @@
     }
     var w = currentWeapon();
     if (gadgetSel) {
-      var gActive = !paused && !menuOpen && player.hp > 0;
+      var gActive = !paused && !menuOpen && !chatOpen && player.hp > 0;
       if (gActive && triggerQueued) throwGrenade(gadgetSel);
       else if (gActive && triggerHeavyQueued) throwGrenade(gadgetSel, 0.5);
       triggerQueued = false;
@@ -3697,7 +3697,7 @@
     }
     if (!reloading && !gadgetSel && player.hp > 0 && !w.melee && awpBoltT <= 0 &&
         ammo[curW] <= 0 && reserve[curW] > 0) startReload();
-    var active = !paused && !menuOpen && player.hp > 0;
+    var active = !paused && !menuOpen && !chatOpen && player.hp > 0;
     if (active && w.melee) {
       if (triggerHeavyQueued) fireShot(true);
       else if (triggerQueued) fireShot(false);
@@ -3736,6 +3736,7 @@
   /* ================= GİRDİ / AYARLAR / MENÜ ================= */
   var keys = {}, locked = false, sens = 1, dragFallback = false, dragging = false, dragMoved = 0;
   var paused = true, menuOpen = false, startedOnce = false, menuWeapon = 0, vol = 0.5;
+  var chatOpen = false, chatMode = 'team', chatWasLocked = false;
   var jumpLatch = false;
   var godMode = false, infAmmo = false, brightness = 1;
   var chCfg = { color: '#4dff88', size: 7, thickness: 2, gap: 4, dot: 0, dynamic: 1 };
@@ -3746,6 +3747,10 @@
   var selectedMenuTab = 'play';
   var overlayMode = 'lobby', leaveGuard = true;
   var overlayEl = document.getElementById('overlay');
+  var chatLogEl = document.getElementById('chatlog');
+  var chatBarEl = document.getElementById('chatbar');
+  var chatInputEl = document.getElementById('chatinput');
+  var chatModeEl = document.getElementById('chatmode');
   var sensEl = document.getElementById('sens');
   var playEl = document.getElementById('play');
   var resumeEl = document.getElementById('resume');
@@ -4509,6 +4514,7 @@
     persistSettings();
   }
   function showOverlay(mode) {
+    closeChat(false, true);
     overlayMode = mode;
     menuOpen = mode === 'pause' && startedOnce && !matchEnded;
     paused = !menuOpen;
@@ -4528,6 +4534,98 @@
     if (pmEl) pmEl.textContent = currentMap ? currentMap.name : '';
     applySettings();
   }
+
+  /* ================= OYUN İÇİ SOHBET ================= */
+  function chatSanitize(t) {
+    return String(t || '').replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
+  }
+  function chatAllowed() {
+    return startedOnce && !paused && !menuOpen && !consoleOpen && overlayEl.style.display !== 'flex';
+  }
+  function chatAddLine(name, team, text, mode, isYou) {
+    if (!chatLogEl) return;
+    var line = document.createElement('div');
+    line.className = 'chatline' + (mode === 'team' ? ' team' : '');
+    var tag = document.createElement('span');
+    tag.className = 'chat-tag';
+    tag.textContent = mode === 'team' ? 'TAKIM' : 'HERKES';
+    var nm = document.createElement('span');
+    nm.className = 'chat-name ' + (isYou ? 'you' : (team === 'red' ? 'red' : 'blue'));
+    nm.textContent = name || 'OYUNCU';
+    var tx = document.createElement('span');
+    tx.className = 'chat-text';
+    tx.textContent = ': ' + text;
+    line.appendChild(tag); line.appendChild(nm); line.appendChild(tx);
+    chatLogEl.appendChild(line);
+    while (chatLogEl.children.length > 6) chatLogEl.removeChild(chatLogEl.firstChild);
+    setTimeout(function () {
+      line.className += ' out';
+      setTimeout(function () { if (line.parentNode) line.parentNode.removeChild(line); }, 400);
+    }, 6500);
+  }
+  function mpChatRelay(fromTeam, fromName, mode, msg, exceptCid) {
+    if (mpRole !== 'host') return;
+    for (var id in mpGuests) {
+      if (exceptCid && id === exceptCid) continue;
+      if (mode === 'team' && mpGuests[id].team !== fromTeam) continue;
+      mpConnSend(mpGuests[id].conn, { t: 'ch', m: msg, md: mode, nm: fromName, tm: fromTeam });
+    }
+  }
+  function chatSend(text, mode) {
+    var msg = chatSanitize(text);
+    if (!msg) return false;
+    mode = mode === 'all' ? 'all' : 'team';
+    chatAddLine(userName || 'SEN', player.team, msg, mode, true);
+    if (mpRole === 'host') mpChatRelay(player.team, userName || 'ANA MAKİNE', mode, msg, null);
+    else if (mpRole === 'guest') mpSendHost({ t: 'ch', m: msg, md: mode });
+    return true;
+  }
+  function openChat(mode) {
+    if (chatOpen || !chatAllowed()) return false;
+    chatMode = mode === 'all' ? 'all' : 'team';
+    chatOpen = true;
+    chatWasLocked = !!locked;
+    triggerHeld = false; triggerQueued = false; triggerHeavyQueued = false;
+    dragging = false; dragMoved = 0;
+    for (var ck in keys) keys[ck] = false;
+    if (chatModeEl) {
+      chatModeEl.textContent = chatMode === 'all' ? 'HERKES' : 'TAKIM';
+      chatModeEl.className = chatMode === 'all' ? 'all' : '';
+    }
+    if (chatBarEl) chatBarEl.classList.remove('hidden');
+    if (chatInputEl) chatInputEl.value = '';
+    hideScoreboard();
+    if (chatWasLocked && document.exitPointerLock) {
+      try { document.exitPointerLock(); } catch (ce1) {}
+    }
+    setTimeout(function () { if (chatInputEl && chatOpen) chatInputEl.focus(); }, 0);
+    return true;
+  }
+  function closeChat(sendMsg, noRelock) {
+    if (!chatOpen) return;
+    var text = chatInputEl ? chatInputEl.value : '';
+    var mode = chatMode;
+    chatOpen = false;
+    if (chatBarEl) chatBarEl.classList.add('hidden');
+    if (chatInputEl) { chatInputEl.value = ''; chatInputEl.blur(); }
+    if (sendMsg) chatSend(text, mode);
+    if (chatWasLocked) {
+      chatWasLocked = false;
+      if (!noRelock && !paused && !menuOpen && !consoleOpen) requestLock();
+    }
+  }
+  if (chatInputEl) {
+    chatInputEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault(); e.stopPropagation();
+        closeChat(true);
+      } else if (e.key === 'Escape') {
+        e.preventDefault(); e.stopPropagation();
+        closeChat(false);
+      }
+    });
+    chatInputEl.addEventListener('keyup', function (e) { e.stopPropagation(); });
+  }
   function checkMatchEnd() {
     if (!startedOnce || matchEnded) return;
     if (mpRole === 'guest') return;                    // bitişi ana makine duyurur
@@ -4541,6 +4639,7 @@
     if (!startedOnce || matchEnded) return;
     matchEnded = true;
     paused = true;
+    closeChat(false, true);
     hideScoreboard();
     triggerHeld = false; triggerQueued = false;
     for (var ek in keys) keys[ek] = false;
@@ -4633,15 +4732,15 @@
     overlayMode = 'playing';
   }
   renderer.domElement.addEventListener('click', function () {
-    if (!locked && !paused && !menuOpen && !consoleOpen) { initAudio(); requestLock(); }
+    if (!locked && !paused && !menuOpen && !consoleOpen && !chatOpen) { initAudio(); requestLock(); }
   });
-  document.addEventListener('pointerlockerror', function () { if (!paused && !menuOpen) enableDragFallback(); });
+  document.addEventListener('pointerlockerror', function () { if (!paused && !menuOpen && !chatOpen) enableDragFallback(); });
   document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
   renderer.domElement.addEventListener('mousedown', function (e) {
     if (consoleOpen) return;
     initAudio();
     if (e.button === 1) { e.preventDefault(); return; }
-    if (paused || menuOpen) return;
+    if (paused || menuOpen || chatOpen) return;
     if (e.button === 0) { triggerHeld = true; triggerQueued = true; }
     else if (e.button === 2) {
       if (gadgetSel) { triggerHeavyQueued = true; return; }
@@ -4676,13 +4775,13 @@
         overlayEl.style.display = 'none';
         overlayMode = 'playing';
       }
-    } else if (!dragFallback && !consoleOpen && overlayEl.style.display !== 'flex') {
+    } else if (!dragFallback && !consoleOpen && !chatOpen && overlayEl.style.display !== 'flex') {
       openMenu();
     }
   });
   document.addEventListener('mousemove', function (e) {
     if (dragging) dragMoved += Math.abs(e.movementX) + Math.abs(e.movementY);
-    if (paused || menuOpen || consoleOpen) return;
+    if (paused || menuOpen || consoleOpen || chatOpen) return;
     if (!locked && !(dragFallback && dragging)) return;
     var zoomFactor = camera.fov / baseFov;          // dürbün seviyesine göre hassasiyet
     var s = 0.0022 * sens * Math.max(0.12, zoomFactor);
@@ -5543,6 +5642,17 @@
     mpHostDropGuest(rec, ban ? 'Ana makine seni bu lobiden yasakladı.' : 'Ana makine seni lobiden attı.', ban, false);
   }
   function mpHostHandleMessage(rec, m) {
+    if (m.t === 'ch') {
+      if (!startedOnce) return;
+      var cmsg = chatSanitize(m.m);
+      if (!cmsg) return;
+      var cmode = m.md === 'all' ? 'all' : 'team';
+      mpChatRelay(rec.team, rec.name || 'OYUNCU', cmode, cmsg, rec.id);
+      if (cmode === 'all' || rec.team === player.team) {
+        chatAddLine(rec.name || 'OYUNCU', rec.team, cmsg, cmode, false);
+      }
+      return;
+    }
     if (m.t === 'team') { mpHostAssignTeam(rec, m.team); return; }
     if (m.t === 'png') { mpSendTo(rec.id, { t: 'pong', ts: m.ts }); return; }
     if (m.t === 'pong') {
@@ -5677,6 +5787,14 @@
     mpSendHost({ t: 'team', team: team });
   }
   function mpGuestHandleMessage(m) {
+    if (m.t === 'ch') {
+      if (!startedOnce) return;
+      var gmsg = chatSanitize(m.m);
+      if (!gmsg) return;
+      var gmode = m.md === 'all' ? 'all' : 'team';
+      chatAddLine(m.nm || 'OYUNCU', m.tm === 'red' ? 'red' : 'blue', gmsg, gmode, false);
+      return;
+    }
     if (m.t === 'welcome') {
       mpHostId = m.hostId || null;
       if (m.cfg) mpApplyHostCfg(m.cfg);
@@ -6147,6 +6265,11 @@
     var k = e.key.toLowerCase();
     initAudio();
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (chatOpen) {
+      if (e.key === 'Enter') { e.preventDefault(); closeChat(true); }
+      else if (e.key === 'Escape') { e.preventDefault(); closeChat(false); }
+      return;
+    }
     if (k === 'tab') {
       e.preventDefault();
       if (!paused && !menuOpen) showScoreboard();
@@ -6155,6 +6278,9 @@
     if (paused || menuOpen) {
       if (k === ' ') e.preventDefault();
       return;
+    }
+    if ((k === 'u' || k === 'y') && !e.repeat) {
+      if (openChat(k === 'y' ? 'all' : 'team')) { e.preventDefault(); return; }
     }
     var combo = e.ctrlKey || e.metaKey || e.altKey;
     var devKey = k === 'f12' || (combo && e.shiftKey && (k === 'i' || k === 'j' || k === 'c'));
@@ -6187,7 +6313,10 @@
 
   window.addEventListener('wheel', function (e) { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
   window.addEventListener('dragstart', function (e) { e.preventDefault(); });
-  window.addEventListener('selectstart', function (e) { e.preventDefault(); });
+  window.addEventListener('selectstart', function (e) {
+    if (e.target === chatInputEl) return;
+    e.preventDefault();
+  });
   window.addEventListener('auxclick', function (e) { e.preventDefault(); });
 
   window.addEventListener('resize', function () {
@@ -6200,7 +6329,7 @@
   function updatePlayer(dt) {
     var wasX = player.x, wasZ = player.z;
     var dead = player.hp <= 0;
-    var ctl = !paused && !menuOpen && !dead;
+    var ctl = !paused && !menuOpen && !chatOpen && !dead;
     var crTarget = (ctl && keys['control']) ? 1 : 0;
     player.crouch += (crTarget - player.crouch) * Math.min(1, dt * (crTarget ? 10 : 8));
     if (player.crouch < 0.002) player.crouch = 0;
@@ -6456,7 +6585,9 @@
     getScore: function () { return { blue: matchScore.blue, red: matchScore.red, ended: matchEnded }; },
     getRules: function () { return { difficulty: botDifficulty, killLimit: killLimit, timeLimit: timeLimit }; },
     consoleOpen: function () { return consoleOpen; }, consoleRun: runCommand, consoleToggle: function () { if (consoleOpen) dcClose(); else dcOpen(); },
-    mode: function () { return { locked: locked, dragFallback: dragFallback, paused: paused, menuOpen: menuOpen, overlay: overlayEl.style.display, overlayMode: overlayMode, console: consoleOpen, tab: selectedMenuTab }; },
+    mode: function () { return { locked: locked, dragFallback: dragFallback, paused: paused, menuOpen: menuOpen, chatOpen: chatOpen, overlay: overlayEl.style.display, overlayMode: overlayMode, console: consoleOpen, tab: selectedMenuTab }; },
+    chat: function () { return { open: chatOpen, mode: chatMode, lines: chatLogEl ? chatLogEl.children.length : 0 }; },
+    chatOpen: openChat, chatClose: closeChat, chatSend: function (mode, text) { return chatSend(text, mode); },
     setPaused: function (v) { paused = !!v; }, setSens: function (v) { sens = v; },
     spread: computeSpread,
     botFire: function (i) { return botFindTarget(targets[i]); },
