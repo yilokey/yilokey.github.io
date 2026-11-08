@@ -3,8 +3,10 @@
 Tarayıcıda çalışan, **tamamen çevrimdışı** bir FPS demosu. three.js r128
 projede gömülü; haritalar, silahlar, botlar, dokular ve sesler çalışma anında
 prosedürel olarak üretilir. Kurulum, derleme veya internet bağlantısı gerekmez.
-Aynı ağdaki iki bilgisayar **LAN eşler arası** maç yapabilir (kod kopyala-yapıştır
-yeterlidir; sunucu yoktur).
+Aynı ağdaki bilgisayarlar **LAN eşler arası** maç yapabilir (kod kopyala-yapıştır
+yeterlidir; sunucu yoktur). İnternet varsa **tek kodla bağlanma** modu da hazır:
+oda açanın 6 haneli kodunu yazan herkes aynı lobiye katılabilir; lobi kalabalık
+olabilir (ana makine + birden fazla katılımcı).
 
 ## Çalıştırma
 
@@ -12,7 +14,8 @@ yeterlidir; sunucu yoktur).
 
 - Oyun `file://` üzerinden açılmaya hazırdır; `libs/three.min.js` klasörde durur.
 - İstersen VS Code Live Server gibi basit bir sunucuyla da açabilirsin.
-- Ayarlar ve son seçimler `localStorage` içinde (`dust2-settings`) saklanır.
+- Ayarlar, kullanıcı adı ve silah yüklemesi `localStorage` içinde
+  (`dust2-settings-r7`) saklanır.
 
 ## Lobi
 
@@ -23,11 +26,16 @@ Açılışta maç otomatik başlamaz; önce lobi gelir:
 - **Bot sayısı:** 0–15 arası. Toplam takım mevcudu 15'i geçemez; kendi
   takımında en fazla 14 bot olabilir (15. kişi sensin), karşı takımda 15 bot
   olabilir.
-- **Silah seç:** AK-47, USP, AWP, M4A4, Deagle. AWP Lego2 haritasında yalnızca
-  AWP seçilebilir.
-- **Ayarlar:** fare hassasiyeti, parlaklık, ses, görüş açısı (FOV), nişan
-  çizgisi (renk / boyut / kalınlık / boşluk / nokta / dinamik), sınırsız şarjör,
-  ölümsüzlük ve geliştirici konsolu.
+- **Kullanıcı adı (zorunlu):** Maça başlamadan önce 2–16 karakterlik bir ad gir.
+  Ad; üst profil, skorbord, öldürme akışı ve çok oyunculu eşleşmede görünür.
+- **Silah yüklemesi (zorunlu):** Tüm tüfeklerden **bir adet** (AK-47, AWP,
+  M4A4) ve tüm tabancalardan **bir adet** (USP, Deagle) seçmeden maç başlamaz.
+  Seçimler değiştirene kadar geçerlidir; maç içinde yalnızca bu iki ateşli
+  silah kullanılır. AWP Lego2 haritasında tüfek olarak yalnızca AWP kullanılır
+  (bıçak her haritada yanında).
+- **Ayarlar:** fare hassasiyeti, parlaklık, ses, görüş açısı (FOV, varsayılan
+  75°), nişan çizgisi (renk / boyut / kalınlık / boşluk / nokta / dinamik),
+  sınırsız şarjör, ölümsüzlük ve geliştirici konsolu.
 - Ayarlar anında uygulanır ve kaydedilir.
 
 `MAÇI BAŞLAT` ile oyun başlar. Oyun sırasında `Esc` menüyü açar ve duraklatır;
@@ -39,14 +47,16 @@ Açılışta maç otomatik başlamaz; önce lobi gelir:
 | --- | --- |
 | `W A S D` | Yürü |
 | `Fare` | Etrafa bak (tıklayınca imleç kilitlenir) |
-| `Sol tık` | Ateş (AK-47/M4A4 tam otomatik; USP, AWP, Deagle tek tek) |
-| `1` `2` `3` `4` `5` | Silah değiştir: AK-47 / USP / AWP / M4A4 / Deagle |
+| `Sol tık` | Ateş (AK-47/M4A4 tam otomatik; USP, AWP, Deagle tek tek); bıçakta **hızlı hamle (35)**; bombadayken **fırlat** |
+| `1` | Yüklemede seçtiğin tüfek |
+| `2` | Yüklemede seçtiğin tabanca |
+| `3` | Bıçak |
+| `4` `5` `6` | Sis / Flaş / HE bombasını **ele al** (atmak için sol tık) |
+| `G` `F` `H` | Sis / Flaş / HE bombasını ele al veya bırak |
+| `Tab` (basılı) | Skor tablosunu göster |
 | `R` | Şarjör değiştir (animasyonlu) |
-| `G` | Sis bombası at |
-| `F` | Flaş bombası at (bakanı kör eder) |
-| `H` | HE el bombası at (alan hasarı) |
 | `Ctrl` (basılı) | Eğil: alçal, yavaşla, isabeti artır |
-| `Sağ tık` | AWP dürbünü: **1. basış 1x → 2. basış 2x → 3. basış dürbünden çıkar** |
+| `Sağ tık` | AWP dürbünü (**1x → 2x → çık**); bıçakta **ağır hamle (75, 2 kat yavaş)**; bombadayken bırak |
 | `Space` | Zıpla |
 | `Shift` | Sessiz / yavaş yürü |
 | `Esc` | Menü / duraklat |
@@ -77,10 +87,15 @@ onay penceresi devreye girer.
 
 - İki takım vardır: **mavi** ve **kırmızı**. Her takımın kendi doğuş noktaları
   vardır; oyuncu seçtiği takımın doğuşunda başlar.
-- Ölen oyuncu ve botlar **10 saniye** sonra **kendi takımlarının doğuş
+- Ölen oyuncu ve botlar **5 saniye** sonra **kendi takımlarının doğuş
   noktasında** yeniden doğar.
 - Yeniden doğuşta **3 saniye doğuş koruması** vardır; bu sürede hasar almazsın
   ve HUD'da koruma sayacı görünür.
+- Ölümde **kart/pencere açılmaz**; yalnızca alttaki **5 sn** geri sayımı görünür
+  ve süre dolunca otomatik doğarsın. Doğuşta yüklemede seçtiğin sınıfın silahı
+  (tüfek veya tabanca) **dolu şarjör + yedek** ile eline gelir.
+- **Tab** tuşunu basılı tutunca takım skorları, oyuncu/bot adları, öldürme,
+  ölüm, K/D, can ve durum bilgilerini içeren skor tablosu açılır.
 - **Dost ateşi kapalıdır:** ne sen ne de botlar kendi takımına hasar verebilir.
   Botlar hedef seçerken de dost takımı hiç hedeflemez.
 - Sağ üstte skor, canlı bot sayıları ve takım rozeti; sol üstte harita adı ve
@@ -88,19 +103,31 @@ onay penceresi devreye girer.
 
 ## Silahlar ve ekipman
 
-- **AK-47 (1):** Çok yönlü tam otomatik tüfek; dengeli hasar ve şarjör.
-- **USP (2):** Hafif tabanca; hareket halinde en bağışlayıcı silah.
-- **AWP (3):** Tek atışlık keskin nişancı; koşarken neredeyse hiç isabet
+Yüklemede **bir tüfek + bir tabanca** seçilir; maç içinde yalnızca bunlar
+kullanılabilir. Slotlar: `1` tüfek, `2` tabanca, `3` bıçak, `4` sis,
+`5` flaş, `6` HE.
+
+- **AK-47:** Çok yönlü tam otomatik tüfek; dengeli hasar ve şarjör.
+- **USP:** Hafif tabanca; hareket halinde en bağışlayıcı silah.
+- **AWP:** Tek atışlık keskin nişancı; koşarken neredeyse hiç isabet
   etmez, dürbün döngüsü 1x → 2x → çık.
-- **M4A4 (4):** Tam otomatik tüfek; AK-47'ye rakip, daha kontrollü geri tepme.
-- **Deagle (5):** Yarı otomatik ağır tabanca; kafaya tek atış potansiyeli,
+- **M4A4:** Tam otomatik tüfek; AK-47'ye rakip, daha kontrollü geri tepme.
+- **Deagle:** Yarı otomatik ağır tabanca; kafaya tek atış potansiyeli,
   güçlü geri tepme.
-- **Sis (`G`):** zıplar, duman çıkarır ve 16 saniye görüşü keser; botlar dumanın
-  içinden ateş edemez. Aynı anda en fazla 3 sis aktif olur.
-- **Flaş (`F`):** patladığında ona bakan herkes (botlar dahil) geçici olarak
-  kör olur; köşe temizlemede kullan.
-- **HE (`H`):** alan hasarı verir; dost takımına zarar vermez. HUD'daki
-  ekipman sayacı (Sis / Flaş / HE) kalan bombaları gösterir.
+- **Bıçak (3):** Yakın mesafe (2 m) savurma silahı; şarjörsüz ve sınırsız.
+  **Sol tık 35 hasar ve hızlı**, **sağ tık 75 hasar ama 2 kat yavaş**. Hedefin
+  arkasındaysan sol tık **50**, sağ tık **tek atış** yapar. Normal yürüyüşten
+  **%20 hızlıdır**; tabanca taşırken **%10 hızlı**, tüfekte mevcut hızda
+  hareket edersin.
+- **Bombalar (`4` / `5` / `6` veya `G` / `F` / `H`):** Tuşa basmak bombayı
+  **atmaz, ele alır**. Sol tıkla nişan çizgisinin gösterdiği yöne fizik
+  kurallarına göre (yerçekimi + sekme) fırlatılır. Sağ tık bombayı bırakır.
+- **Sis:** duman çıkarır ve 16 saniye görüşü keser; botlar dumanın içinden
+  ateş edemez. Aynı anda en fazla 3 sis aktif olur.
+- **Flaş:** patladığında ona bakan herkesi (botlar dahil) geçici olarak kör
+  eder; köşe temizlemede kullan.
+- **HE:** alan hasarı verir; dost takımına zarar vermez. HUD'daki ekipman
+  sayacı (Sis / Flaş / HE) kalan bombaları gösterir.
 
 ## Atış mekaniği
 
@@ -126,23 +153,53 @@ onay penceresi devreye girer.
   geri tepme, namlu alevi ve ölüm/doğuş animasyonları vardır.
 - Haritaya özel devriye rotalarında gezerler; görüş hattı, mesafe, duvar, kasa ve
   sis kontrolüyle düşman ararlar. Dost takımı hedeflemezler.
+- Engellere takıldıklarında **A\* yol bulma** ile dolambaçlı rota çizer, duvar
+  boyunca kayarak köşeleri dönerler; haritanın her köşesine ulaşabilirler.
 - **Taktik davranışlar:** düşman görünce baskı altında ateş eder, ağır hasar
   alınca **geri çekilip** siper arar, koridor ve kapı gibi dar geçitlerde
   **köşe tutar**; yüksek zorlukta hedefe doğru yan adım atarak (strafe)
   ateş eder.
 - Vurulunca düşerler; başlarının üstündeki can/zırh barları ve doğuş koruması
-  çerçevesi durumlarını gösterir. 10 saniye sonra kendi doğuşlarında yeniden
+  çerçevesi durumlarını gösterir. 5 saniye sonra kendi doğuşlarında yeniden
   doğarlar.
 - Botlar birbirlerinin ve oyuncunun içinden geçmez; kalabalıkta birbirlerini
   itmez, yolları tıkanırsa yan yola geçerler.
 - Mini haritada takım renkleriyle görünürler.
 
-## Çok Oyunculu (LAN)
+## Çok Oyunculu
 
-Lobideki **Çok Oyunculu** sekmesinden, aynı ağdaki iki bilgisayarla 1v1 maç
-yapılır. Bağlantı **WebRTC eşler arasıdır**; ortada sunucu yoktur, sadece
-kodlar kopyalanıp yapıştırılır. İnternet bağlantısı gerekmez (buz sunucuları
-kullanılmaz; iki taraf da aynı LAN'da olmalıdır).
+Lobideki **Çok Oyunculu** sekmesinden **kalabalık maç** yapılır: bir ana makine
+ve istediği kadar katılımcı aynı lobiye bağlanabilir. Bağlantı **WebRTC eşler
+arasıdır**: hareket, atış ve skor verileri sunucudan geçmez, doğrudan akar.
+İki mod vardır:
+
+### Tek kodla bağlan (önerilen)
+
+- **Ana makine:** OYNA sekmesinde kuralları seç, MP sekmesinde **ODA AÇ**'a
+  bas — 6 haneli bir oda kodu üretilir. Aynı kodu birden fazla arkadaşın
+  kullanabilir.
+- **Katılımcı:** kodu yazıp **KODLA BAĞLAN**'a bas. Bağlanınca **iki takım
+  kartı** açılır; mavi veya kırmızıyı seçersin. Seçim ana makineye iletilir.
+- **Takım dengeleme (isteğe bağlı):** ana makine bu ayarı açarsa yeni katılan,
+  insan sayısı az olan takıma yerleştirilir ve kart seçimine göre gerekirse
+  dengelenir. Kapalıyken herkes seçtiği takıma girer.
+- **Lobi listesi:** ana makine tüm oyuncuları görür; yanlarındaki **KICK** ve
+  **BAN** düğmeleriyle lobiden atabilir. **Banlanan aynı odaya geri giremez**;
+  **atılan (kick) yeniden bağlanabilir**.
+- **Yetkiler:** harita, bot sayıları, zorluk, öldürme hedefi, süre ve takım
+  dengeleme ayarlarını **yalnızca ana makine** değiştirebilir. Katılımcılarda bu
+  alanlar kilitlidir; maçı da ana makine başlatır.
+- Kod internet üzerinden de çalışır: PeerJS buluşma sunucusu tarafları
+  eşleştirir, veri yine doğrudan şifreli eşler arası akar. Kodu bilen odaya
+  girebilir.
+- Ağ koparsa oyuncu lobiye döner; tek oyunculu oyun etkilenmez.
+
+### Manuel kod değişimi (çevrimdışı LAN)
+
+İnternet yoksa aynı yerel ağdaki makineler davet/cevap koduyla bağlanır.
+Bu mod tamamen sunucusuzdur; buz sunucuları dahil hiçbir sunucu kullanılmaz
+(taraflar aynı LAN'da olmalıdır). Her davet/cevap kod çifti **tek bir konuk**
+bağlar; kalabalık lobi için tek kod modunu kullan.
 
 **Maç kurmak (Ana Makine):**
 
@@ -151,9 +208,9 @@ kullanılmaz; iki taraf da aynı LAN'da olmalıdır).
 2. Karşı taraf kendi ekranındaki **MAÇA KATIL** alanına bu kodu yapıştırıp
    **KATIL** der; ona bir **cevap kodu** çıkar.
 3. Cevap kodunu al, **CEVAPLA BAĞLAN** alanına yapıştır ve **BAĞLAN**'a bas.
-4. Bağlantı kurulunca maç otomatik başlar. Ana makine haritayı, takımları,
-   botları, skoru ve maç sonunu yönetir; konuk otomatik olarak **karşı takımda**
-   başlar.
+4. Bağlantı kurulunca lobi listesi dolar; konuk **takım kartlarından** seçim
+   yapar. Ana makine haritayı, takımları, botları, skoru ve maç sonunu yönetir;
+   maçı **MAÇI BAŞLAT** ile o başlatır.
 
 **Maça katılmak (Konuk):**
 
@@ -162,11 +219,14 @@ kullanılmaz; iki taraf da aynı LAN'da olmalıdır).
 
 Kurallar:
 
-- Ana makine **yetkilidir:** harita, botlar, skor ve maç sonu ona aittir.
+- Ana makine **yetkilidir:** harita, botlar, skor, lobi ayarları ve maç sonu ona
+  aittir; katılımcılar bu ayarları değiştiremez.
 - Her oyuncu kendi canını yönetir; hasar mesajları eşler arası gönderilir.
 - Ana makinenin botları konuğun ekranında **hayalet** olarak canlandırılır;
   konuk onlara vurabilir, hasar ana makineye iletilir ve skor işlenir.
-- Skor, ölüm/öldürme akışı ve maç sonu kartı iki tarafta da senkron gider.
+- Ana makine **KICK** ile oyuncuyu atabilir (tekrar bağlanabilir) veya **BAN**
+  ile yasaklayabilir (aynı odaya geri giremez).
+- Skor, ölüm/öldürme akışı ve maç sonu kartı tüm istemcilerde senkron gider.
 - Bağlantı koparsa lobiye dönülür; tek taraflı maç bozulmaz.
 
 ## Haritalar
