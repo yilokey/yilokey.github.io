@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dust2 Web Arena · r7</title>
+<title>BASIC-STRIKE · r7</title>
 <style>
   :root { color-scheme: dark; --gold:#e4ae58; --gold2:#ffd88a; --panel:rgba(14,16,20,.97); --panel2:rgba(20,23,28,.96);
     --line:rgba(255,214,150,.18); --line2:rgba(255,255,255,.09); --blue:#4a9eff; --red:#ff6154; --green:#6dff9c;
@@ -50,6 +50,7 @@
   .kf{display:flex;align-items:center;gap:7px;background:rgba(8,10,13,.74);border:1px solid rgba(255,255,255,.08);border-left:2px solid #b58e4f;padding:4px 8px;font-size:11px;animation:kfin .16s ease-out;letter-spacing:.3px}
   .kf .kf-blue{color:#8ec7ff;font-weight:700}.kf .kf-red{color:#ff9f92;font-weight:700}.kf .kf-you{color:var(--gold2);font-weight:800}
   .kf .kfico{opacity:.55;font-size:10px}.kf .kfhs{color:#ffbd76;font-size:9px;font-weight:800;border:1px solid rgba(255,180,100,.4);padding:0 3px;border-radius:2px}
+  .kf .kfw{color:#d8c49a;font-size:8.5px;font-weight:800;letter-spacing:.6px;border:1px solid rgba(210,180,120,.35);background:rgba(210,180,120,.08);padding:1px 4px;border-radius:2px;white-space:nowrap}
   @keyframes kfin{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
   #dmgflash{position:fixed;inset:0;z-index:8;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 50%, rgba(160,20,10,0) 35%, rgba(150,18,8,.85) 100%);transition:opacity .1s linear}
   #flashov{position:fixed;inset:0;z-index:7;pointer-events:none;background:#fdfcf7;opacity:0}
@@ -348,7 +349,7 @@
   .sb-scores .s{display:flex;align-items:baseline;gap:7px;font-size:24px;font-weight:900}
   .sb-scores .s small{font-size:8px;letter-spacing:1.4px;color:#85877f;font-weight:700}
   .sb-scores .blue{color:#9dcfff}.sb-scores .red{color:#ffb2a9}.sb-scores .colon{color:#5e5b52;font-size:17px}
-  .sb-headrow,.sb-row{display:grid;grid-template-columns:1.7fr .6fr .6fr .7fr .6fr .9fr;gap:6px;align-items:center;padding:5px 13px;font-size:10.5px}
+  .sb-headrow,.sb-row{display:grid;grid-template-columns:1.6fr .5fr .5fr .6fr .55fr .5fr .8fr;gap:6px;align-items:center;padding:5px 13px;font-size:10.5px}
   .sb-headrow{font-size:8px;letter-spacing:1.1px;color:#777a73;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02)}
   .sb-headrow span:not(:first-child),.sb-row span:not(:first-child){text-align:center}
   #sbTeams{overflow-y:auto;padding-bottom:4px}
@@ -504,16 +505,16 @@
       <div class="colon">:</div>
       <div class="s red"><b id="sbRed">0</b><small>KIRMIZI</small></div>
     </div>
-    <div class="sb-headrow"><span>OYUNCU</span><span>ÖLD.</span><span>ÖLÜM</span><span>K/D</span><span>CAN</span><span>DURUM</span></div>
+    <div class="sb-headrow"><span>OYUNCU</span><span>ÖLD.</span><span>ÖLÜM</span><span>K/D</span><span>PING</span><span>CAN</span><span>DURUM</span></div>
     <div id="sbTeams"></div>
-    <div class="sb-foot">TAB basılı tut · skor tablosu · K/D ve can durumu canlı güncellenir</div>
+    <div class="sb-foot">TAB basılı tut · skor tablosu · K/D ve ping canlı güncellenir · rakip canı gizli</div>
   </div>
 </div>
 
 <div id="overlay" class="mode-lobby">
   <div id="card">
     <header class="brand">
-      <div class="logo">DUST<span>2</span> WEB</div>
+      <div class="logo">BASIC<span>-</span>STRIKE</div>
       <div class="brandtxt"><div class="sub">TACTICAL ARENA</div><div class="tag">OFFLINE FPS · TAKIM SAVAŞI</div></div>
       <div class="profile"><span class="avatar" id="profileAvatar">?</span><div><b id="profileName">AD GİRİLMEDİ</b><small id="profileMeta">Mavi Takım · rütbe 07</small></div></div>
       <div class="ver">R7<br>4 HARİTA · 6 SİLAH</div>
@@ -730,7 +731,7 @@
                 <div class="keyrow"><span class="kk"><kbd>G</kbd><kbd>F</kbd><kbd>H</kbd></span><span>Bombayı ele al / bırak (atmak için sol tık)</span></div>
                 <div class="keyrow"><span class="kk"><kbd>Tab</kbd></span><span>Skor tablosu (basılı tut)</span></div>
                 <div class="keyrow"><span class="kk"><kbd>R</kbd></span><span>Şarjör değiştir</span></div>
-                <div class="keyrow"><span class="kk"><kbd>Esc</kbd></span><span>Menü / duraklat</span></div>
+                <div class="keyrow"><span class="kk"><kbd>Esc</kbd></span><span>Menü aç / kapat (oyun durmaz)</span></div>
                 <div class="keyrow"><span class="kk"><kbd>"</kbd></span><span>Konsol (ayardan aç)</span></div>
               </div>
             </div>
