@@ -104,6 +104,8 @@ onay penceresi devreye girer.
   ölüm, K/D, **ping**, can ve durum bilgilerini içeren skor tablosu açılır.
 - **Killfeed:** sağ üstte kimin kimi **hangi silahla** (AK-47, M4A4, AWP, USP,
   Deagle, BIÇAK, EL BOMBASI) vurduğu gösterilir; kafa vuruşları ayrıca işaretlenir.
+  AWP **dürbünsüz** vuruşta `NO-SCOPE`, **sisin içinden** yapılan vuruşta `SİS`
+  rozeti silah adının yanında görünür.
 - **Can görünürlüğü:** oyun sırasında yalnızca **kendi takımının** can/zırh
   barlarını görürsün; rakip oyuncu ve botların canı gizlidir (skor tablosunda
   da `—` olarak görünür).
@@ -111,6 +113,8 @@ onay penceresi devreye girer.
   Botlar hedef seçerken de dost takımı hiç hedeflemez.
 - Sağ üstte skor, canlı bot sayıları ve takım rozeti; sol üstte **FPS'in hemen
   yanında kendi ping'in**, harita adı ve bulunduğun bölge (callout) görünür.
+- **Radar (mini harita):** yalnızca **kendi takım arkadaşlarını** gösterir;
+  rakip oyuncular ve botlar radarda görünmez.
 
 ## Silahlar ve ekipman
 
@@ -138,8 +142,9 @@ kullanılabilir. Slotlar: `1` tüfek, `2` tabanca, `3` bıçak, `4` sis,
   fırlatır.
 - **Sis:** duman çıkarır ve 16 saniye görüşü keser; botlar dumanın içinden
   ateş edemez. Aynı anda en fazla 3 sis aktif olur.
-- **Flaş:** patladığında ona bakan herkesi (botlar dahil) geçici olarak kör
-  eder; **etki yarıçapı 52 m'dir** (eski değerin 2 katı), köşe temizlemede kullan.
+- **Flaş:** patladığında **ona doğru bakan ve görüş hattı açık** olan herkesi
+  (botlar dahil) geçici olarak kör eder; **etki yarıçapı 156 m'dir** (eski
+  değerin 3 katı). **Arkasını dönen veya arada duvar olan etkilenmez.**
 - **HE:** alan hasarı verir; dost takımına zarar vermez. HUD'daki ekipman
   sayacı (Sis / Flaş / HE) kalan bombaları gösterir.
 
