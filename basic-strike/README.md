@@ -274,7 +274,8 @@ haritasını getirir. Oyuncu ve bot doğuşları takıma göre ayrıdır.
 
 Lobideki **Geliştirici → Geliştirici konsolu** anahtarını açtıktan sonra oyun
 içinde `"` tuşuyla konsolu açabilirsin. Konsol oyunu duraklatır; kapatmak için
-`"`, `'` veya `Esc`. Komut geçmişi `↑` / `↓` ile gezilir.
+`Esc` (komut yazarken de çalışır) veya komut satırı odakta değilken `"` / `'`.
+Komut geçmişi `↑` / `↓` ile gezilir.
 
 Örnek komutlar:
 
