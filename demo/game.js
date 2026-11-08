@@ -1,4 +1,4 @@
-/* Dust2 Web Demo — three.js r128 ile FPS gezinti demosu.
+/* BASIC-STRIKE — three.js r128 ile FPS gezinti demosu.
    Kontroller: WASD yürü · Fare bak · Space zıpla · Shift yavaş yürü · R başa dön */
 (function () {
   'use strict';
@@ -1346,7 +1346,7 @@
     { id: 'pistol', name: 'USP', cls: 'pistol', speedMul: 1.1, auto: false, dmg: 25, headMul: 4, rpm: 380, magSize: 12, reserveMax: 60,
       spread: 0.009, bloom: 0.011, bloomMax: 0.055, kickUp: 0.8, kickSide: 0.35, reloadTime: 2.1, moveSpread: 0.026,
       pos: { x: 0.30, y: -0.23, z: -0.52 }, muzzle: { x: 0.16, y: -0.17, z: -0.62 } },
-    { id: 'sniper', name: 'AWP', cls: 'rifle', speedMul: 1, auto: false, dmg: 115, headMul: 4, rpm: 41, magSize: 10, reserveMax: 30,
+    { id: 'sniper', name: 'AWP', cls: 'rifle', speedMul: 1, auto: false, dmg: 115, headMul: 4, legDmg: 85, rpm: 41, magSize: 10, reserveMax: 30,
       spread: 0.002, bloom: 0.03, bloomMax: 0.09, kickUp: 2.6, kickSide: 0.5, reloadTime: 3.0, zoom: true, moveSpread: 0.09,
       pos: { x: 0.34, y: -0.25, z: -0.66 }, muzzle: { x: 0.2, y: -0.16, z: -1.0 } },
     { id: 'rifle2', name: 'M4A4', cls: 'rifle', speedMul: 1, auto: true, dmg: 33, headMul: 4, rpm: 666, magSize: 30, reserveMax: 90,
@@ -1645,6 +1645,7 @@
   function effectiveRifle() { return (currentMap && currentMap.awpOnly) ? 2 : loadout.rifle; }
   function updateViewModelVisibility() {
     for (var gid in weaponGroups) weaponGroups[gid].visible = false;
+    if (player.hp <= 0) { gadgetGroup.visible = false; return; }
     if (gadgetSel) {
       gadgetGroup.visible = true;
     } else {
@@ -1782,6 +1783,12 @@
   function computeSpread() {
     var w = currentWeapon();
     var crouch = player.crouch || 0;
+    if (w.id === 'sniper' && !scoped) {
+      // dürbünsüz AWP: cross'a göre belirgin saçılma, hareket/zıplama ile artar
+      var su = 0.048 + Math.min(1, Math.max(0, moveAmt)) * 0.055;
+      if (!player.grounded) su += 0.05;
+      return su * (1 - crouch * 0.3);
+    }
     if (scoped) return w.spread * (scopeLevel === 2 ? 0.12 : 0.25) * (1 - crouch * 0.3);
     var s = (w.spread + bloom) * (1 - crouch * 0.35);
     var mv = Math.min(1, Math.max(0, moveAmt));
@@ -1919,7 +1926,7 @@
     }
     return false;
   }
-  function throwGrenade(type) {
+  function throwGrenade(type, power) {
     var nowS2 = performance.now() / 1000;
     if (nowS2 < nextThrowTime || player.hp <= 0) return;
     if (!nades[type] || nades[type] <= 0) { playTick(820, 0.06, 0.02); updateHudNades(); updateHudAmmo(); return; }
@@ -1939,7 +1946,7 @@
     mesh.position.copy(pos);
     mesh.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
     scene.add(mesh);
-    var speed = 15.2;
+    var speed = 15.2 * (power || 1);
     var gr = { mesh: mesh, type: type, team: player.team, vel: fwd.clone().multiplyScalar(speed),
       fuse: type === 'he' ? 1.55 : 1.35, spin: (Math.random() - 0.5) * 8 };
     grenades.push(gr);
@@ -1976,14 +1983,14 @@
     flashes.push({ s: spr, age: 0, dur: 0.55 });
     var dx = player.x - x, dy = (player.y + 1.5) - 1.4, dz = player.z - z;
     var d = Math.sqrt(dx * dx + dy * dy + dz * dz);
-    if (d < 26) {
+    if (d < 52) {
       var eff;
-      if (d < 2) eff = Math.max(0, 1 - d / 26);            // ayakucunda: yön şartı yok
+      if (d < 2) eff = Math.max(0, 1 - d / 52);            // ayakucunda: yön şartı yok
       else {
         var toFlash = new THREE.Vector3(dx / d, dy / d, dz / d);
         var fwd = new THREE.Vector3(); camera.getWorldDirection(fwd);
         var dot = toFlash.dot(fwd);
-        eff = Math.max(0, (dot - 0.25) / 0.75) * Math.max(0, 1 - d / 26);
+        eff = Math.max(0, (dot - 0.25) / 0.75) * Math.max(0, 1 - d / 52);
       }
       if (eff > 0.04) {
         flashBlind = Math.min(1, eff * (d < 6 ? 1.1 : 0.9));
@@ -1997,9 +2004,9 @@
       if (t.state !== 'alive') continue;
       var bdx = t.group.position.x - x, bdz = t.group.position.z - z;
       var bd = Math.sqrt(bdx * bdx + bdz * bdz);
-      if (bd < 24 && losClear(x, 1.4, z, t.group.position.x, 1.2, t.group.position.z)) {
+      if (bd < 48 && losClear(x, 1.4, z, t.group.position.x, 1.2, t.group.position.z)) {
         var face = bd < 2 ? 1 : (-Math.sin(t.group.rotation.y) * bdx - Math.cos(t.group.rotation.y) * bdz) / bd;
-        var seff = Math.max(0, (face - 0.2) / 0.8) * Math.max(0, 1 - bd / 24);
+        var seff = Math.max(0, (face - 0.2) / 0.8) * Math.max(0, 1 - bd / 48);
         if (seff > 0.1) {
           t.stunT = Math.max(t.stunT || 0, 1.2 + seff * 2.6);
           t.target = null;
@@ -2031,12 +2038,12 @@
       var heWasAlive = player.hp > 0;
       hurtPlayer(maxDmg * Math.max(0, 1 - dp / R), false);
       if (heWasAlive && player.hp <= 0 && mpConnected && mpRole && tt !== player.team) {
-        addKillFeed('EL BOMBASI', (userName || 'SEN'), tt, player.team, false, true);
+        addKillFeed('EL BOMBASI', (userName || 'SEN'), tt, player.team, false, true, 'he');
         if (mpRole === 'host') {
           addTeamScore(tt, 1);
-          mpBroadcastKf('EL BOMBASI', tt, (userName || 'SEN'), player.team, false, null, mpSelfId);
+          mpBroadcastKf('EL BOMBASI', tt, (userName || 'SEN'), player.team, false, null, mpSelfId, 'he');
         } else {
-          mpSendHost({ t: 'dth', kn: 'EL BOMBASI', kt: tt, kid: null, head: false });
+          mpSendHost({ t: 'dth', kn: 'EL BOMBASI', kt: tt, kid: null, head: false, w: 'he' });
         }
       }
       if (dp < 10) shakeT = Math.max(shakeT, 0.4 * (1 - dp / 10));
@@ -2048,7 +2055,7 @@
       var bdx = t.group.position.x - x, bdz = t.group.position.z - z;
       var bd = Math.sqrt(bdx * bdx + bdz * bdz);
       if (bd < R + 0.6 && losClear(x, 1.0, z, t.group.position.x, 1.2, t.group.position.z)) {
-        damageTarget(t, maxDmg * Math.max(0, 1 - bd / R), false, true);
+        damageTarget(t, maxDmg * Math.max(0, 1 - bd / R), false, true, null, null, 'he');
       }
     }
   }
@@ -2288,6 +2295,10 @@
     return true;
   }
   function drawBotBar(t) {
+    if (t.team !== player.team) {          // rakip canı görünmez
+      if (t.bar && t.bar.sprite) t.bar.sprite.visible = false;
+      return;
+    }
     var x = t.bar.ctx, c = t.bar.canvas;
     var nowS = performance.now() / 1000;
     var prot = t.state === 'alive' && t.protectUntil > nowS ? 1 : 0;
@@ -2338,18 +2349,18 @@
     // --- bacaklar: üst bacak + diz + alt bacak + taktik bot ---
     function makeLeg(side) {
       var hip = new THREE.Group(); hip.position.set(side * 0.14, 0.74, 0); g.add(hip);
-      var thigh = part(new THREE.Mesh(new THREE.BoxGeometry(0.185, 0.38, 0.20), nMatPants), 'body', hip);
+      var thigh = part(new THREE.Mesh(new THREE.BoxGeometry(0.185, 0.38, 0.20), nMatPants), 'leg', hip);
       thigh.position.y = -0.19;
-      var pocket = part(new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.15, 0.055), nMatPants), 'body', hip);
+      var pocket = part(new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.15, 0.055), nMatPants), 'leg', hip);
       pocket.position.set(side * 0.105, -0.22, -0.075);
       var lower = new THREE.Group(); lower.position.y = -0.38; hip.add(lower);
-      var shin = part(new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.36, 0.17), nMatPants), 'body', lower);
+      var shin = part(new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.36, 0.17), nMatPants), 'leg', lower);
       shin.position.y = -0.18;
-      var knee = part(new THREE.Mesh(new THREE.BoxGeometry(0.175, 0.12, 0.075), nMatKnee), 'body', lower);
+      var knee = part(new THREE.Mesh(new THREE.BoxGeometry(0.175, 0.12, 0.075), nMatKnee), 'leg', lower);
       knee.position.set(0, -0.01, -0.09);
-      var boot = part(new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.14, 0.27), nMatBoot), 'body', lower);
+      var boot = part(new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.14, 0.27), nMatBoot), 'leg', lower);
       boot.position.set(0, -0.28, -0.055);
-      var sole = part(new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.035, 0.29), nMatKnee), 'body', lower);
+      var sole = part(new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.035, 0.29), nMatKnee), 'leg', lower);
       sole.position.set(0, -0.357, -0.055);
       return { hip: hip, lower: lower, knee: knee };
     }
@@ -2611,7 +2622,7 @@
               dmg: dmg * (isHead ? 2.5 : 1), head: isHead, w: 'rifle',
               kn: t.name, kt: t.team, kid: t.id });
           } else {
-            damageTarget(hitBot, dmg * (isHead ? 3 : 1), isHead, false, t.team, t.name);
+            damageTarget(hitBot, dmg * (isHead ? 3 : 1), isHead, false, t.team, t.name, 'rifle');
           }
           end.copy(hits[0].point);
         }
@@ -2627,7 +2638,10 @@
           var wasAlive = player.hp > 0;
           hurtPlayer(dmg * (headHit ? 2.5 : 1), headHit);
           if (wasAlive && player.hp <= 0) {
-            addKillFeed(t.name, (userName || 'SEN'), t.team, player.team, headHit, true);
+            addKillFeed(t.name, (userName || 'SEN'), t.team, player.team, headHit, true, 'rifle');
+            if (mpRole === 'host' && mpConnected) {
+              mpBroadcastKf(t.name, t.team, (userName || 'SEN'), player.team, headHit, null, mpSelfId, 'rifle');
+            }
             addTeamScore(t.team, 1);
           }
           end.copy(closest);
@@ -2648,12 +2662,12 @@
       hitmarkerEl.style.opacity = '1';
     }
   }
-  function damageTarget(t, dmg, head, byPlayer, attackerTeam, attackerName) {
+  function damageTarget(t, dmg, head, byPlayer, attackerTeam, attackerName, weaponId) {
     if (!t || t.state !== 'alive') return;
     var nowS = performance.now() / 1000;
     if (t.protectUntil > nowS) return;             // doğuş koruması
     if (byPlayer && t.team === player.team) return; // dost ateşi kapalı
-    if (t.armor > 0) {
+    if (t.armor > 0 && weaponId !== 'sniper') {
       var absorbed = Math.min(t.armor, dmg * (head ? 0.25 : 0.5));
       t.armor -= absorbed;
       dmg -= absorbed;
@@ -2679,7 +2693,11 @@
       }
       var killerTeam = byPlayer ? player.team : attackerTeam;
       if (killerTeam && killerTeam !== t.team) {
-        addKillFeed(byPlayer ? (userName || 'SEN') : (attackerName || 'BOT'), t.name || 'BOT', killerTeam, t.team, head, byPlayer);
+        var killerName = byPlayer ? (userName || 'SEN') : (attackerName || 'BOT');
+        addKillFeed(killerName, t.name || 'BOT', killerTeam, t.team, head, byPlayer, weaponId);
+        if (byPlayer && mpRole === 'host' && mpConnected) {
+          mpBroadcastKf(killerName, killerTeam, t.name || 'BOT', t.team, head, mpSelfId, null, weaponId);
+        }
         addTeamScore(killerTeam, 1);
       }
       drawBotBar(t);
@@ -2911,12 +2929,34 @@
     if (t.repathT > 0) t.repathT -= dt;
     return moving;
   }
+  function reviveBotAtSpawn(t, nowS) {
+    var sp = t.spawnPos || t.home || { x: 0, z: 0 };
+    t.state = 'alive'; t.dead = false; t.fallT = 0;
+    t.hp = t.maxHp; t.armor = t.maxArmor;
+    t.group.visible = true;
+    t.group.position.set(sp.x, 0, sp.z);
+    t.group.rotation.set(0, t.spawnYaw !== undefined ? t.spawnYaw : 0, 0);
+    if (t.gunG) t.gunG.visible = true;
+    t.upper.position.y = 0.78; t.upper.rotation.x = 0;
+    t.gunG.rotation.x = 0; t.gunG.position.z = -0.3;
+    t.protectUntil = nowS + SPAWN_PROTECT;
+    t.target = null; t.burstLeft = 0; t.nextShot = nowS + 1.2;
+    t.recoil = 0; t.flashT = 0; t.aimPitch = 0; t.stuckT = 0;
+    t.lastSeenT = 0; t.retreatT = 0; t.stunT = 0; t.scanA = 0; t.moveSpread = 0; t.strafeT = 0;
+    if (t.flash) t.flash.visible = false;
+    t.legL.rotation.x = 0; t.legR.rotation.x = 0;
+    if (t.kneeL) t.kneeL.rotation.x = 0;
+    if (t.kneeR) t.kneeR.rotation.x = 0;
+    t.armL.rotation.x = 1.3; t.armR.rotation.x = 1.12;
+    t.wp = 1; t.dwell = 0.4 + Math.random() * t.dwellTime;
+    drawBotBar(t);
+  }
   function updateTargets(dt) {
     var nowS = performance.now() / 1000;
     for (var i6 = 0; i6 < targets.length; i6++) {
       var t = targets[i6];
       if (t.bar && t.bar.sprite) {
-        t.bar.sprite.visible = t.state === 'alive';
+        t.bar.sprite.visible = t.state === 'alive' && t.team === player.team;
         // yakındaki botların barları ekranı kaplamasın: mesafeye göre ölçekle
         var bdx = t.group.position.x - player.x, bdz = t.group.position.z - player.z;
         var bd = Math.sqrt(bdx * bdx + bdz * bdz);
@@ -2944,7 +2984,10 @@
             while (dyy < -Math.PI) dyy += Math.PI * 2;
             t.group.rotation.y += dyy * Math.min(1, dt * 14);
           }
-          if (t.netCrouch > 0.5) t.group.position.y = -0.42; else t.group.position.y = 0;
+          var wantY = (t.netY || 0) + (t.netCrouch > 0.5 ? -0.42 : 0);
+          if (Math.abs(wantY - t.group.position.y) > 0.002) {
+            t.group.position.y += (wantY - t.group.position.y) * Math.min(1, dt * 18);
+          } else t.group.position.y = wantY;
         } else {
         if (t.stunT > 0) {
           t.stunT -= dt;
@@ -3162,34 +3205,22 @@
       if (t.state === 'falling') {
         t.upper.position.y = 0.78;
         t.upper.rotation.x = 0;
+        if (t.gunG) t.gunG.visible = false;
         t.fallT += dt / 0.35;
         var k = Math.min(1, t.fallT);
         t.group.rotation.x = -1.5708 * (k * k * (3 - 2 * k));
-        if (k >= 1) { t.state = 'down'; t.downUntil = nowS + 4.35; }
+        if (k >= 1) { t.state = 'down'; t.downUntil = nowS + 4.0; }
       } else if (t.state === 'down') {
-        if (nowS >= t.downUntil) t.state = 'rising';
-      } else if (t.state === 'rising') {
-        t.fallT -= dt / 0.3;
-        var k2 = Math.max(0, t.fallT);
-        t.group.rotation.x = -1.5708 * (k2 * k2 * (3 - 2 * k2));
-        if (k2 <= 0) {
-          t.state = 'alive'; t.hp = t.maxHp; t.armor = t.maxArmor; t.dead = false;
-          var sp = t.spawnPos || t.home;
-          t.group.position.set(sp.x, 0, sp.z);
-          t.group.rotation.set(0, t.spawnYaw !== undefined ? t.spawnYaw : 0, 0);
-          t.protectUntil = nowS + SPAWN_PROTECT;
-          t.target = null; t.burstLeft = 0; t.nextShot = nowS + 1.2;
-          t.recoil = 0; t.flashT = 0; t.aimPitch = 0; t.stuckT = 0;
-          t.lastSeenT = 0; t.retreatT = 0; t.stunT = 0; t.scanA = 0; t.moveSpread = 0; t.strafeT = 0;
-          if (t.flash) t.flash.visible = false;
-          t.upper.position.y = 0.78; t.upper.rotation.x = 0;
-          t.gunG.rotation.x = 0; t.gunG.position.z = -0.3;
-          t.legL.rotation.x = 0; t.legR.rotation.x = 0;
-          if (t.kneeL) t.kneeL.rotation.x = 0;
-          if (t.kneeR) t.kneeR.rotation.x = 0;
-          t.armL.rotation.x = 1.3; t.armR.rotation.x = 1.12;
-          t.wp = 1; t.dwell = 0.4 + Math.random() * t.dwellTime;
-          drawBotBar(t);
+        if (nowS >= t.downUntil) {
+          if (t.isRemote || t.isGhost) {
+            // ceset 4 sn sonra tamamen kaldırılır; ağdan "canlı" gelince doğuşta geri gelir
+            t.state = 'gone';
+            if (t.group.parent) scene.remove(t.group);
+            if (t.bar && t.bar.sprite) t.bar.sprite.visible = false;
+            rebuildHittables();
+          } else {
+            reviveBotAtSpawn(t, nowS);
+          }
         }
       }
     }
@@ -3215,7 +3246,12 @@
     var wasScoped = scopeLevel;
     var nowS = performance.now() / 1000;
     if (nowS < nextShotTime) return;
-    if (!w.melee && ammo[curW] <= 0) { nextShotTime = nowS + 0.35; playTick(820, 0.06, 0.02); return; }
+    if (!w.melee && ammo[curW] <= 0) {
+      nextShotTime = nowS + 0.35;
+      if (reserve[curW] > 0) startReload();
+      else playTick(820, 0.06, 0.02);
+      return;
+    }
     if (!w.melee) heavy = false;
     nextShotTime = nowS + 60 / (w.melee && heavy ? (w.heavyRpm || w.rpm * 0.5) : w.rpm);
     if (w.melee) {
@@ -3258,12 +3294,17 @@
       var tgt = hit.object.__tgt;
       if (tgt) {
         if (tgt.team !== player.team) {
-          var isHead = hit.object.userData.part === 'head';
+          var hitPart = hit.object.userData.part;
+          var isHead = hitPart === 'head';
           var dmg, headHit;
           if (w.melee) {
             var behind = isBehindTarget(tgt);
             dmg = heavy ? (behind ? w.heavyBackstab : w.heavyDmg) : (behind ? w.backstabDmg : w.dmg);
             headHit = false;
+          } else if (w.id === 'sniper') {
+            // AWP: gövde/kafa tek atış, bacak/ayak sabit 85
+            dmg = hitPart === 'leg' ? (w.legDmg || 85) : w.dmg;
+            headHit = isHead;
           } else {
             dmg = w.dmg * (isHead ? w.headMul : 1);
             headHit = isHead;
@@ -3280,7 +3321,7 @@
             playDink(headHit);
             showHitmarker(headHit, false);
           } else {
-            damageTarget(tgt, dmg, headHit, true);
+            damageTarget(tgt, dmg, headHit, true, null, null, w.id);
           }
         }
       } else if (w.melee) {
@@ -3405,7 +3446,15 @@
   function clearKillFeed() {
     if (killFeedEl) killFeedEl.innerHTML = '';
   }
-  function addKillFeed(killerName, victimName, killerTeam, victimTeam, head, involvedPlayer) {
+  function weaponLabel(id) {
+    if (!id) return '';
+    if (id === 'he') return 'EL BOMBASI';
+    if (id === 'flash') return 'FLAŞ';
+    if (id === 'smoke') return 'DUMAN';
+    for (var i = 0; i < WEAPONS.length; i++) if (WEAPONS[i].id === id) return WEAPONS[i].name;
+    return String(id).toUpperCase();
+  }
+  function addKillFeed(killerName, victimName, killerTeam, victimTeam, head, involvedPlayer, weaponId) {
     if (!killFeedEl || !startedOnce || matchEnded) return;
     var row = document.createElement('div');
     row.className = 'kf';
@@ -3417,6 +3466,10 @@
     }
     var meName = userName || 'SEN';
     row.appendChild(nameEl(killerName, killerTeam, involvedPlayer && killerName === meName));
+    var wl = weaponLabel(weaponId);
+    if (wl) {
+      var wc = document.createElement('span'); wc.className = 'kfw'; wc.textContent = wl; row.appendChild(wc);
+    }
     var ico = document.createElement('span'); ico.className = 'kfico'; ico.textContent = '▸'; row.appendChild(ico);
     row.appendChild(nameEl(victimName, victimTeam, involvedPlayer && victimName === meName));
     if (head) {
@@ -3429,12 +3482,14 @@
   function appendSbRow(sec, data) {
     var row = document.createElement('div');
     row.className = 'sb-row' + (data.self ? ' me' : '') + (data.alive ? '' : ' dead');
+    var pingTxt = (data.ping === null || data.ping === undefined) ? '—' : data.ping + ' ms';
     var cells = [
       data.name,
       String(data.kills),
       String(data.deaths),
       data.deaths > 0 ? (data.kills / data.deaths).toFixed(2) : data.kills.toFixed(2),
-      data.alive ? String(data.hp) : '—',
+      pingTxt,
+      data.hideHp ? '—' : (data.alive ? String(data.hp) : '—'),
       data.alive ? 'CANLI' : (data.waiting ? 'BEKLİYOR' : 'ÖLÜ')
     ];
     for (var i = 0; i < cells.length; i++) {
@@ -3445,6 +3500,15 @@
     }
     sec.appendChild(row);
   }
+  function mpPingFor(id) {
+    if (!mpConnected || !mpRole) return null;
+    if (!id || id === mpSelfId) return mpRole === 'host' ? 0 : mpPingMs;
+    if (mpRole === 'host') {
+      var g = mpGuests[id];
+      return (g && typeof g.ping === 'number') ? g.ping : null;
+    }
+    return (typeof mpPingMap[id] === 'number') ? mpPingMap[id] : null;
+  }
   function renderScoreboard() {
     if (!sbTeamsEl) return;
     if (sbMapEl) sbMapEl.textContent = (currentMap ? currentMap.name.toUpperCase() : 'DUST II') + ' · ' +
@@ -3454,7 +3518,8 @@
     var teams = { blue: [], red: [] };
     var pt = player.team === 'red' ? 'red' : 'blue';
     teams[pt].push({ name: userName || 'SEN', kills: stats.kills, deaths: stats.deaths || 0,
-      hp: Math.max(0, Math.round(player.hp)), alive: player.hp > 0, self: true });
+      hp: Math.max(0, Math.round(player.hp)), alive: player.hp > 0, self: true,
+      ping: mpRole ? (mpRole === 'host' ? 0 : mpPingMs) : null, hideHp: false });
     for (var i = 0; i < targets.length; i++) {
       var t = targets[i];
       if (!t || !t.name) continue;
@@ -3462,7 +3527,8 @@
       var hp = Math.max(0, Math.round(t.hp || 0));
       var alive = t.state === 'alive' && hp > 0;
       teams[tm].push({ name: t.name, kills: t.kills || 0, deaths: t.deaths || 0, hp: hp,
-        alive: alive, waiting: t.state === 'down', self: false });
+        alive: alive, waiting: t.state === 'down', self: false,
+        ping: t.isRemote ? mpPingFor(t.netId) : null, hideHp: tm !== pt });
     }
     sbTeamsEl.innerHTML = '';
     var order = [pt, pt === 'blue' ? 'red' : 'blue'];
@@ -3525,11 +3591,11 @@
     if (hpNumEl) hpNumEl.textContent = Math.max(0, Math.round(player.hp));
     if (armorNumEl) armorNumEl.textContent = Math.max(0, Math.round(player.armor));
   }
-  function hurtPlayer(dmg, head) {
+  function hurtPlayer(dmg, head, weaponId) {
     if (player.hp <= 0 || godMode) return;
     if (!startedOnce) return;                                    // başlamadan ölümsüzlük
     if (performance.now() / 1000 < player.protectUntil) return;  // doğuş koruması
-    if (player.armor > 0) {
+    if (player.armor > 0 && weaponId !== 'sniper') {
       var absorbed = Math.min(player.armor, dmg * (head ? 0.25 : 0.5));
       player.armor -= absorbed;
       dmg -= absorbed;
@@ -3567,11 +3633,12 @@
     }
     var w = currentWeapon();
     if (gadgetSel) {
-      var gActive = !paused && player.hp > 0;
+      var gActive = !paused && !menuOpen && player.hp > 0;
       if (gActive && triggerQueued) throwGrenade(gadgetSel);
+      else if (gActive && triggerHeavyQueued) throwGrenade(gadgetSel, 0.5);
       triggerQueued = false;
       triggerHeavyQueued = false;
-      if (!paused && gadgetAutoOff > 0) {
+      if (!paused && !menuOpen && gadgetAutoOff > 0) {
         gadgetAutoOff -= dt;
         if (gadgetAutoOff <= 0) { gadgetAutoOff = 0; switchWeapon(curW, true, true); return; }
       }
@@ -3628,7 +3695,9 @@
       playTick(660, 0.06, 0.03);
       updateHudAmmo();
     }
-    var active = !paused && player.hp > 0;
+    if (!reloading && !gadgetSel && player.hp > 0 && !w.melee && awpBoltT <= 0 &&
+        ammo[curW] <= 0 && reserve[curW] > 0) startReload();
+    var active = !paused && !menuOpen && player.hp > 0;
     if (active && w.melee) {
       if (triggerHeavyQueued) fireShot(true);
       else if (triggerQueued) fireShot(false);
@@ -3666,7 +3735,8 @@
 
   /* ================= GİRDİ / AYARLAR / MENÜ ================= */
   var keys = {}, locked = false, sens = 1, dragFallback = false, dragging = false, dragMoved = 0;
-  var paused = true, startedOnce = false, menuWeapon = 0, vol = 0.5;
+  var paused = true, menuOpen = false, startedOnce = false, menuWeapon = 0, vol = 0.5;
+  var jumpLatch = false;
   var godMode = false, infAmmo = false, brightness = 1;
   var chCfg = { color: '#4dff88', size: 7, thickness: 2, gap: 4, dot: 0, dynamic: 1 };
   var devConsoleEnabled = false, consoleOpen = false, consolePrevPaused = true;
@@ -3793,8 +3863,6 @@
     else if (PISTOL_SLOTS.indexOf(stored.weapon) >= 0) { loadout.pistol = stored.weapon; pistolChosen = true; }
   }
   menuWeapon = loadout.rifle;
-  if (typeof stored.god === 'boolean') godMode = stored.god;
-  if (typeof stored.inf === 'boolean') infAmmo = stored.inf;
   if (typeof stored.brightness === 'number') brightness = Math.max(0.6, Math.min(1.8, stored.brightness));
   if (stored.map && MAP_DEFS[stored.map]) selectedMapId = stored.map;
   if (MAP_DEFS[selectedMapId] && MAP_DEFS[selectedMapId].awpOnly) {
@@ -4104,8 +4172,14 @@
     if (openConsoleEl) openConsoleEl.disabled = !devConsoleEnabled;
     updateHudAmmo();
   }
-  if (godEl) godEl.addEventListener('change', function () { godMode = !!godEl.checked; persistSettings(); });
-  if (infEl) infEl.addEventListener('change', function () { infAmmo = !!infEl.checked; persistSettings(); syncToggles(); });
+  if (godEl) godEl.addEventListener('change', function () {
+    if (mpRole === 'guest') { godMode = false; godEl.checked = false; return; }
+    godMode = !!godEl.checked; persistSettings();
+  });
+  if (infEl) infEl.addEventListener('change', function () {
+    if (mpRole === 'guest') { infAmmo = false; infEl.checked = false; return; }
+    infAmmo = !!infEl.checked; persistSettings(); syncToggles();
+  });
   if (devChkEl) devChkEl.addEventListener('change', function () {
     devConsoleEnabled = !!devChkEl.checked;
     if (!devConsoleEnabled && consoleOpen) dcClose();
@@ -4398,6 +4472,7 @@
     initAudio(); applySettings();
     overlayEl.style.display = 'none';
     overlayMode = 'playing';
+    menuOpen = false;
     paused = false;
     dragging = false;
     dragFallback = false;
@@ -4425,6 +4500,7 @@
       mpStarted = false;
     }
     paused = true;
+    menuOpen = false;
     triggerHeld = false; triggerQueued = false;
     for (var kk in keys) keys[kk] = false;
     respawn();
@@ -4434,7 +4510,8 @@
   }
   function showOverlay(mode) {
     overlayMode = mode;
-    paused = true;
+    menuOpen = mode === 'pause' && startedOnce && !matchEnded;
+    paused = !menuOpen;
     hideScoreboard();
     triggerHeld = false; triggerQueued = false;
     for (var kk2 in keys) keys[kk2] = false;
@@ -4550,23 +4627,24 @@
   function enableDragFallback() {
     if (!startedOnce) return;
     dragFallback = true;
+    menuOpen = false;
     paused = false;
     overlayEl.style.display = 'none';
     overlayMode = 'playing';
   }
   renderer.domElement.addEventListener('click', function () {
-    if (!locked && !paused && !consoleOpen) { initAudio(); requestLock(); }
+    if (!locked && !paused && !menuOpen && !consoleOpen) { initAudio(); requestLock(); }
   });
-  document.addEventListener('pointerlockerror', function () { if (!paused) enableDragFallback(); });
+  document.addEventListener('pointerlockerror', function () { if (!paused && !menuOpen) enableDragFallback(); });
   document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
   renderer.domElement.addEventListener('mousedown', function (e) {
     if (consoleOpen) return;
     initAudio();
     if (e.button === 1) { e.preventDefault(); return; }
-    if (paused) return;
+    if (paused || menuOpen) return;
     if (e.button === 0) { triggerHeld = true; triggerQueued = true; }
     else if (e.button === 2) {
-      if (gadgetSel) { switchWeapon(curW, true, true); return; }
+      if (gadgetSel) { triggerHeavyQueued = true; return; }
       if (currentWeapon().melee) {
         if (locked || dragFallback) triggerHeavyQueued = true;
         else { dragging = true; dragMoved = 0; }
@@ -4593,6 +4671,7 @@
     locked = document.pointerLockElement === renderer.domElement;
     if (locked) {
       if (startedOnce) {
+        menuOpen = false;
         paused = false;
         overlayEl.style.display = 'none';
         overlayMode = 'playing';
@@ -4603,7 +4682,7 @@
   });
   document.addEventListener('mousemove', function (e) {
     if (dragging) dragMoved += Math.abs(e.movementX) + Math.abs(e.movementY);
-    if (paused || consoleOpen) return;
+    if (paused || menuOpen || consoleOpen) return;
     if (!locked && !(dragFallback && dragging)) return;
     var zoomFactor = camera.fov / baseFov;          // dürbün seviyesine göre hassasiyet
     var s = 0.0022 * sens * Math.max(0.12, zoomFactor);
@@ -4791,11 +4870,13 @@
         break;
       }
       case 'god': case 'tanri': {
+        if (mpRole === 'guest') { dcLog('Bu ayarı yalnızca lobi sahibi değiştirebilir.', 'err'); break; }
         godMode = dcBool(a[0], godMode);
         syncToggles(); persistSettings();
         dcLog('god = ' + (godMode ? 'açık' : 'kapalı'), 'ok'); break;
       }
       case 'inf': case 'infammo': case 'sınırsız': {
+        if (mpRole === 'guest') { dcLog('Bu ayarı yalnızca lobi sahibi değiştirebilir.', 'err'); break; }
         infAmmo = dcBool(a[0], infAmmo);
         syncToggles(); persistSettings();
         dcLog('infammo = ' + (infAmmo ? 'açık' : 'kapalı'), 'ok'); break;
@@ -4950,6 +5031,9 @@
   var mpKicked = false;            // kick/ban sonrası otomatik geri dönüşü engelle
   var mpBanned = {};               // host: cid -> 1
   var mpStateAcc = 0, mpWorldAcc = 0;
+  var mpPingMs = null;             // konukta: ana makineye gidiş-dönüş (ms)
+  var mpPingMap = {};              // konukta: cid -> ms (ana makinenin ping tablosu)
+  var mpPingAcc = 1.2;             // ilk ping kısa sürede gitsin
   var mpStatusEl = document.getElementById('mpStatus');
   var mpHostCodeEl = document.getElementById('mpHostCode');
   var mpAnswerCodeEl = document.getElementById('mpAnswerCode');
@@ -5056,16 +5140,16 @@
   function mpApplyKf(m) {
     if (!m || !startedOnce) return;
     addKillFeed(m.kn || 'BOT', m.vn || 'OYUNCU', m.kt || 'blue', m.vt || 'red', !!m.head,
-      (m.kid && m.kid === mpSelfId) || (m.vid && m.vid === mpSelfId));
+      (m.kid && m.kid === mpSelfId) || (m.vid && m.vid === mpSelfId), m.w || null);
     if (m.kid && m.kid === mpSelfId) {
       stats.kills++; if (m.head) stats.headshots++;
       playKill(); showHitmarker(m.head, true); updateHudScore();
     }
   }
-  function mpBroadcastKf(kn, kt, vn, vt, head, kid, vid) {
+  function mpBroadcastKf(kn, kt, vn, vt, head, kid, vid, weaponId) {
     if (mpRole !== 'host' || !mpConnected) return;
     mpBroadcast({ t: 'kf', kn: kn || 'BOT', kt: kt || 'blue', vn: vn || 'OYUNCU', vt: vt || 'red',
-      head: !!head, kid: kid || null, vid: vid || null });
+      head: !!head, kid: kid || null, vid: vid || null, w: weaponId || null });
   }
   function mpRenderRoster() {
     if (!mpRosterEl) return;
@@ -5169,6 +5253,25 @@
       play.disabled = guest;
       play.textContent = guest ? 'ANA MAKİNE BEKLENİYOR ⏳' : 'MAÇI BAŞLAT ▶';
     }
+    // ölümsüzlük / sınırsız mermi yalnızca lobi sahibinde
+    if (godEl) {
+      godEl.disabled = guest;
+      var godLab = godEl.closest ? godEl.closest('label') : null;
+      if (godLab) {
+        godLab.classList.toggle('hostonly-lock', guest);
+        godLab.title = guest ? 'Bu ayarı yalnızca ana makine açabilir' : '';
+      }
+      if (guest) { godMode = false; godEl.checked = false; }
+    }
+    if (infEl) {
+      infEl.disabled = guest;
+      var infLab = infEl.closest ? infEl.closest('label') : null;
+      if (infLab) {
+        infLab.classList.toggle('hostonly-lock', guest);
+        infLab.title = guest ? 'Bu ayarı yalnızca ana makine açabilir' : '';
+      }
+      if (guest) { infAmmo = false; infEl.checked = false; }
+    }
   }
   function mpCleanup() {
     if (mpPeer) {
@@ -5188,6 +5291,9 @@
     mpRole = null;
     mpStarted = false;
     mpAllowGuestStart = false;
+    mpPingMs = null;
+    mpPingMap = {};
+    mpPingAcc = 1.2;
     mpApplyMpLocks();
     mpRenderRoster();
   }
@@ -5336,7 +5442,7 @@
   }
   // ---------- ANA MAKİNE: konuk bağlantıları ----------
   function mpHostAttach(conn) {
-    var rec = { id: null, name: null, team: null, conn: conn, last: null, avatar: null };
+    var rec = { id: null, name: null, team: null, conn: conn, last: null, avatar: null, ping: null };
     var closed = false;
     mpAttachEvents(conn, function () {}, function (d) {
       var m = mpParse(d);
@@ -5438,6 +5544,11 @@
   }
   function mpHostHandleMessage(rec, m) {
     if (m.t === 'team') { mpHostAssignTeam(rec, m.team); return; }
+    if (m.t === 'png') { mpSendTo(rec.id, { t: 'pong', ts: m.ts }); return; }
+    if (m.t === 'pong') {
+      if (typeof m.ts === 'number') rec.ping = Math.max(1, Math.round(performance.now() - m.ts));
+      return;
+    }
     if (m.t === 'st') {
       rec.last = m;
       if (rec.avatar) mpRemoteUpdate(rec.avatar, m);
@@ -5462,10 +5573,10 @@
         if (targets[i].id === m.id && !targets[i].isRemote && !targets[i].isGhost) { bt = targets[i]; break; }
       }
       if (!bt || bt.state !== 'alive' || bt.team === rec.team) return;
-      damageTarget(bt, m.dmg, m.head, false, rec.team, rec.name);
+      damageTarget(bt, m.dmg, m.head, false, rec.team, rec.name, m.w || 'rifle');
       var killed = bt.state !== 'alive';
       mpSendTo(rec.id, { t: 'ba', id: m.id, killed: killed ? 1 : 0, head: !!m.head });
-      if (killed) mpBroadcastKf(rec.name, rec.team, bt.name, bt.team, m.head, rec.id, null);
+      if (killed) mpBroadcastKf(rec.name, rec.team, bt.name, bt.team, m.head, rec.id, null, m.w || 'rifle');
       return;
     }
     if (m.t === 'pd') {
@@ -5473,16 +5584,16 @@
       if (!m.to || m.to === mpSelfId) {
         if (rec.team === player.team) return;
         var was = player.hp > 0;
-        hurtPlayer(m.dmg, m.head);
+        hurtPlayer(m.dmg, m.head, m.w);
         if (was && player.hp <= 0) {
           var kn = rec.name || 'OYUNCU';
-          addKillFeed(kn, (userName || 'SEN'), rec.team, player.team, m.head, true);
+          addKillFeed(kn, (userName || 'SEN'), rec.team, player.team, m.head, true, m.w || 'rifle');
           addTeamScore(rec.team, 1);
-          mpBroadcastKf(kn, rec.team, (userName || 'SEN'), player.team, m.head, rec.id, mpSelfId);
+          mpBroadcastKf(kn, rec.team, (userName || 'SEN'), player.team, m.head, rec.id, mpSelfId, m.w || 'rifle');
         }
       } else {
         var tg = mpGuests[m.to];
-        if (tg && tg.team !== rec.team) mpSendTo(m.to, { t: 'pd', dmg: m.dmg, head: m.head, kn: rec.name, kt: rec.team, kid: rec.id });
+        if (tg && tg.team !== rec.team) mpSendTo(m.to, { t: 'pd', dmg: m.dmg, head: m.head, kn: rec.name, kt: rec.team, kid: rec.id, w: m.w || 'rifle' });
       }
       return;
     }
@@ -5492,10 +5603,10 @@
       if (!victim) return;
       var kt = m.kt === 'blue' ? 'blue' : 'red';
       if (kt === victim.team) return;
-      addKillFeed(m.kn || 'BOT', victim.name, kt, victim.team, m.head, !!(m.kid === mpSelfId));
+      addKillFeed(m.kn || 'BOT', victim.name, kt, victim.team, m.head, !!(m.kid === mpSelfId), m.w || 'rifle');
       addTeamScore(kt, 1);
       if (m.kid === mpSelfId) { stats.kills++; if (m.head) stats.headshots++; playKill(); showHitmarker(m.head, true); updateHudScore(); }
-      mpBroadcastKf(m.kn || 'BOT', kt, victim.name, victim.team, m.head, m.kid || null, victim.id);
+      mpBroadcastKf(m.kn || 'BOT', kt, victim.name, victim.team, m.head, m.kid || null, victim.id, m.w || 'rifle');
       return;
     }
     if (m.t === 'bye') { mpHostDropGuest(rec, null, false, true); return; }
@@ -5599,6 +5710,12 @@
       return;
     }
     if (m.t === 'cfg') { mpApplyHostCfg(m); return; }
+    if (m.t === 'png') { mpSendHost({ t: 'pong', ts: m.ts }); return; }
+    if (m.t === 'pong') {
+      if (typeof m.ts === 'number') mpPingMs = Math.max(1, Math.round(performance.now() - m.ts));
+      return;
+    }
+    if (m.t === 'pings') { mpPingMap = m.p || {}; return; }
     if (m.t === 'start') {
       mpApplyHostCfg(m);
       if (m.balance !== undefined) mpBalance = !!m.balance;
@@ -5617,9 +5734,9 @@
     if (m.t === 'pd') {
       if (!m.kid || m.kid === mpSelfId) return;
       var wasAlive = player.hp > 0;
-      hurtPlayer(m.dmg, m.head);
+      hurtPlayer(m.dmg, m.head, m.w);
       if (wasAlive && player.hp <= 0) {
-        mpSendHost({ t: 'dth', kn: m.kn || 'OYUNCU', kt: m.kt || 'red', kid: m.kid || null, head: !!m.head });
+        mpSendHost({ t: 'dth', kn: m.kn || 'OYUNCU', kt: m.kt || 'red', kid: m.kid || null, head: !!m.head, w: m.w || 'rifle' });
       }
       return;
     }
@@ -5791,13 +5908,18 @@
     if (b.st !== gh.state) {
       var nowS = performance.now() / 1000;
       if (b.st === 'falling') { gh.state = 'falling'; gh.fallT = 0; }
-      else if (b.st === 'down') { gh.state = 'down'; gh.downUntil = nowS + 4.35; }
-      else if (b.st === 'rising') { gh.state = 'rising'; }
-      else {
+      else if (b.st === 'down') { gh.state = 'down'; gh.downUntil = nowS + 4.0; }
+      else if (b.st === 'rising') {
+        gh.state = 'gone';
+        if (gh.group.parent) scene.remove(gh.group);
+      } else {
+        var wasGone = gh.state === 'gone';
         gh.state = 'alive'; gh.fallT = 0; gh.dead = false;
         gh.group.rotation.x = 0;
         gh.group.position.set(b.x, 0, b.z);
         gh.group.rotation.y = b.ya || 0;
+        if (gh.gunG) gh.gunG.visible = true;
+        if (wasGone) { scene.add(gh.group); rebuildHittables(); }
       }
     }
     if (b.fl) {
@@ -5815,6 +5937,7 @@
   function mpRemoteUpdate(av, p) {
     if (!av || !p) return;
     av.nx = p.x; av.nz = p.z; av.nyaw = p.ya;
+    av.netY = (typeof p.y === 'number') ? p.y : 0;
     av.netCrouch = p.c || 0;
     av.netPitch = p.pi || 0;
     av.hp = p.hp; av.armor = p.ar;
@@ -5822,10 +5945,13 @@
     if (p.hp <= 0) {
       if (alive) { av.state = 'falling'; av.fallT = 0; av.dead = true; }
     } else if (!alive) {
+      var wasGone = av.state === 'gone';
       av.state = 'alive'; av.fallT = 0; av.dead = false;
       av.group.rotation.x = 0;
-      av.group.position.set(p.x, 0, p.z);
+      av.group.position.set(p.x, av.netY || 0, p.z);
       av.group.rotation.y = p.ya || 0;
+      if (av.gunG) av.gunG.visible = true;
+      if (wasGone) { scene.add(av.group); rebuildHittables(); }
     }
     drawBotBar(av);
   }
@@ -5879,21 +6005,24 @@
       if (added) rebuildHittables();
     }
     var seen = {};
+    var botsChanged = false;
     if (m.bots) {
       for (var gi = 0; gi < m.bots.length; gi++) {
         var b = m.bots[gi];
         seen[b.id] = 1;
         var gh = mpBotGhosts[b.id];
-        if (!gh) { gh = mpMakeGhost(b); mpBotGhosts[b.id] = gh; }
+        if (!gh) { gh = mpMakeGhost(b); mpBotGhosts[b.id] = gh; botsChanged = true; }
         mpGhostApply(gh, b);
       }
       for (var gid in mpBotGhosts) {
         if (!seen[gid]) {
           mpRemoveEntity(mpBotGhosts[gid]);
           delete mpBotGhosts[gid];
+          botsChanged = true;
         }
       }
     }
+    if (botsChanged) rebuildHittables();
     if (m.sc) {
       matchScore.blue = m.sc.blue; matchScore.red = m.sc.red;
       updateTeamScoreHud();
@@ -5904,6 +6033,21 @@
     return { x: +player.x.toFixed(2), y: +player.y.toFixed(2), z: +player.z.toFixed(2),
       ya: +player.yaw.toFixed(3), pi: +player.pitch.toFixed(3), c: +player.crouch.toFixed(2),
       hp: Math.round(player.hp), ar: Math.round(player.armor), w: curW, g: scopeLevel };
+  }
+  function mpPingTick(dt) {
+    if (!mpConnected || !mpRole) return;
+    mpPingAcc += dt;
+    if (mpPingAcc < 2) return;
+    mpPingAcc = 0;
+    var now = performance.now();
+    if (mpRole === 'guest') { mpSendHost({ t: 'png', ts: now }); return; }
+    var pings = {};
+    pings[mpSelfId] = 0;
+    for (var id in mpGuests) {
+      mpSendTo(id, { t: 'png', ts: now });
+      if (typeof mpGuests[id].ping === 'number') pings[id] = mpGuests[id].ping;
+    }
+    mpBroadcast({ t: 'pings', p: pings });
   }
   function mpNetTick(dt) {
     if (!mpConnected || !mpRole || !startedOnce || matchEnded) return;
@@ -5934,10 +6078,11 @@
         var g = mpGuests[id];
         if (!g.team) continue;
         var gs = g.last ? g.last : (g.avatar ? {
-          x: +g.avatar.group.position.x.toFixed(2), z: +g.avatar.group.position.z.toFixed(2),
+          x: +g.avatar.group.position.x.toFixed(2), y: +g.avatar.group.position.y.toFixed(2),
+          z: +g.avatar.group.position.z.toFixed(2),
           ya: +g.avatar.group.rotation.y.toFixed(3), c: 0, pi: 0,
           hp: Math.round(g.avatar.hp), ar: Math.round(g.avatar.armor), w: 'rifle', g: 0
-        } : { x: 0, z: 0, ya: 0, c: 0, pi: 0, hp: 100, ar: 100, w: 'rifle', g: 0 });
+        } : { x: 0, y: 0, z: 0, ya: 0, c: 0, pi: 0, hp: 100, ar: 100, w: 'rifle', g: 0 });
         players.push({ id: id, name: g.name, team: g.team, x: gs.x, y: gs.y || 0, z: gs.z,
           ya: gs.ya || 0, pi: gs.pi || 0, c: gs.c || 0, hp: gs.hp, ar: gs.ar, w: gs.w, g: gs.g || 0 });
       }
@@ -6004,10 +6149,10 @@
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     if (k === 'tab') {
       e.preventDefault();
-      if (!paused) showScoreboard();
+      if (!paused && !menuOpen) showScoreboard();
       return;
     }
-    if (paused) {
+    if (paused || menuOpen) {
       if (k === ' ') e.preventDefault();
       return;
     }
@@ -6055,11 +6200,12 @@
   function updatePlayer(dt) {
     var wasX = player.x, wasZ = player.z;
     var dead = player.hp <= 0;
-    var crTarget = (!paused && !dead && keys['control']) ? 1 : 0;
+    var ctl = !paused && !menuOpen && !dead;
+    var crTarget = (ctl && keys['control']) ? 1 : 0;
     player.crouch += (crTarget - player.crouch) * Math.min(1, dt * (crTarget ? 10 : 8));
     if (player.crouch < 0.002) player.crouch = 0;
-    var f = (!paused && !dead && (keys['w'] || keys['arrowup']) ? 1 : 0) - (!paused && !dead && (keys['s'] || keys['arrowdown']) ? 1 : 0);
-    var s = (!paused && !dead && (keys['d'] || keys['arrowright']) ? 1 : 0) - (!paused && !dead && (keys['a'] || keys['arrowleft']) ? 1 : 0);
+    var f = (ctl && (keys['w'] || keys['arrowup']) ? 1 : 0) - (ctl && (keys['s'] || keys['arrowdown']) ? 1 : 0);
+    var s = (ctl && (keys['d'] || keys['arrowright']) ? 1 : 0) - (ctl && (keys['a'] || keys['arrowleft']) ? 1 : 0);
     var speed = (keys['shift'] ? WALK : RUN) * (1 - player.crouch * 0.62) * (currentWeapon().speedMul || 1);
     var wx = 0, wz = 0;
     var len = Math.sqrt(f * f + s * s);
@@ -6083,7 +6229,12 @@
     var g0 = groundHeight(player.x, player.z, player.y);
     if (g0 > player.y && g0 - player.y <= STEP + 0.01) player.y = g0;
 
-    if (!paused && !dead && keys[' '] && player.grounded) { player.vy = JUMP * (1 - player.crouch * 0.15); player.grounded = false; }
+    if (ctl && keys[' '] && player.grounded && !jumpLatch) {
+      player.vy = JUMP * (1 - player.crouch * 0.15);
+      player.grounded = false;
+      jumpLatch = true;
+    }
+    if (!keys[' ']) jumpLatch = false;
     player.vy -= GRAV * dt;
     var ny = player.y + player.vy * dt;
 
@@ -6181,6 +6332,7 @@
     updateWeapon(dt);
     updateTargets(dt);
     mpNetTick(dt);
+    mpPingTick(dt);
     updatePuffs(dt);
     updateTracers(dt);
     updateFlash(dt);
@@ -6220,7 +6372,12 @@
     if (hudAcc >= 0.25) {
       hudAcc = 0;
       if (areaEl) areaEl.textContent = currentArea();
-      if (statsEl) statsEl.textContent = fpsVal.toFixed(0) + ' FPS · X:' + player.x.toFixed(0) + ' Z:' + player.z.toFixed(0);
+      var mpPingText = '';
+      if (mpConnected && mpRole) {
+        var ownPing = mpRole === 'host' ? 0 : mpPingMs;
+        mpPingText = ' · ' + (typeof ownPing === 'number' ? Math.round(ownPing) + ' MS' : '— MS');
+      }
+      if (statsEl) statsEl.textContent = fpsVal.toFixed(0) + ' FPS' + mpPingText + ' · X:' + player.x.toFixed(0) + ' Z:' + player.z.toFixed(0);
       updateHudAmmo();
       updateTeamScoreHud();
       if (scoreboardVisible) renderScoreboard();
@@ -6280,8 +6437,8 @@
     mpHostAttach: mpHostAttach, mpHostDropGuest: mpHostDropGuest, mpHostKick: mpHostKick, mpHostStartAll: mpHostStartAll,
     mpSend: mpSend, mpCreateHost: mpCreateHost, mpJoinFromCode: mpJoinFromCode, mpAcceptAnswer: mpAcceptAnswer, mpLeave: mpLeave,
     mpOpenRoom: mpOpenRoom, mpJoinRoom: mpJoinRoom,
-    setGod: function (v) { godMode = !!v; persistSettings(); syncToggles(); },
-    setInf: function (v) { infAmmo = !!v; persistSettings(); syncToggles(); },
+    setGod: function (v) { if (mpRole === 'guest') return false; godMode = !!v; persistSettings(); syncToggles(); return godMode; },
+    setInf: function (v) { if (mpRole === 'guest') return false; infAmmo = !!v; persistSettings(); syncToggles(); return infAmmo; },
     chooseSpawnClass: chooseSpawnClass, syncSpawnPick: syncSpawnPick,
     chooseSlot: chooseSlot, equipGadget: equipGadget,
     fov: function () { return camera.fov; },
@@ -6299,7 +6456,7 @@
     getScore: function () { return { blue: matchScore.blue, red: matchScore.red, ended: matchEnded }; },
     getRules: function () { return { difficulty: botDifficulty, killLimit: killLimit, timeLimit: timeLimit }; },
     consoleOpen: function () { return consoleOpen; }, consoleRun: runCommand, consoleToggle: function () { if (consoleOpen) dcClose(); else dcOpen(); },
-    mode: function () { return { locked: locked, dragFallback: dragFallback, paused: paused, overlay: overlayEl.style.display, overlayMode: overlayMode, console: consoleOpen, tab: selectedMenuTab }; },
+    mode: function () { return { locked: locked, dragFallback: dragFallback, paused: paused, menuOpen: menuOpen, overlay: overlayEl.style.display, overlayMode: overlayMode, console: consoleOpen, tab: selectedMenuTab }; },
     setPaused: function (v) { paused = !!v; }, setSens: function (v) { sens = v; },
     spread: computeSpread,
     botFire: function (i) { return botFindTarget(targets[i]); },
@@ -6328,7 +6485,7 @@
         gadget: gadgetSel, deaths: stats.deaths,
         bloom: +bloom.toFixed(4), spread: +computeSpread().toFixed(4), reloading: reloading, scoped: scoped,
         scopeLevel: scopeLevel, bolt: +awpBoltT.toFixed(2), boltPending: awpRescopePending, god: godMode, inf: infAmmo, noclip: noclip,
-        crouch: +player.crouch.toFixed(3), paused: paused, moveAmt: +moveAmt.toFixed(3),
+        crouch: +player.crouch.toFixed(3), paused: paused, menuOpen: menuOpen, moveAmt: +moveAmt.toFixed(3),
         kills: stats.kills, headshots: stats.headshots, raise: +raiseT.toFixed(2),
         hp: Math.round(player.hp), armor: Math.round(player.armor),
         protect: +Math.max(0, player.protectUntil - performance.now() / 1000).toFixed(2),
