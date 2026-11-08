@@ -62,7 +62,9 @@ oyunculu olduğu için **durmaz**, botlar ve maç saati arka planda devam eder.
 | `Sağ tık` | AWP dürbünü (**1x → 2x → çık**); bıçakta **ağır hamle (75, 2 kat yavaş)**; bombadayken **yarı mesafeye fırlat** |
 | `Space` | Zıpla (basılı tutsan da her basışta bir kez) |
 | `Shift` | Sessiz / yavaş yürü |
-| `Esc` | Menüyü aç / kapat (oyun durmaz) |
+| `U` | **Takım sohbeti** yaz (`Enter` gönder / boşsa kapat, `Esc` iptal) |
+| `Y` | **Herkese açık sohbet** yaz (`Enter` gönder / boşsa kapat, `Esc` iptal) |
+| `Esc` | Menüyü aç / kapat (oyun durmaz, sohbet açıkken önce sohbeti kapatır) |
 
 `Q` ile dürbün ve `K` ile başlangıca dönme kaldırıldı. Aynı silahı yeniden
 seçmek kaldırma animasyonunu tekrar oynatmaz.
@@ -205,6 +207,10 @@ arasıdır**: hareket, atış ve skor verileri sunucudan geçmez, doğrudan akar
 - Kod internet üzerinden de çalışır: PeerJS buluşma sunucusu tarafları
   eşleştirir, veri yine doğrudan şifreli eşler arası akar. Kodu bilen odaya
   girebilir.
+- **Sohbet:** `U` takım, `Y` herkes. Mesajlar ana makine üzerinden dağıtılır;
+  takım mesajını yalnızca aynı takım görür, herkes mesajını tüm oyuncular görür.
+  Yazarken oyun durmaz, hareket/ateş kilitlenir; mesajlar 6,5 saniye sonra
+  sohbet geçmişinden silinir.
 - Ağ koparsa oyuncu lobiye döner; tek oyunculu oyun etkilenmez.
 
 ### Manuel kod değişimi (çevrimdışı LAN)
