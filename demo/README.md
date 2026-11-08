@@ -1,4 +1,4 @@
-# Dust2 Web Arena — r7
+# BASIC-STRIKE — r7
 
 Tarayıcıda çalışan, **tamamen çevrimdışı** bir FPS demosu. three.js r128
 projede gömülü; haritalar, silahlar, botlar, dokular ve sesler çalışma anında
@@ -35,11 +35,14 @@ Açılışta maç otomatik başlamaz; önce lobi gelir:
   (bıçak her haritada yanında).
 - **Ayarlar:** fare hassasiyeti, parlaklık, ses, görüş açısı (FOV, varsayılan
   75°), nişan çizgisi (renk / boyut / kalınlık / boşluk / nokta / dinamik),
-  sınırsız şarjör, ölümsüzlük ve geliştirici konsolu.
+  sınırsız şarjör, ölümsüzlük ve geliştirici konsolu. Sınırsız şarjör ve
+  ölümsüzlük varsayılan olarak **kapalıdır**; çok oyunculuda yalnızca
+  **lobi sahibi** açabilir.
 - Ayarlar anında uygulanır ve kaydedilir.
 
-`MAÇI BAŞLAT` ile oyun başlar. Oyun sırasında `Esc` menüyü açar ve duraklatır;
-`DEVAM ET` ile kalınan yerden devam edilir, `LOBİYE DÖN` ile maç sıfırlanır.
+`MAÇI BAŞLAT` ile oyun başlar. Oyun sırasında `Esc` menüyü açar; oyun çok
+oyunculu olduğu için **durmaz**, botlar ve maç saati arka planda devam eder.
+`DEVAM ET` ile menü kapanır, `LOBİYE DÖN` ile maç sıfırlanır.
 
 ## Kontroller
 
@@ -56,10 +59,10 @@ Açılışta maç otomatik başlamaz; önce lobi gelir:
 | `Tab` (basılı) | Skor tablosunu göster |
 | `R` | Şarjör değiştir (animasyonlu) |
 | `Ctrl` (basılı) | Eğil: alçal, yavaşla, isabeti artır |
-| `Sağ tık` | AWP dürbünü (**1x → 2x → çık**); bıçakta **ağır hamle (75, 2 kat yavaş)**; bombadayken bırak |
-| `Space` | Zıpla |
+| `Sağ tık` | AWP dürbünü (**1x → 2x → çık**); bıçakta **ağır hamle (75, 2 kat yavaş)**; bombadayken **yarı mesafeye fırlat** |
+| `Space` | Zıpla (basılı tutsan da her basışta bir kez) |
 | `Shift` | Sessiz / yavaş yürü |
-| `Esc` | Menü / duraklat |
+| `Esc` | Menüyü aç / kapat (oyun durmaz) |
 
 `Q` ile dürbün ve `K` ile başlangıca dönme kaldırıldı. Aynı silahı yeniden
 seçmek kaldırma animasyonunu tekrar oynatmaz.
@@ -88,29 +91,37 @@ onay penceresi devreye girer.
 - İki takım vardır: **mavi** ve **kırmızı**. Her takımın kendi doğuş noktaları
   vardır; oyuncu seçtiği takımın doğuşunda başlar.
 - Ölen oyuncu ve botlar **5 saniye** sonra **kendi takımlarının doğuş
-  noktasında** yeniden doğar.
+  noktasında** yeniden doğar. Cesetler öldükleri yerde **4 saniye** kaldıktan
+  sonra tamamen silinir; doğuş anında ölüm yerinde anlık bir kopya görünmez.
 - Yeniden doğuşta **3 saniye doğuş koruması** vardır; bu sürede hasar almazsın
   ve HUD'da koruma sayacı görünür.
 - Ölümde **kart/pencere açılmaz**; yalnızca alttaki **5 sn** geri sayımı görünür
   ve süre dolunca otomatik doğarsın. Doğuşta yüklemede seçtiğin sınıfın silahı
   (tüfek veya tabanca) **dolu şarjör + yedek** ile eline gelir.
 - **Tab** tuşunu basılı tutunca takım skorları, oyuncu/bot adları, öldürme,
-  ölüm, K/D, can ve durum bilgilerini içeren skor tablosu açılır.
+  ölüm, K/D, **ping**, can ve durum bilgilerini içeren skor tablosu açılır.
+- **Killfeed:** sağ üstte kimin kimi **hangi silahla** (AK-47, M4A4, AWP, USP,
+  Deagle, BIÇAK, EL BOMBASI) vurduğu gösterilir; kafa vuruşları ayrıca işaretlenir.
+- **Can görünürlüğü:** oyun sırasında yalnızca **kendi takımının** can/zırh
+  barlarını görürsün; rakip oyuncu ve botların canı gizlidir (skor tablosunda
+  da `—` olarak görünür).
 - **Dost ateşi kapalıdır:** ne sen ne de botlar kendi takımına hasar verebilir.
   Botlar hedef seçerken de dost takımı hiç hedeflemez.
-- Sağ üstte skor, canlı bot sayıları ve takım rozeti; sol üstte harita adı ve
-  bulunduğun bölge (callout) görünür.
+- Sağ üstte skor, canlı bot sayıları ve takım rozeti; sol üstte **FPS'in hemen
+  yanında kendi ping'in**, harita adı ve bulunduğun bölge (callout) görünür.
 
 ## Silahlar ve ekipman
 
 Yüklemede **bir tüfek + bir tabanca** seçilir; maç içinde yalnızca bunlar
 kullanılabilir. Slotlar: `1` tüfek, `2` tabanca, `3` bıçak, `4` sis,
-`5` flaş, `6` HE.
+`5` flaş, `6` HE. **Şarjör boşalınca yedek mermi varsa otomatik olarak
+şarjör değiştirilir**; AWP'de bu, sürgü hareketi bittikten sonra olur.
 
 - **AK-47:** Çok yönlü tam otomatik tüfek; dengeli hasar ve şarjör.
 - **USP:** Hafif tabanca; hareket halinde en bağışlayıcı silah.
-- **AWP:** Tek atışlık keskin nişancı; koşarken neredeyse hiç isabet
-  etmez, dürbün döngüsü 1x → 2x → çık.
+- **AWP:** Tek atışlık keskin nişancı; **gövde ve kafa tek atış**, **bacak ve
+  ayak 85 hasar** (zırhı deler). Koşarken neredeyse hiç isabet etmez, dürbün
+  döngüsü 1x → 2x → çık.
 - **M4A4:** Tam otomatik tüfek; AK-47'ye rakip, daha kontrollü geri tepme.
 - **Deagle:** Yarı otomatik ağır tabanca; kafaya tek atış potansiyeli,
   güçlü geri tepme.
@@ -121,11 +132,12 @@ kullanılabilir. Slotlar: `1` tüfek, `2` tabanca, `3` bıçak, `4` sis,
   hareket edersin.
 - **Bombalar (`4` / `5` / `6` veya `G` / `F` / `H`):** Tuşa basmak bombayı
   **atmaz, ele alır**. Sol tıkla nişan çizgisinin gösterdiği yöne fizik
-  kurallarına göre (yerçekimi + sekme) fırlatılır. Sağ tık bombayı bırakır.
+  kurallarına göre (yerçekimi + sekme) fırlatılır; **sağ tık yarı mesafeye**
+  fırlatır.
 - **Sis:** duman çıkarır ve 16 saniye görüşü keser; botlar dumanın içinden
   ateş edemez. Aynı anda en fazla 3 sis aktif olur.
 - **Flaş:** patladığında ona bakan herkesi (botlar dahil) geçici olarak kör
-  eder; köşe temizlemede kullan.
+  eder; **etki yarıçapı 52 m'dir** (eski değerin 2 katı), köşe temizlemede kullan.
 - **HE:** alan hasarı verir; dost takımına zarar vermez. HUD'daki ekipman
   sayacı (Sis / Flaş / HE) kalan bombaları gösterir.
 
@@ -150,7 +162,8 @@ kullanılabilir. Slotlar: `1` tüfek, `2` tabanca, `3` bıçak, `4` sis,
 
 - 0–15 arası bot seçilebilir; 15v15'e kadar (oyuncu dahil 30 kişi) çalışır.
 - Botlar takım renklerinde modellenir, ellerinde silah taşır; yürüme, nişan alma,
-  geri tepme, namlu alevi ve ölüm/doğuş animasyonları vardır.
+  geri tepme, namlu alevi ve ölüm/doğuş animasyonları vardır. Ölünce silahı
+  bırakıp yere devrilirler; ceset 4 saniye sonra kaldırılır.
 - Haritaya özel devriye rotalarında gezerler; görüş hattı, mesafe, duvar, kasa ve
   sis kontrolüyle düşman ararlar. Dost takımı hedeflemezler.
 - Engellere takıldıklarında **A\* yol bulma** ile dolambaçlı rota çizer, duvar
@@ -220,8 +233,13 @@ bağlar; kalabalık lobi için tek kod modunu kullan.
 Kurallar:
 
 - Ana makine **yetkilidir:** harita, botlar, skor, lobi ayarları ve maç sonu ona
-  aittir; katılımcılar bu ayarları değiştiremez.
+  aittir; katılımcılar bu ayarları değiştiremez. Ölümsüzlük ve sınırsız şarjör
+  de yalnızca ana makinede açılabilir; katılımcılarda kilitli ve kapalıdır.
+- **Ping:** her oyuncunun gidiş-dönüş süresi skor tablosunda, kendi ping'in ise
+  oyun içinde FPS'in yanında canlı gösterilir.
 - Her oyuncu kendi canını yönetir; hasar mesajları eşler arası gönderilir.
+  Konuklar ana makinenin botlarını vurabilir; hasar ve öldürme kaydı ana
+  makinede işlenir. Obje üstündeki oyuncuların yüksekliği de eşlere aktarılır.
 - Ana makinenin botları konuğun ekranında **hayalet** olarak canlandırılır;
   konuk onlara vurabilir, hasar ana makineye iletilir ve skor işlenir.
 - Ana makine **KICK** ile oyuncuyu atabilir (tekrar bağlanabilir) veya **BAN**
