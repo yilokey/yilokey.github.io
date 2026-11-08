@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BASIC-STRIKE · r7</title>
+<style>
+  :root { color-scheme: dark; --gold:#e4ae58; --gold2:#ffd88a; --panel:rgba(14,16,20,.97); --panel2:rgba(20,23,28,.96);
+    --line:rgba(255,214,150,.18); --line2:rgba(255,255,255,.09); --blue:#4a9eff; --red:#ff6154; --green:#6dff9c;
+    --muted:#a7a69e; --ui:"Bahnschrift SemiCondensed","Bahnschrift","Segoe UI",Tahoma,Arial,sans-serif; }
+  * { box-sizing: border-box; }
+  html,body{margin:0;height:100%;overflow:hidden;background:#0b0d10;font-family:var(--ui);color:#f0ebe1;overscroll-behavior:none;user-select:none}
+  #app{position:fixed;inset:0}
+  canvas{display:block}
+  button,input{font-family:inherit}
+  .hud{position:fixed;z-index:5;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.85)}
+  #topleft{left:14px;top:12px;font-size:13px;line-height:1.5;opacity:.94}
+  #area{font-size:16px;font-weight:700;letter-spacing:.8px;color:var(--gold2)}
+  .teambadge{display:inline-block;margin-top:4px;font-size:10px;font-weight:800;letter-spacing:1.5px;padding:2px 9px;border-radius:3px}
+  .teambadge.blue{background:rgba(50,120,210,.26);border:1px solid rgba(90,170,255,.65);color:#a9d4ff}
+  .teambadge.red{background:rgba(190,60,45,.26);border:1px solid rgba(255,110,90,.65);color:#ffb3a8}
+  #mapbox{right:14px;top:12px;background:rgba(9,11,14,.68);border:1px solid rgba(255,255,255,.16);border-radius:4px;padding:6px;line-height:0}
+  #minimap{display:block;width:auto;height:auto;max-width:168px;max-height:168px;image-rendering:pixelated}
+  #bottombar{left:50%;bottom:12px;transform:translateX(-50%);font-size:11px;background:rgba(9,11,14,.62);padding:6px 13px;border-radius:3px;border:1px solid rgba(255,255,255,.1);white-space:nowrap;letter-spacing:.2px}
+  #crosshair{position:fixed;left:50%;top:50%;z-index:6;pointer-events:none}
+  .ch{position:absolute;background:#4dff88;box-shadow:0 0 2px rgba(0,0,0,.9)}
+  #ch-dot{position:absolute;display:none;left:0;top:0;transform:translate(-50%,-50%);border-radius:50%;background:#4dff88;width:3px;height:3px}
+  #scope{position:fixed;inset:0;z-index:3;display:none;pointer-events:none;background:radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0 33%, rgba(0,0,0,.985) 34%)}
+  #scope .vline{position:absolute;left:50%;top:0;width:2px;height:100%;margin-left:-1px;background:rgba(8,8,8,.85)}
+  #scope .hline{position:absolute;top:50%;left:0;height:2px;width:100%;margin-top:-1px;background:rgba(8,8,8,.85)}
+  #hitmarker{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:700;color:#e8e8e8;opacity:0;z-index:6;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.9)}
+  #protecthint{position:fixed;left:50%;top:61%;transform:translateX(-50%);z-index:6;display:none;pointer-events:none;font-size:12px;font-weight:700;letter-spacing:1px;color:#9feaff;background:rgba(8,22,28,.72);border:1px solid rgba(120,220,255,.35);padding:4px 12px;border-radius:3px;text-shadow:0 1px 3px rgba(0,0,0,.8)}
+  #ammobox{right:14px;bottom:14px;text-align:right;font-size:13px;line-height:1.45;background:linear-gradient(90deg,transparent,rgba(9,11,14,.5));padding:5px 10px;border-radius:3px}
+  #wepname{color:var(--gold2);font-weight:700;font-size:15px;letter-spacing:.5px}
+  #ammo{font-size:23px;font-weight:700;letter-spacing:1px}
+  #nades{font-size:10px;color:#cbb98d;opacity:.9;letter-spacing:.4px}
+  #score{opacity:.72;font-size:11.5px}
+  #error{display:none;margin-top:10px;color:#ff9c8a;font-size:13px}
+
+  /* ---------- MAÇ SKORBORDU / KILL FEED ---------- */
+  #matchbar{left:50%;top:10px;transform:translateX(-50%);display:none;align-items:stretch;background:rgba(8,10,13,.82);border:1px solid rgba(255,255,255,.13);border-radius:4px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.35)}
+  #matchbar .mscore{min-width:92px;display:flex;align-items:center;justify-content:center;gap:8px;padding:5px 12px;font-size:19px;font-weight:800;letter-spacing:.5px}
+  #matchbar .mscore small{font-size:8.5px;letter-spacing:1.4px;opacity:.62;font-weight:700}
+  #matchbar .mscore.blue{color:#9dcfff;border-right:2px solid rgba(74,158,255,.65)}
+  #matchbar .mscore.red{color:#ffb2a9;border-left:2px solid rgba(255,90,74,.65)}
+  #matchbar .mcenter{min-width:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 10px;background:rgba(255,255,255,.03)}
+  #matchTimer{font-size:16px;font-weight:800;letter-spacing:1px;color:#f5ead5}
+  #matchGoal{font-size:8px;letter-spacing:1px;opacity:.55;margin-top:1px}
+  #killfeed{right:14px;top:196px;width:min(330px,36vw);display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+  .kf{display:flex;align-items:center;gap:7px;background:rgba(8,10,13,.74);border:1px solid rgba(255,255,255,.08);border-left:2px solid #b58e4f;padding:4px 8px;font-size:11px;animation:kfin .16s ease-out;letter-spacing:.3px}
+  .kf .kf-blue{color:#8ec7ff;font-weight:700}.kf .kf-red{color:#ff9f92;font-weight:700}.kf .kf-you{color:var(--gold2);font-weight:800}
+  .kf .kfico{opacity:.55;font-size:10px}.kf .kfhs{color:#ffbd76;font-size:9px;font-weight:800;border:1px solid rgba(255,180,100,.4);padding:0 3px;border-radius:2px}
+  .kf .kfw{color:#d8c49a;font-size:8.5px;font-weight:800;letter-spacing:.6px;border:1px solid rgba(210,180,120,.35);background:rgba(210,180,120,.08);padding:1px 4px;border-radius:2px;white-space:nowrap}
+  @keyframes kfin{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+  #dmgflash{position:fixed;inset:0;z-index:8;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 50%, rgba(160,20,10,0) 35%, rgba(150,18,8,.85) 100%);transition:opacity .1s linear}
+  #flashov{position:fixed;inset:0;z-index:7;pointer-events:none;background:#fdfcf7;opacity:0}
+  #deathmsg{position:fixed;left:50%;bottom:74px;transform:translateX(-50%);z-index:9;display:none;pointer-events:none}
+  #deathcount{font-size:12px;font-weight:700;letter-spacing:1px;color:#ffd8a8;background:rgba(8,10,13,.72);border:1px solid rgba(255,140,110,.25);border-radius:3px;padding:5px 13px;text-shadow:0 1px 3px rgba(0,0,0,.9)}
+
+  /* ---------- CAN / ARMOR ---------- */
+  #healthbox{left:14px;bottom:14px;width:214px}
+  .hbar-row{display:flex;align-items:center;gap:8px;margin-top:5px}
+  .hbar-ico{width:16px;text-align:center;font-size:12px;opacity:.85}
+  .hbar-bg{flex:1;height:14px;background:rgba(8,10,12,.74);border:1px solid rgba(255,255,255,.18);border-radius:2px;overflow:hidden;position:relative}
+  .hbar-fill{height:100%;width:100%;transition:width .18s ease-out}
+  #hpbar{background:#57c04b}
+  #armorbar{background:#5b9fd4}
+  .hbar-num{width:34px;text-align:right;font-size:13px;font-weight:700}
+
+  /* ---------- ANA MENÜ ---------- */
+  #overlay{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:
+    linear-gradient(rgba(6,8,10,.84),rgba(6,8,10,.94)),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 1px,transparent 1px 64px),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 64px),#090b0e;backdrop-filter:blur(4px);overflow:hidden}
+  #overlay::before{content:"";position:absolute;inset:-30%;z-index:0;pointer-events:none;background:
+    radial-gradient(circle at 62% 42%,rgba(197,132,49,.14),transparent 34%),
+    radial-gradient(circle at 38% 68%,rgba(50,92,145,.11),transparent 36%);
+    animation:glowdrift 17s ease-in-out infinite alternate}
+  @keyframes glowdrift{from{transform:translate(-4%,-3%) rotate(0deg)}to{transform:translate(5%,4%) rotate(8deg)}}
+  #card,#endcard{z-index:1}
+  .mode-pause .lobbyOnly, .mode-lobby .pauseOnly { display:none !important; }
+  #overlay.mode-lobby #card{animation:cardin .3s cubic-bezier(.2,.7,.3,1)}
+  #overlay.mode-pause #card{animation:cardin .16s ease-out}
+  #overlay.mode-end #endcard{animation:cardin .26s cubic-bezier(.2,.7,.3,1)}
+  @keyframes cardin{from{opacity:0;transform:translateY(13px) scale(.985)}to{opacity:1;transform:none}}
+  #overlay.mode-lobby #play{animation:btnpulse 2.6s ease-in-out infinite}
+  @keyframes btnpulse{0%,100%{box-shadow:0 4px 18px rgba(201,146,57,.22)}50%{box-shadow:0 4px 30px rgba(240,190,96,.55)}}
+  #card{position:relative;background:linear-gradient(145deg,rgba(24,27,32,.98),rgba(10,12,15,.99));border:1px solid rgba(226,176,92,.28);border-radius:8px;
+    width:min(1240px,97vw);height:min(770px,94vh);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.78),0 0 0 1px rgba(0,0,0,.5) inset}
+  #card::before,#card::after{content:"";position:absolute;z-index:2;width:26px;height:26px;pointer-events:none;border-color:rgba(255,201,115,.65);border-style:solid}
+  #card::before{left:7px;top:7px;border-width:2px 0 0 2px}
+  #card::after{right:7px;bottom:7px;border-width:0 2px 2px 0}
+  .brand{flex:none;display:flex;align-items:center;gap:14px;padding:14px 22px 13px;border-bottom:1px solid rgba(255,255,255,.08);background:
+    linear-gradient(90deg,rgba(228,174,88,.09),transparent 34%),linear-gradient(180deg,rgba(255,255,255,.03),transparent)}
+  .brand .logo{font-size:28px;font-weight:900;letter-spacing:2.5px;color:#ffe2a7;line-height:1;text-shadow:0 2px 10px rgba(0,0,0,.55)}
+  .brand .logo span{color:#d98b33}
+  .brand .brandtxt{display:flex;flex-direction:column;gap:2px;padding-left:13px;border-left:1px solid rgba(255,255,255,.13)}
+  .brand .sub{font-size:10px;font-weight:800;letter-spacing:3.5px;color:#c8bda6}
+  .brand .tag{font-size:8.5px;letter-spacing:1.5px;color:#6f716e}
+  .brand .profile{margin-left:auto;display:flex;align-items:center;gap:9px;padding:4px 9px 4px 5px;border:1px solid rgba(255,255,255,.09);border-radius:4px;background:rgba(255,255,255,.025)}
+  .brand .avatar{width:31px;height:31px;border-radius:3px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#325f8f,#1b2d43);border:1px solid rgba(130,190,255,.3);font-size:14px;font-weight:900;color:#cbe6ff}
+  .brand .profile b{display:block;font-size:11px;letter-spacing:.8px;color:#e8e2d5}
+  .brand .profile small{display:block;font-size:8.5px;color:#878983;margin-top:1px;letter-spacing:.5px}
+  .brand .ver{margin-left:11px;font-size:9px;letter-spacing:1.2px;color:#777972;text-align:right;line-height:1.45}
+
+  .menu-body{flex:1;min-height:0;display:grid;grid-template-columns:208px minmax(0,1fr) 258px}
+  .sidebar{display:flex;flex-direction:column;gap:5px;padding:17px 12px 14px;border-right:1px solid rgba(255,255,255,.075);background:linear-gradient(180deg,rgba(255,255,255,.024),transparent 55%)}
+  .navlabel{font-size:8.5px;letter-spacing:2.5px;color:#6f6b60;padding:0 9px 6px}
+  .navbtn{appearance:none;display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:4px;
+    padding:9px 10px;color:#c7c1b5;font-size:12px;font-weight:800;letter-spacing:1.2px;cursor:pointer;position:relative;transition:background .15s,border-color .15s,color .15s,transform .15s}
+  .navbtn .ni{width:20px;height:20px;flex:none;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.13);border-radius:3px;font-size:10px;color:#b89c68;transition:border-color .15s,color .15s}
+  .navbtn small{display:block;font-size:8.5px;font-weight:500;letter-spacing:.2px;color:#777972;margin-top:1px}
+  .navbtn:hover{background:rgba(255,255,255,.045);border-color:rgba(255,215,140,.2);color:#f4ead8;transform:translateX(2px)}
+  .navbtn.active{background:linear-gradient(90deg,rgba(222,169,82,.17),rgba(222,169,82,.035));border-color:rgba(232,185,100,.35);color:#ffe4b3}
+  .navbtn.active::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:2px;background:#e4ae58;transform-origin:top;animation:navslide .18s ease-out}
+  @keyframes navslide{from{transform:scaleY(0)}}
+  .navbtn.active .ni{border-color:rgba(232,185,100,.5);color:#ffd88a}
+  .sidefoot{margin-top:auto;padding:10px 9px 0;border-top:1px solid rgba(255,255,255,.075)}
+  .statusline{font-size:8.5px;letter-spacing:1px;color:#7d8978;display:flex;align-items:center;gap:5px}
+  .statusline i{width:5px;height:5px;border-radius:50%;background:#6dce85;box-shadow:0 0 7px rgba(109,206,133,.8);animation:dotpulse 2.4s ease-in-out infinite}
+  .sidehint{font-size:8px;line-height:1.5;color:#5d605c;margin-top:6px;letter-spacing:.3px}
+
+  .content{min-width:0;overflow-y:auto;padding:17px 20px 22px}
+  .content::-webkit-scrollbar,.brief::-webkit-scrollbar{width:7px}
+  .content::-webkit-scrollbar-thumb,.brief::-webkit-scrollbar-thumb{background:#34322b;border-radius:4px}
+  .tabpane{display:none}
+  .tabpane.active{display:block}
+  .tabpane.active>*{animation:panein .24s ease-out backwards}
+  .tabpane.active>*:nth-child(2){animation-delay:.04s}
+  .tabpane.active>*:nth-child(3){animation-delay:.08s}
+  .tabpane.active>*:nth-child(4){animation-delay:.12s}
+  .tabpane.active>*:nth-child(n+5){animation-delay:.16s}
+  @keyframes panein{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+  .pane-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin:1px 0 13px}
+  .pane-head h2{margin:0;font-size:21px;font-weight:900;letter-spacing:2px;color:#f4e7d0;line-height:1}
+  .pane-head p{margin:5px 0 0;font-size:10.5px;color:#8f918a;line-height:1.45;letter-spacing:.2px}
+  .chip{font-size:8.5px;font-weight:800;letter-spacing:1.3px;color:#9bd4a8;border:1px solid rgba(110,210,140,.28);background:rgba(55,125,77,.13);padding:4px 7px;border-radius:2px;white-space:nowrap}
+  .chip.gold{color:#ffd88a;border-color:rgba(232,185,100,.3);background:rgba(160,115,43,.12)}
+  .section-title{font-size:9px;letter-spacing:2.2px;color:#a69a83;margin:2px 0 7px;display:flex;justify-content:space-between;align-items:baseline;font-weight:800}
+  .section-title span:last-child{letter-spacing:.3px;font-weight:500;font-size:9px;color:#73756f}
+  #card p{margin:6px 0;font-size:12px;line-height:1.55;color:#b7b3a9}
+  kbd{background:#2a2a27;border:1px solid #4b473e;border-bottom-width:2px;border-radius:3px;padding:1px 5px;font-size:10.5px;font-family:inherit;color:#ded6c7}
+
+  /* harita kartları */
+  .maps{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .mcard{position:relative;display:flex;flex-direction:column;gap:2px;text-align:left;background:linear-gradient(120deg,rgba(255,255,255,.045),rgba(255,255,255,.015));
+    border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:9px 10px 9px 64px;min-height:57px;color:#ece5d8;cursor:pointer;transition:border-color .15s,background .15s,transform .15s;overflow:hidden}
+  .mcard::before{content:"";position:absolute;top:0;bottom:0;left:-75%;width:50%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.08),transparent);transform:skewX(-20deg);transition:left .5s ease;pointer-events:none}
+  .mcard:hover{background:linear-gradient(120deg,rgba(255,215,140,.1),rgba(255,255,255,.02));border-color:rgba(255,215,140,.38);transform:translateY(-1px)}
+  .mcard:hover::before{left:130%}
+  .mcard.sel{border-color:var(--gold);background:linear-gradient(120deg,rgba(255,215,140,.14),rgba(255,255,255,.025));box-shadow:0 0 0 1px rgba(255,215,140,.2) inset}
+  .mcard.sel::after{content:"SEÇİLİ";position:absolute;right:6px;top:5px;font-size:7px;letter-spacing:1px;color:#f5ce85;background:rgba(40,30,14,.8);border:1px solid rgba(232,185,100,.28);padding:1px 4px;border-radius:2px}
+  .mcard .mthumb{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:46px;height:38px;border-radius:3px;border:1px solid rgba(255,255,255,.17);overflow:hidden;transition:transform .18s}
+  .mcard:hover .mthumb{transform:translateY(-50%) scale(1.07)}
+  .mthumb::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.18),transparent 42%,rgba(0,0,0,.2))}
+  .mthumb.dust{background:linear-gradient(135deg,#d2b57c 0 34%,#a78c58 34% 47%,#e0c38b 47% 68%,#8f7448 68%)}
+  .mthumb.aim{background:linear-gradient(135deg,#78828a 0 43%,#c94a3c 43% 51%,#3d444c 51% 77%,#c94a3c 77%)}
+  .mthumb.lego{background:linear-gradient(135deg,#3f7fd6 0 32%,#f0c33a 32% 58%,#d23c3c 58% 82%,#4daa64 82%)}
+  .mthumb.village{background:linear-gradient(135deg,#87966a 0 40%,#b08a55 40% 66%,#4c7f9a 66% 84%,#d2b57c 84%)}
+  .mcard .mname{font-size:12.5px;font-weight:900;letter-spacing:.5px}
+  .mcard .mdesc{font-size:9px;color:#898b84;line-height:1.35}
+  .mapnote{font-size:10.5px;color:#8c8e87;line-height:1.45;margin-top:7px;min-height:28px}
+  .mapnote b{color:#d6b16d}
+
+  /* takım + bot */
+  .split{display:grid;grid-template-columns:1.05fr .95fr;gap:12px;margin-top:12px}
+  .panel{border:1px solid rgba(255,255,255,.075);background:rgba(255,255,255,.018);border-radius:5px;padding:10px 11px}
+  .teams{display:flex;gap:7px}
+  .tsel{flex:1;padding:8px 24px 8px 9px;border-radius:4px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);color:#ece5d8;cursor:pointer;font-weight:900;letter-spacing:.6px;font-size:11px;text-align:left;transition:border-color .15s,background .15s;position:relative}
+  .tsel small{display:block;font-weight:500;font-size:8.5px;color:#82847d;letter-spacing:0;margin-top:2px}
+  .tsel[data-team=blue]:hover,.tsel[data-team=blue].sel{border-color:rgba(90,170,255,.75);background:rgba(50,120,210,.19)}
+  .tsel[data-team=red]:hover,.tsel[data-team=red].sel{border-color:rgba(255,120,100,.75);background:rgba(190,60,45,.19)}
+  .tsel.sel{box-shadow:0 0 0 1px rgba(255,255,255,.1) inset}
+  .tsel.sel::after{content:"✓";position:absolute;right:9px;top:8px;font-size:12px;font-weight:900;color:var(--gold2)}
+  .botrow{display:grid;grid-template-columns:82px 1fr 27px;align-items:center;gap:7px;margin-top:6px;font-size:10.5px;color:#b9b6ad}
+  .botrow .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:1px}
+  .botrow.blue .dot{background:var(--blue);box-shadow:0 0 5px rgba(74,158,255,.7)}
+  .botrow.red .dot{background:var(--red);box-shadow:0 0 5px rgba(255,90,74,.7)}
+  .botrow b{text-align:right;font-size:11px;color:var(--gold2)}
+  .teamtotals{font-size:9.5px;color:#898b84;margin-top:6px;line-height:1.4}
+  .hint{color:#7d807a;font-size:9.5px;line-height:1.5;margin-top:8px}
+  .hint b{color:#cab180;font-weight:600}
+  input[type=range]{width:100%;height:17px;margin:0;cursor:pointer;-webkit-appearance:none;appearance:none;background:transparent}
+  input[type=range]::-webkit-slider-runnable-track{height:3px;background:rgba(255,255,255,.13);border-radius:2px}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:linear-gradient(180deg,#f2c877,#c99239);border:1px solid #8a6524;margin-top:-5px;box-shadow:0 1px 4px rgba(0,0,0,.55);transition:transform .12s}
+  input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.18)}
+  input[type=range]::-moz-range-track{height:3px;background:rgba(255,255,255,.13);border-radius:2px}
+  input[type=range]::-moz-range-thumb{width:13px;height:13px;border:1px solid #8a6524;border-radius:50%;background:linear-gradient(180deg,#f2c877,#c99239);box-shadow:0 1px 4px rgba(0,0,0,.55)}
+  .row{display:flex;justify-content:space-between;align-items:baseline;font-size:10.5px;margin:8px 0 1px;color:#b8b5ac}
+  .row b{color:var(--gold2);font-weight:700}
+
+  /* çok oyunculu */
+  .mpcode{width:100%;background:#0b0e11;border:1px solid rgba(255,255,255,.13);border-radius:4px;color:#c9c2b4;font-family:Consolas,monospace;font-size:9px;line-height:1.45;padding:7px 8px;resize:vertical;margin-top:5px;display:block;box-sizing:border-box}
+  .mpcode:focus{outline:none;border-color:rgba(232,185,100,.55)}
+  .mpstep{font-size:9.5px;color:#a69a83;line-height:1.5;margin-top:10px;border-top:1px solid rgba(255,255,255,.06);padding-top:7px}
+  .mpstep b{color:#d6b16d}
+  .mpcodein{width:100%;background:#0b0e11;border:1px solid rgba(255,255,255,.13);border-radius:4px;color:#ffd88a;font-family:Consolas,monospace;font-size:15px;font-weight:700;letter-spacing:3px;text-align:center;padding:9px 8px;margin-top:5px;display:block;box-sizing:border-box;text-transform:uppercase}
+  .mpcodein:focus{outline:none;border-color:rgba(232,185,100,.55);box-shadow:0 0 0 2px rgba(228,174,88,.12)}
+  .mpmanual{margin-top:10px;border:1px solid rgba(255,255,255,.09);border-radius:4px;background:rgba(255,255,255,.015)}
+  .mpmanual summary{cursor:pointer;font-size:10px;font-weight:800;letter-spacing:.5px;color:#a9a79f;padding:8px 10px;user-select:none}
+  .mpmanual summary:hover{color:#e7dcc8}
+  .mpmanual .settings-grid{padding:0 10px 10px}
+  .mproster{display:flex;flex-direction:column;gap:5px;margin-top:4px}
+  .mpempty{font-size:10px;color:#757870;padding:7px 2px}
+  .mprow{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.075);border-left:2px solid #4a9eff;border-radius:3px;padding:5px 7px;font-size:10.5px}
+  .mprow.red{border-left-color:#ff6154}
+  .mprow.self{background:rgba(228,174,88,.08);border-color:rgba(228,174,88,.18);border-left-color:#e4ae58}
+  .mprow .mpname{flex:1;min-width:0;font-weight:700;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ddd6c7}
+  .mprow .mptag{font-size:8px;letter-spacing:.8px;color:#8d9088;border:1px solid rgba(255,255,255,.12);padding:1px 4px;border-radius:2px;white-space:nowrap}
+  .mprow .mpteam{font-size:8.5px;font-weight:800;letter-spacing:.6px;color:#8ec7ff}
+  .mprow.red .mpteam{color:#ff9f92}
+  .mprow .mpact{display:flex;gap:4px}
+  .mprow .mpact button{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:#c9c4b8;font-size:8px;font-weight:800;letter-spacing:.4px;padding:2px 6px;border-radius:2px;cursor:pointer}
+  .mprow .mpact button:hover{border-color:rgba(255,215,140,.45);color:#ffe4b3}
+  .mprow .mpact button.mpban{border-color:rgba(255,110,90,.3);color:#ffb0a4}
+  .mprow .mpact button.mpban:hover{background:rgba(190,50,35,.22);border-color:rgba(255,120,100,.6)}
+  .mprow .mpact button.mpkick:hover{background:rgba(228,174,88,.14)}
+  .mproster-locked{opacity:.55;pointer-events:none}
+  .hostonly-lock{opacity:.45;pointer-events:none;filter:saturate(.6)}
+  .mpguestnote{font-size:9px;color:#d6b16d;letter-spacing:.3px;margin-top:6px;display:none}
+  .mpguestnote.on{display:block}
+
+  /* takım seçim kartları */
+  #mpTeamPick{position:fixed;inset:0;z-index:45;display:none;align-items:center;justify-content:center;background:rgba(4,6,9,.78);backdrop-filter:blur(4px)}
+  #mpTeamPick.on{display:flex}
+  .mtp-card{width:min(630px,94vw);background:linear-gradient(145deg,rgba(24,27,32,.99),rgba(9,11,14,.995));border:1px solid rgba(226,176,92,.35);border-radius:8px;padding:24px 26px 20px;box-shadow:0 30px 90px rgba(0,0,0,.8);text-align:center;position:relative}
+  .mtp-eyebrow{font-size:8.5px;letter-spacing:3px;color:#9d8e74}
+  #mpTeamPick h2{margin:6px 0 3px;font-size:25px;letter-spacing:3px;color:#ffe0a2}
+  #mpTeamPick p{margin:0;font-size:10.5px;color:#8f918a;line-height:1.5}
+  .mtp-teams{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:17px}
+  .mtp-team{appearance:none;text-align:left;padding:16px 15px;border-radius:6px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03);color:#ece5d8;cursor:pointer;transition:border-color .15s,background .15s,transform .12s;position:relative;overflow:hidden}
+  .mtp-team b{display:block;font-size:16px;letter-spacing:1px}
+  .mtp-team small{display:block;font-size:9px;color:#8b8d86;margin-top:3px}
+  .mtp-team span{display:inline-block;margin-top:12px;font-size:9px;font-weight:900;letter-spacing:1.2px;color:#e4ae58}
+  .mtp-team.blue{border-left:3px solid #4a9eff}
+  .mtp-team.red{border-left:3px solid #ff6154}
+  .mtp-team.blue:hover{background:rgba(50,120,210,.2);border-color:rgba(90,170,255,.7);transform:translateY(-2px)}
+  .mtp-team.red:hover{background:rgba(190,60,45,.2);border-color:rgba(255,120,100,.7);transform:translateY(-2px)}
+  .mtp-team.blue.sel{background:rgba(50,120,210,.24);border-color:rgba(90,170,255,.85)}
+  .mtp-team.red.sel{background:rgba(190,60,45,.24);border-color:rgba(255,120,100,.85)}
+  #mpTeamPickStatus{margin-top:13px;font-size:9.5px;color:#a69a83;min-height:15px}
+  #mpTeamPickStatus b{color:#ffd88a}
+
+  /* kurallar */
+  .rulegroup{margin-top:2px}
+  .rulegroup .rlabel{font-size:9px;letter-spacing:.7px;color:#8d8f88;margin-bottom:4px}
+  .seg{display:flex;gap:4px;flex-wrap:wrap}
+  .segbtn{appearance:none;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.025);color:#a9a79f;font-size:9.5px;font-weight:800;letter-spacing:.4px;padding:5px 8px;border-radius:3px;cursor:pointer;transition:all .13s}
+  .segbtn:hover{border-color:rgba(232,185,100,.35);color:#e7dcc8}
+  .segbtn.active{background:rgba(228,174,88,.16);border-color:rgba(232,185,100,.56);color:#ffda92;box-shadow:0 0 0 1px rgba(228,174,88,.1) inset}
+  .rulehint{font-size:9px;color:#70736d;line-height:1.45;margin-top:8px;border-top:1px solid rgba(255,255,255,.06);padding-top:7px}
+  .rulehint b{color:#c4a36d}
+
+  /* silahlar */
+  .weapons{display:flex;flex-direction:column;gap:7px}
+  .wcard{position:relative;display:grid;grid-template-columns:45px minmax(0,1fr) auto;grid-template-rows:auto auto auto;gap:2px 10px;text-align:left;background:linear-gradient(100deg,rgba(255,255,255,.045),rgba(255,255,255,.015));
+    border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:9px 11px;color:#ece5d8;cursor:pointer;transition:border-color .15s,background .15s,transform .15s,box-shadow .15s;overflow:hidden}
+  .wcard::before{content:"";position:absolute;top:0;bottom:0;left:-75%;width:50%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.07),transparent);transform:skewX(-20deg);transition:left .5s ease;pointer-events:none}
+  .wcard:hover{background:linear-gradient(100deg,rgba(255,215,140,.09),rgba(255,255,255,.02));border-color:rgba(255,215,140,.35);transform:translateY(-1px)}
+  .wcard:hover::before{left:130%}
+  .wcard.sel{border-color:var(--gold);background:linear-gradient(100deg,rgba(255,215,140,.12),rgba(255,255,255,.02));box-shadow:0 0 0 1px rgba(255,215,140,.18) inset}
+  .wcard.sel .wkey{background:var(--gold);border-color:var(--gold);color:#241a08}
+  .wcard.disabled{opacity:.35;cursor:not-allowed;filter:grayscale(.5)}
+  .wcard.disabled::before{display:none}
+  .wcard.disabled:hover{transform:none}
+  .wart{grid-column:1;grid-row:1/4;align-self:center;height:34px;position:relative}
+  .wart::before{content:"";position:absolute;left:1px;top:14px;width:39px;height:5px;background:#b8b1a3;border-radius:1px;box-shadow:0 1px 0 rgba(0,0,0,.5)}
+  .wart::after{content:"";position:absolute;left:10px;top:11px;width:10px;height:12px;background:#746e62;border-radius:1px}
+  .wart.rifle::before{width:37px;left:3px;box-shadow:9px -4px 0 -1px #b8b1a3,0 1px 0 rgba(0,0,0,.5)}
+  .wart.pistol::before{width:23px;left:8px;top:13px}
+  .wart.pistol::after{left:12px;top:15px;width:8px;height:10px;transform:skewX(-10deg)}
+  .wart.awp::before{width:41px;left:1px;box-shadow:0 -4px 0 -1px #827b6e,0 1px 0 rgba(0,0,0,.5)}
+  .wart.awp::after{left:5px;top:12px;width:11px;height:9px}
+  .wart.m4::before{width:37px;left:3px;box-shadow:0 -7px 0 -2px #827b6e,9px -4px 0 -1px #b8b1a3,0 1px 0 rgba(0,0,0,.5)}
+  .wart.m4::after{left:17px;top:9px;width:7px;height:9px;transform:skewX(8deg)}
+  .wart.deagle::before{width:30px;left:5px;top:12px;background:#9a938a}
+  .wart.deagle::after{left:13px;top:14px;width:9px;height:11px;transform:skewX(-8deg)}
+  .wcard .wname{grid-column:2;grid-row:1;font-size:12.5px;font-weight:900;letter-spacing:.4px}
+  .wcard .wtag{grid-column:2;grid-row:2;font-size:8.5px;color:#85877f}
+  .wcard .wkey{grid-column:3;grid-row:1/3;align-self:center;font-size:9px;color:#8a887f;border:1px solid rgba(255,255,255,.16);border-radius:2px;padding:1px 5px}
+  .wstat{grid-column:2/-1;display:grid;grid-template-columns:57px 1fr;align-items:center;gap:7px;font-size:8.5px;color:#9a9a91;margin-top:1px}
+  .wstat i{position:relative;display:block;height:4px;border-radius:2px;background:rgba(255,255,255,.07);overflow:hidden}
+  .wstat i::before{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--v,50%);background:linear-gradient(90deg,#8f6a2c,#e8b95f);border-radius:2px;box-shadow:0 0 6px rgba(232,185,95,.28);transform-origin:left;animation:wfill .5s .12s ease-out backwards}
+  @keyframes wfill{from{transform:scaleX(0)}}
+  .loadout-detail{margin-top:12px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.14);border-radius:5px;padding:11px 12px}
+  .ldtop{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(255,255,255,.07);padding-bottom:7px;margin-bottom:7px}
+  .ldtop b{font-size:16px;letter-spacing:.6px;color:#ffd88a}
+  .ldtop span{font-size:9px;color:#7e817a;letter-spacing:.8px}
+  .ldgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .ldstat{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);padding:5px 7px;border-radius:3px}
+  .ldstat small{display:block;font-size:8px;letter-spacing:.7px;color:#74766f}
+  .ldstat b{display:block;font-size:13px;color:#ddd4c3;margin-top:2px}
+  #loadoutNote{font-size:9.5px;line-height:1.5;color:#7e817a;margin:8px 0 0}
+
+  /* ayarlar */
+  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .subgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+  .chgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
+  .chin{display:flex;align-items:center;gap:6px;font-size:9.5px;color:#a8a69d}
+  .chin input[type=color]{width:31px;height:21px;padding:0;border:1px solid rgba(255,255,255,.22);border-radius:3px;background:none;cursor:pointer}
+  .chin input[type=range]{flex:1}
+  .chin b{width:24px;text-align:right;color:var(--gold2);font-size:9.5px}
+  .chchecks{display:flex;flex-direction:column;gap:5px;font-size:10px;margin-top:6px;color:#a8a69d}
+  .chchecks label{display:flex;align-items:center;gap:5px;cursor:pointer}
+  .chprev{position:relative;height:64px;margin-top:8px;border:1px solid rgba(255,255,255,.07);border-radius:4px;background:
+    radial-gradient(circle at 50% 50%,rgba(255,255,255,.03),transparent 60%),repeating-linear-gradient(0deg,transparent 0 15px,rgba(255,255,255,.025) 15px 16px)}
+  .chprev i{position:absolute;left:50%;top:50%;background:#4dff88;box-shadow:0 0 2px rgba(0,0,0,.9)}
+  .chprev #chPrevDot{display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;background:#4dff88}
+  .toggles{display:flex;flex-direction:column;gap:5px;margin-top:4px}
+  .tgl{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:7px 9px;font-size:10.5px;cursor:pointer;color:#c0bdb4}
+  .tgl:hover{border-color:rgba(255,215,140,.3)}
+  .tgl small{display:block;color:#777a73;font-size:8.5px;margin-top:1px}
+  .switch{position:relative;width:34px;height:18px;flex:none}
+  .switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+  .switch i{position:absolute;inset:0;background:#343631;border-radius:20px;transition:background .15s;pointer-events:none}
+  .switch i::after{content:"";position:absolute;left:2px;top:2px;width:14px;height:14px;border-radius:50%;background:#d9d4c8;transition:transform .15s}
+  .switch input:checked + i{background:#8f6a2c}
+  .switch input:checked + i::after{transform:translateX(16px)}
+
+  /* kontroller */
+  .keygrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:10.5px;color:#b5b2a9}
+  .keyrow{display:flex;align-items:center;gap:7px;border-bottom:1px solid rgba(255,255,255,.055);padding:4px 0}
+  .keyrow .kk{min-width:76px}
+  .keyrow span:last-child{color:#888b84}
+  .infoblock{border-left:2px solid rgba(228,174,88,.45);padding:2px 0 2px 10px;margin-top:10px;font-size:10.5px;line-height:1.55;color:#999b93}
+  .infoblock b{color:#dbc28f}
+  .devstate{font:10px/1.55 Consolas,"Courier New",monospace;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.07);border-radius:3px;padding:8px 9px;color:#95b69f;white-space:pre-wrap;min-height:92px}
+
+  /* ---------- KULLANICI ADI / ZORUNLU YÜKLEME ---------- */
+  .namefield{display:flex;gap:7px;align-items:center;margin-top:6px}
+  .namefield .name-ico{width:26px;text-align:center;color:#c9a86a;font-size:14px}
+  #playerName{flex:1;min-width:0;background:#0b0e11;border:1px solid rgba(255,255,255,.16);border-radius:4px;color:#ffe0a2;font:800 14px var(--ui);letter-spacing:1px;padding:9px 10px;text-transform:uppercase}
+  #playerName:focus{outline:none;border-color:rgba(232,185,100,.7);box-shadow:0 0 0 2px rgba(228,174,88,.12)}
+  #playerName::placeholder{color:#6f716b;letter-spacing:.5px;text-transform:none;font-weight:600}
+  .hint.warn,#loadoutReq.warn{color:#ffab8f}
+  #playGate{display:none;margin-top:8px;font-size:10px;line-height:1.4;color:#ffb09a;background:rgba(90,20,12,.3);border:1px solid rgba(255,120,90,.28);border-radius:3px;padding:6px 8px}
+  .btn.needsSetup{box-shadow:0 0 0 1px rgba(255,130,90,.35) inset,0 4px 18px rgba(201,146,57,.22)}
+  .loadout-group+.loadout-group{margin-top:14px}
+  .wcard.sel .wname{color:#ffe0a2}
+
+  /* ---------- TAB SKORBORDU ---------- */
+  #scoreboard{position:fixed;inset:0;z-index:14;display:none;align-items:center;justify-content:center;pointer-events:none;background:radial-gradient(circle at 50% 45%,rgba(4,6,9,.55),rgba(4,6,9,.78))}
+  #scoreboard.on{display:flex}
+  .sb-card{width:min(780px,94vw);max-height:86vh;overflow:hidden;display:flex;flex-direction:column;background:linear-gradient(145deg,rgba(19,22,27,.985),rgba(8,10,13,.995));border:1px solid rgba(226,176,92,.38);border-radius:7px;box-shadow:0 26px 80px rgba(0,0,0,.8),0 0 0 1px rgba(0,0,0,.5) inset}
+  .sb-top{display:flex;align-items:baseline;justify-content:space-between;padding:11px 15px;border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(90deg,rgba(228,174,88,.1),transparent 45%)}
+  .sb-top b{font-size:13px;letter-spacing:2px;color:#ffe0a2}
+  .sb-top span{font-size:9.5px;letter-spacing:1px;color:#8f918a}
+  .sb-scores{display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.07)}
+  .sb-scores .s{display:flex;align-items:baseline;gap:7px;font-size:24px;font-weight:900}
+  .sb-scores .s small{font-size:8px;letter-spacing:1.4px;color:#85877f;font-weight:700}
+  .sb-scores .blue{color:#9dcfff}.sb-scores .red{color:#ffb2a9}.sb-scores .colon{color:#5e5b52;font-size:17px}
+  .sb-headrow,.sb-row{display:grid;grid-template-columns:1.6fr .5fr .5fr .6fr .55fr .5fr .8fr;gap:6px;align-items:center;padding:5px 13px;font-size:10.5px}
+  .sb-headrow{font-size:8px;letter-spacing:1.1px;color:#777a73;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02)}
+  .sb-headrow span:not(:first-child),.sb-row span:not(:first-child){text-align:center}
+  #sbTeams{overflow-y:auto;padding-bottom:4px}
+  .sb-team{--tc:#4a9eff}
+  .sb-team.red{--tc:#ff6154}
+  .sb-teamhead{display:flex;justify-content:space-between;align-items:center;padding:6px 13px;margin-top:3px;background:linear-gradient(90deg,rgba(255,255,255,.045),transparent);border-left:2px solid var(--tc);font-size:9px;font-weight:900;letter-spacing:1.5px;color:#d7d2c6}
+  .sb-teamhead b{color:var(--tc);font-size:13px}
+  .sb-row{border-bottom:1px solid rgba(255,255,255,.035);color:#c4c1b8}
+  .sb-row .sb-name{font-weight:700;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sb-row.me{background:rgba(228,174,88,.09);color:#ffe0a2;box-shadow:0 0 0 1px rgba(228,174,88,.12) inset}
+  .sb-row.me .sb-name::after{content:" · SEN";font-size:7.5px;letter-spacing:1px;color:#b9995e}
+  .sb-row.dead{opacity:.55}
+  .sb-row.dead .sb-name{color:#989a93}
+  .sb-foot{padding:7px 15px;border-top:1px solid rgba(255,255,255,.07);font-size:8.5px;letter-spacing:.8px;color:#7d807a;text-align:center}
+
+  /* butonlar */
+  .actions{display:flex;gap:8px;margin-top:12px}
+  .btn{padding:10px 15px;border:0;border-radius:4px;font-size:11px;font-weight:900;letter-spacing:1.5px;cursor:pointer;transition:background .15s,border-color .15s,transform .08s}
+  .btn.primary{background:linear-gradient(180deg,#e8b65f,#c99239);color:#1b1710;box-shadow:0 4px 18px rgba(201,146,57,.22)}
+  .btn.primary:hover{background:linear-gradient(180deg,#f6ca7c,#dfa84f)}
+  .btn.ghost{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.16);color:#d9d4c9}
+  .btn.ghost:hover{border-color:rgba(255,215,140,.45);background:rgba(255,215,140,.07)}
+  .btn:active{transform:translateY(1px)}
+  .btn[disabled]{opacity:.4;cursor:not-allowed}
+  .btn .ar{font-size:10px;margin-left:8px}
+
+  /* sağ özet */
+  .brief{min-width:0;overflow-y:auto;padding:17px 15px 15px;border-left:1px solid rgba(255,255,255,.075);background:
+    linear-gradient(180deg,rgba(228,174,88,.06),transparent 30%),rgba(0,0,0,.12)}
+  .brief-title{display:flex;justify-content:space-between;align-items:baseline;font-size:9px;letter-spacing:2px;color:#a69a83;font-weight:800;margin-bottom:9px}
+  .brief-title span{font-size:7.5px;color:#6f716b;border:1px solid rgba(255,255,255,.11);padding:1px 4px;border-radius:2px}
+  .brief-map{font-size:20px;font-weight:900;letter-spacing:1.4px;color:#f5dfb4;line-height:1.05}
+  .brief-sub{font-size:9px;line-height:1.4;color:#7e817a;margin-top:4px;border-bottom:1px solid rgba(255,255,255,.07);padding-bottom:9px}
+  .brief-teams{display:flex;gap:6px;margin-top:9px}
+  .brief-team{flex:1;border:1px solid rgba(255,255,255,.08);border-radius:3px;padding:5px 7px;background:rgba(255,255,255,.025)}
+  .brief-team b{display:block;font-size:18px;line-height:1}
+  .brief-team small{display:block;font-size:7.5px;letter-spacing:1px;color:#797c75;margin-top:3px}
+  .brief-team.blue{border-left:2px solid rgba(74,158,255,.7)}.brief-team.blue b{color:#a9d4ff}
+  .brief-team.red{border-left:2px solid rgba(255,90,74,.7)}.brief-team.red b{color:#ffb3a8}
+  .brief-rows{margin-top:9px;display:flex;flex-direction:column;gap:0}
+  .brief-row{display:flex;justify-content:space-between;gap:8px;font-size:9px;padding:5px 4px;margin:0 -4px;border-bottom:1px solid rgba(255,255,255,.055);transition:background .12s}
+  .brief-row:hover{background:rgba(255,215,140,.05)}
+  .brief-row span{color:#7c7f78}.brief-row b{color:#c7bda9;font-weight:700;text-align:right}
+  .brief-tip{margin-top:10px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02);padding:7px 8px;font-size:8.5px;line-height:1.5;color:#747770;border-radius:3px}
+  .brief-tip b{color:#a6a08f}
+  .brief-score{display:none;margin-top:9px;font-size:8.5px;color:#787b74;line-height:1.5}
+  .mode-pause .brief-score{display:block}
+
+  /* alt eylem barı */
+  .menu-footer{flex:none;display:flex;align-items:center;gap:10px;padding:11px 20px;border-top:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(0,0,0,.1))}
+  .footinfo{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.5px;color:#85887f;margin-right:auto}
+  .footinfo i{width:5px;height:5px;border-radius:50%;background:#6dce85;box-shadow:0 0 6px rgba(109,206,133,.7);animation:dotpulse 2.4s ease-in-out infinite}
+  @keyframes dotpulse{0%,100%{opacity:.75}50%{opacity:1;box-shadow:0 0 13px rgba(109,206,133,1)}}
+  .menu-footer .btn{min-width:132px}
+  .menu-footer .btn.primary{min-width:190px}
+
+  /* maç sonu */
+  #endcard{display:none;width:min(620px,94vw);background:linear-gradient(145deg,rgba(25,27,31,.99),rgba(10,12,15,.99));border:1px solid rgba(226,176,92,.3);border-radius:8px;padding:26px 30px 24px;box-shadow:0 30px 90px rgba(0,0,0,.8);position:relative;overflow:hidden}
+  #endcard::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 0,rgba(228,174,88,.12),transparent 55%);pointer-events:none}
+  .mode-end #card{display:none}.mode-end #endcard{display:block}
+  .end-eyebrow{font-size:9px;letter-spacing:3px;color:#9d8e74;text-align:center;position:relative}
+  #endWinner{text-align:center;font-size:31px;font-weight:900;letter-spacing:2px;margin:7px 0 3px;color:#ffe0a2;position:relative}
+  #endReason{text-align:center;font-size:10px;color:#85877f;letter-spacing:.8px;position:relative}
+  .endscore{display:flex;align-items:center;justify-content:center;gap:18px;margin:17px 0 13px;position:relative}
+  .endscore .es{display:flex;flex-direction:column;align-items:center;min-width:105px}
+  .endscore .es b{font-size:37px;line-height:1;font-weight:900}
+  .endscore .es small{font-size:8px;letter-spacing:1.5px;color:#7d8079;margin-top:4px}
+  .endscore .es.blue b{color:#9dcfff}.endscore .es.red b{color:#ffb2a9}
+  .endscore .ecolon{font-size:24px;color:#5e5b52}
+  .endstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;position:relative;margin-bottom:16px}
+  .endstats div{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);padding:7px;text-align:center;border-radius:3px}
+  .endstats small{display:block;font-size:8px;color:#777a73;letter-spacing:.7px}
+  .endstats b{display:block;font-size:14px;color:#ddd2bd;margin-top:2px}
+  #endcard .actions{justify-content:center;position:relative}
+  #endcard .btn{min-width:155px}
+
+  /* geliştirici konsolu */
+  #devpanel{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;justify-content:flex-end;padding:14px 18px 18px;background:rgba(3,8,5,.8);font:12.5px/1.45 Consolas,"Courier New",monospace;color:#b8ffc8;backdrop-filter:blur(2px)}
+  #devpanel .dcbar{display:flex;align-items:center;gap:8px;font-family:var(--ui);font-size:10px;letter-spacing:1px;color:#8fd8a5;margin-bottom:6px}
+  #devpanel .dcbar b{color:#d6ffe2;letter-spacing:2px}
+  #devpanel .dcbar span{margin-left:auto;opacity:.6}
+  #dcOut{max-height:56vh;overflow:auto;background:rgba(5,12,7,.96);border:1px solid rgba(90,255,150,.3);border-bottom:0;border-radius:4px 4px 0 0;padding:9px 12px;white-space:pre-wrap;word-break:break-word}
+  #dcRow{display:flex;align-items:center;gap:8px;background:rgba(5,12,7,.98);border:1px solid rgba(90,255,150,.3);border-top:1px solid rgba(90,255,150,.14);border-radius:0 0 4px 4px;padding:8px 12px}
+  #dcRow .prompt{color:#5dff96;font-weight:800}
+  #dcIn{flex:1;background:none;border:0;outline:0;color:#d8ffe2;font:13px Consolas,"Courier New",monospace}
+  #devpanel .dchint{font-family:var(--ui);font-size:9.5px;opacity:.55;margin-top:6px;letter-spacing:.3px}
+  .dcline{min-height:16px}.dcline.cmd{color:#d8ffe2}.dcline.ok{color:#7dffa9}.dcline.err{color:#ff9a8a}.dcline.dim{color:#6f9d7e}
+
+  @media (max-width:1080px){
+    .menu-body{grid-template-columns:178px minmax(0,1fr)}
+    .brief{display:none}
+    .brand .ver{display:none}
+  }
+  @media (max-width:820px){
+    #card{height:96vh}
+    .menu-body{grid-template-columns:1fr;overflow-y:auto}
+    .sidebar{flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid rgba(255,255,255,.075);padding:9px;gap:4px;overflow:visible}
+    .navlabel,.sidefoot{display:none}
+    .navbtn{width:auto;flex:1;min-width:100px;padding:6px 8px}
+    .navbtn .ni{display:none}.navbtn small{display:none}
+    .content{overflow:visible;padding:13px}
+    .brand{padding:11px 14px;flex-wrap:wrap}
+    .brand .profile{display:none}
+    .brand .logo{font-size:23px}
+    .split,.settings-grid{grid-template-columns:1fr}
+    .menu-footer{padding:9px 12px;flex-wrap:wrap}
+    .footinfo{width:100%;margin:0 0 3px}
+    .menu-footer .btn{flex:1;min-width:110px}
+  }
+  button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:1px solid rgba(232,185,100,.75);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001s !important;animation-iteration-count:1 !important;transition-duration:.001s !important}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<div id="crosshair">
+  <div class="ch" id="ch-up" style="left:-1px;top:-13px;width:2px;height:8px"></div>
+  <div class="ch" id="ch-down" style="left:-1px;top:5px;width:2px;height:8px"></div>
+  <div class="ch" id="ch-left" style="left:-13px;top:-1px;width:8px;height:2px"></div>
+  <div class="ch" id="ch-right" style="left:5px;top:-1px;width:8px;height:2px"></div>
+  <div id="ch-dot"></div>
+</div>
+<div id="scope"><div class="vline"></div><div class="hline"></div></div>
+<div id="hitmarker">✕</div>
+<div id="protecthint"></div>
+<div id="dmgflash"></div>
+<div id="flashov"></div>
+<div id="deathmsg"><div id="deathcount">Yeniden doğuş: 5 sn</div></div>
+
+<div class="hud" id="topleft"><div id="area">Dust II</div><div id="stats">—</div><div id="teambadge" class="teambadge blue">MAVİ TAKIM</div></div>
+<div class="hud" id="matchbar">
+  <div class="mscore blue"><span id="blueScore">0</span><small>MAVİ</small></div>
+  <div class="mcenter"><div id="matchTimer">30:00</div><div id="matchGoal">HEDEF 30</div></div>
+  <div class="mscore red"><span id="redScore">0</span><small>KIRMIZI</small></div>
+</div>
+<div class="hud" id="killfeed"></div>
+<div class="hud" id="mapbox"><canvas id="minimap"></canvas></div>
+<div class="hud" id="healthbox">
+  <div class="hbar-row"><span class="hbar-ico">❤</span><div class="hbar-bg"><div class="hbar-fill" id="hpbar"></div></div><span class="hbar-num" id="hpnum">100</span></div>
+  <div class="hbar-row"><span class="hbar-ico">🛡</span><div class="hbar-bg"><div class="hbar-fill" id="armorbar"></div></div><span class="hbar-num" id="armornum">100</span></div>
+</div>
+<div class="hud" id="ammobox"><div id="wepname">AK-47</div><div id="ammo">30 / 90</div><div id="nades">Sis 1 · Flaş 2 · HE 1</div><div id="score">Dust II · 0 öldürme · 0 kafa</div></div>
+<div class="hud" id="bottombar">Sol tık ateş · 1 tüfek · 2 tabanca · 3 bıçak · 4 sis · 5 flaş · 6 HE · G/F/H ele al · R şarjör · Tab skor · Ctrl eğil · Sağ tık dürbün · Shift sessiz · Space zıpla · Esc menü</div>
+
+<div id="scoreboard">
+  <div class="sb-card">
+    <div class="sb-top"><b>MAÇ SKORBORDU</b><span id="sbMap">DUST II</span></div>
+    <div class="sb-scores">
+      <div class="s blue"><b id="sbBlue">0</b><small>MAVİ</small></div>
+      <div class="colon">:</div>
+      <div class="s red"><b id="sbRed">0</b><small>KIRMIZI</small></div>
+    </div>
+    <div class="sb-headrow"><span>OYUNCU</span><span>ÖLD.</span><span>ÖLÜM</span><span>K/D</span><span>PING</span><span>CAN</span><span>DURUM</span></div>
+    <div id="sbTeams"></div>
+    <div class="sb-foot">TAB basılı tut · skor tablosu · K/D ve ping canlı güncellenir · rakip canı gizli</div>
+  </div>
+</div>
+
+<div id="overlay" class="mode-lobby">
+  <div id="card">
+    <header class="brand">
+      <div class="logo">BASIC<span>-</span>STRIKE</div>
+      <div class="brandtxt"><div class="sub">TACTICAL ARENA</div><div class="tag">OFFLINE FPS · TAKIM SAVAŞI</div></div>
+      <div class="profile"><span class="avatar" id="profileAvatar">?</span><div><b id="profileName">AD GİRİLMEDİ</b><small id="profileMeta">Mavi Takım · rütbe 07</small></div></div>
+      <div class="ver">R7<br>4 HARİTA · 6 SİLAH</div>
+    </header>
+
+    <div class="menu-body">
+      <aside class="sidebar">
+        <div class="navlabel">KOMUTA MERKEZİ</div>
+        <button class="navbtn active" data-tab="play"><span class="ni">▶</span><span>OYNA<small>Lobi kur · maç başlat</small></span></button>
+        <button class="navbtn" data-tab="loadout"><span class="ni">⌖</span><span>SİLAHLAR<small>Yüklem ve istatistikler</small></span></button>
+        <button class="navbtn" data-tab="settings"><span class="ni">⚙</span><span>AYARLAR<small>Görüntü · ses · nişan</small></span></button>
+        <button class="navbtn" data-tab="controls"><span class="ni">⌨</span><span>KONTROLLER<small>Tuşlar · taktikler</small></span></button>
+        <button class="navbtn" data-tab="dev"><span class="ni">&gt;_</span><span>GELİŞTİRİCİ<small>Konsol · hata ayıklama</small></span></button>
+        <button class="navbtn" data-tab="mp"><span class="ni">⇄</span><span>ÇOK OYUNCULU<small>LAN · eşler arası maç</small></span></button>
+        <div class="sidefoot">
+          <div class="statusline"><i></i>ÇEVRİMDIŞI · LAN HAZIR</div>
+          <div class="sidehint">Tüm modeller ve dokular prosedürel üretilir.<br>Harici sunucu gerekmez · LAN eşler arası MP.</div>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="tabpane active" data-pane="play">
+          <div class="pane-head"><div><h2>MAÇ KUR</h2><p>Kullanıcı adını gir, haritayı ve takımını seç. Kuralları belirle, sahaya çık.</p></div><div class="chip" id="playChip">LOBİ HAZIR</div></div>
+
+          <div class="panel" style="margin-bottom:12px">
+            <div class="section-title"><span>OYUNCU PROFİLİ</span><span>ZORUNLU</span></div>
+            <div class="namefield">
+              <span class="name-ico">◈</span>
+              <input id="playerName" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Kullanıcı adı gir (zorunlu)">
+              <button class="btn ghost" id="playerNameSave">KAYDET</button>
+            </div>
+            <div class="hint" id="nameHint">Zorunlu: maça başlamak için 2–16 karakterlik bir kullanıcı adı gir.</div>
+            <div id="playGate"></div>
+          </div>
+
+          <div class="section-title"><span>HARİTA SEÇ</span><span id="mapnote"></span></div>
+          <div class="maps" data-hostonly>
+            <button class="mcard" data-map="dust2"><span class="mthumb dust"></span><span class="mname">Dust II</span><span class="mdesc">A/B bölgeleri · uzun, mid, tünel</span></button>
+            <button class="mcard" data-map="redline"><span class="mthumb aim"></span><span class="mname">Aim Redline</span><span class="mdesc">Simetrik aim · iki hat · hızlı tempo</span></button>
+            <button class="mcard" data-map="lego2"><span class="mthumb lego"></span><span class="mname">AWP Lego2</span><span class="mdesc">Renkli bloklar · uzun koridor · sadece AWP</span></button>
+            <button class="mcard" data-map="village"><span class="mthumb village"></span><span class="mname">Meydan Köy</span><span class="mdesc">Özel tasarım · çeşme, pazar, iki avlu</span></button>
+          </div>
+          <div class="mapnote" id="mapdesc">Klasik çöl haritası. Mavi takım güneyden, kırmızı takım kuzeyden başlar.</div>
+
+          <div class="split">
+            <div class="panel" data-hostonly>
+              <div class="section-title"><span>TAKIM VE BOT DENGESİ</span><span>MAKS. 15v15</span></div>
+              <div class="teams">
+                <button class="tsel" data-team="blue">MAVİ TAKIM<small>Güney doğuşu · saldırı</small></button>
+                <button class="tsel" data-team="red">KIRMIZI TAKIM<small>Kuzey doğuşu · savunma</small></button>
+              </div>
+              <div class="teamtotals" id="teamtotals">Mavi 5/15 · Kırmızı 4/15 · sen mavi</div>
+              <div class="botrow blue"><span><i class="dot"></i>Mavi bot</span><input id="botsBlue" type="range" min="0" max="15" step="1" value="4"><b id="botsBlueVal">4</b></div>
+              <div class="botrow red"><span><i class="dot"></i>Kırmızı bot</span><input id="botsRed" type="range" min="0" max="15" step="1" value="4"><b id="botsRedVal">4</b></div>
+              <div class="hint">Kendi takımında en fazla <b>14 bot</b> olabilir; 15. slot sensin. Botlar 5 sn sonra kendi doğuş noktasında yeniden doğar ve 3 sn koruma alır.</div>
+            </div>
+
+            <div class="panel" data-hostonly>
+              <div class="section-title"><span>MAÇ KURALLARI</span><span>CS2 ESİNTİLİ</span></div>
+              <div class="rulegroup">
+                <div class="rlabel">BOT ZORLUĞU</div>
+                <div class="seg" id="diffSeg">
+                  <button class="segbtn" data-diff="easy">KOLAY</button>
+                  <button class="segbtn" data-diff="normal">NORMAL</button>
+                  <button class="segbtn" data-diff="hard">ZOR</button>
+                </div>
+              </div>
+              <div class="rulegroup" style="margin-top:9px">
+                <div class="rlabel">ÖLDÜRME HEDEFİ</div>
+                <div class="seg" id="limitSeg">
+                  <button class="segbtn" data-limit="15">15</button>
+                  <button class="segbtn" data-limit="30">30</button>
+                  <button class="segbtn" data-limit="50">50</button>
+                  <button class="segbtn" data-limit="0">SINIRSIZ</button>
+                </div>
+              </div>
+              <div class="rulegroup" style="margin-top:9px">
+                <div class="rlabel">MAÇ SÜRESİ</div>
+                <div class="seg" id="timeSeg">
+                  <button class="segbtn" data-time="5">5 DK</button>
+                  <button class="segbtn" data-time="10">10 DK</button>
+                  <button class="segbtn" data-time="15">15 DK</button>
+                  <button class="segbtn" data-time="0">SINIRSIZ</button>
+                </div>
+              </div>
+              <div class="rulehint">Zorluk; botların isabet oranını, tepki süresini ve hasarını değiştirir. Hedef veya süre dolunca maç sonu ekranı açılır.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tabpane" data-pane="loadout">
+          <div class="pane-head"><div><h2>SİLAH YÜKLEMİ</h2><p>Maç öncesi zorunlu yükleme: bir tüfek ve bir tabanca seç. Maç içinde yalnızca bu iki ateşli silahı kullanırsın.</p></div><div class="chip gold" id="loadoutChip">AK-47 · USP</div></div>
+
+          <div class="loadout-group">
+            <div class="section-title"><span>BİRİNCİL TÜFEK — BİR ADET SEÇ</span><span><kbd>1</kbd> OYUN İÇİ</span></div>
+            <div class="weapons">
+              <button class="wcard" data-w="0">
+                <span class="wart rifle"></span>
+                <div class="wname">AK-47</div><div class="wkey">1</div>
+                <div class="wtag">Tüfek · Tam otomatik · 36 hasar</div>
+                <div class="wstat"><span>Hasar</span><i style="--v:74%"></i></div>
+                <div class="wstat"><span>Atış hızı</span><i style="--v:86%"></i></div>
+                <div class="wstat"><span>İsabet</span><i style="--v:62%"></i></div>
+                <div class="wstat"><span>Kontrol</span><i style="--v:58%"></i></div>
+              </button>
+              <button class="wcard" data-w="2">
+                <span class="wart awp"></span>
+                <div class="wname">AWP</div><div class="wkey">1</div>
+                <div class="wtag">Keskin nişancı · Dürbünlü · 115 hasar</div>
+                <div class="wstat"><span>Hasar</span><i style="--v:100%"></i></div>
+                <div class="wstat"><span>Atış hızı</span><i style="--v:12%"></i></div>
+                <div class="wstat"><span>İsabet</span><i style="--v:96%"></i></div>
+                <div class="wstat"><span>Kontrol</span><i style="--v:18%"></i></div>
+              </button>
+              <button class="wcard" data-w="3">
+                <span class="wart m4"></span>
+                <div class="wname">M4A4</div><div class="wkey">1</div>
+                <div class="wtag">Tüfek · Tam otomatik · 33 hasar</div>
+                <div class="wstat"><span>Hasar</span><i style="--v:68%"></i></div>
+                <div class="wstat"><span>Atış hızı</span><i style="--v:92%"></i></div>
+                <div class="wstat"><span>İsabet</span><i style="--v:70%"></i></div>
+                <div class="wstat"><span>Kontrol</span><i style="--v:66%"></i></div>
+              </button>
+            </div>
+          </div>
+
+          <div class="loadout-group">
+            <div class="section-title"><span>YEDEK TABANCA — BİR ADET SEÇ</span><span><kbd>2</kbd> OYUN İÇİ</span></div>
+            <div class="weapons">
+              <button class="wcard" data-w="1">
+                <span class="wart pistol"></span>
+                <div class="wname">USP</div><div class="wkey">2</div>
+                <div class="wtag">Tabanca · Tek tek · 25 hasar</div>
+                <div class="wstat"><span>Hasar</span><i style="--v:45%"></i></div>
+                <div class="wstat"><span>Atış hızı</span><i style="--v:55%"></i></div>
+                <div class="wstat"><span>İsabet</span><i style="--v:78%"></i></div>
+                <div class="wstat"><span>Kontrol</span><i style="--v:64%"></i></div>
+              </button>
+              <button class="wcard" data-w="4">
+                <span class="wart deagle"></span>
+                <div class="wname">Deagle</div><div class="wkey">2</div>
+                <div class="wtag">Ağır tabanca · Tek tek · 53 hasar</div>
+                <div class="wstat"><span>Hasar</span><i style="--v:88%"></i></div>
+                <div class="wstat"><span>Atış hızı</span><i style="--v:38%"></i></div>
+                <div class="wstat"><span>İsabet</span><i style="--v:60%"></i></div>
+                <div class="wstat"><span>Kontrol</span><i style="--v:30%"></i></div>
+              </button>
+            </div>
+          </div>
+
+          <div class="loadout-detail">
+            <div class="ldtop"><b id="loadoutName">AK-47</b><span id="loadoutTag">BİRİNCİL · TÜFEK</span></div>
+            <div class="ldgrid">
+              <div class="ldstat"><small>HASAR</small><b id="loadoutDmg">36</b></div>
+              <div class="ldstat"><small>ATIŞ / DK</small><b id="loadoutRpm">600</b></div>
+              <div class="ldstat"><small>ŞARJÖR</small><b id="loadoutMag">30</b></div>
+            </div>
+            <p id="loadoutNote">Dengeli hasar ve yüksek atış hızı. Orta mesafede seri ateş için ideal; uzun mesafede kısa aralıklarla ateş et.</p>
+          </div>
+          <div class="hint warn" id="loadoutReq">ZORUNLU: bir tüfek + bir tabanca seçmeden maç başlamaz.</div>
+          <div class="hint">Oyun içi slotlar: <b>1</b> tüfek · <b>2</b> tabanca · <b>3</b> bıçak · <b>4</b> sis · <b>5</b> flaş · <b>6</b> HE. Bombalar tuşuna basınca atılmaz; önce ele alınır, <b>sol tıkla</b> nişan yönünde fizik kurallarına göre atılır. <b>Bıçak:</b> sol tık 35 (arkadan 50), sağ tık 75 (arkadan tek atış) ve 2 kat yavaş. <b>AWP Lego2</b> haritasında tüfek olarak yalnızca AWP kullanılır.</div>
+        </section>
+
+        <section class="tabpane" data-pane="settings">
+          <div class="pane-head"><div><h2>AYARLAR</h2><p>Fare, görüntü ve ses ayarlarını anında uygula. Değişiklikler tarayıcıda saklanır.</p></div><div class="chip" id="settingsChip">KAYDEDİLDİ</div></div>
+          <div class="settings-grid">
+            <div class="panel">
+              <div class="section-title"><span>GÖRÜNTÜ VE FARE</span><span>ANLIK</span></div>
+              <div class="row"><span>Fare hassasiyeti</span><b id="sensVal">1.00</b></div>
+              <input id="sens" type="range" min="0.3" max="2.5" step="0.05" value="1">
+              <div class="row"><span>Parlaklık</span><b id="brightVal">1.00</b></div>
+              <input id="bright" type="range" min="0.6" max="1.8" step="0.05" value="1">
+              <div class="row"><span>Görüş açısı (FOV)</span><b id="fovVal">75</b></div>
+              <input id="fov" type="range" min="60" max="120" step="1" value="75">
+              <div class="section-title" style="margin-top:14px">SES</div>
+              <div class="row"><span>Ana ses</span><b id="volVal">50%</b></div>
+              <input id="vol" type="range" min="0" max="1" step="0.05" value="0.5">
+              <div class="infoblock">Dürbündeyken fare hassasiyeti otomatik olarak düşürülür. AWP'de <b>1x → 2x → çık</b> sırasıyla ilerler.</div>
+            </div>
+            <div class="panel">
+              <div class="section-title"><span>NİŞAN ÇİZGİSİ</span><span>CANLI ÖNİZLEME</span></div>
+              <div class="chgrid">
+                <div class="chin"><input id="chColor" type="color" value="#4dff88"><span>Renk</span></div>
+                <div class="chin"><span>Boyut</span><input id="chSize" type="range" min="2" max="14" step="1" value="7"><b id="chSizeVal">7</b></div>
+                <div class="chin"><span>Kalınlık</span><input id="chThick" type="range" min="1" max="5" step="1" value="2"><b id="chThickVal">2</b></div>
+                <div class="chin"><span>Boşluk</span><input id="chGap" type="range" min="0" max="12" step="1" value="4"><b id="chGapVal">4</b></div>
+              </div>
+              <div class="chchecks">
+                <label><input type="checkbox" id="chDot"> Nokta</label>
+                <label><input type="checkbox" id="chDyn" checked> Dinamik (harekette açılır)</label>
+              </div>
+              <div class="chprev"><i id="chPrevUp"></i><i id="chPrevDown"></i><i id="chPrevLeft"></i><i id="chPrevRight"></i><span id="chPrevDot"></span></div>
+              <div class="hint">Önizleme gerçek nişan çizgisiyle aynı renk, kalınlık ve boşluğu kullanır.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tabpane" data-pane="controls">
+          <div class="pane-head"><div><h2>KONTROLLER</h2><p>Klavye ve fare ile tam kontrol. Tarayıcı kısayolları maç sırasında engellenir.</p></div><div class="chip">PC</div></div>
+          <div class="settings-grid">
+            <div class="panel">
+              <div class="section-title"><span>KLAVYE</span><span>VARSAYILAN</span></div>
+              <div class="keygrid">
+                <div class="keyrow"><span class="kk"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span><span>Hareket</span></div>
+                <div class="keyrow"><span class="kk"><kbd>Shift</kbd></span><span>Sessiz yürüyüş</span></div>
+                <div class="keyrow"><span class="kk"><kbd>Ctrl</kbd></span><span>Eğil</span></div>
+                <div class="keyrow"><span class="kk"><kbd>Space</kbd></span><span>Zıpla</span></div>
+                <div class="keyrow"><span class="kk"><kbd>1</kbd></span><span>Tüfek — yüklemede seçtiğin silah</span></div>
+                <div class="keyrow"><span class="kk"><kbd>2</kbd></span><span>Tabanca — yüklemede seçtiğin silah</span></div>
+                <div class="keyrow"><span class="kk"><kbd>3</kbd></span><span>Bıçak · %20 hızlı</span></div>
+                <div class="keyrow"><span class="kk"><kbd>4</kbd></span><span>Sis bombasını ele al</span></div>
+                <div class="keyrow"><span class="kk"><kbd>5</kbd></span><span>Flaş bombasını ele al</span></div>
+                <div class="keyrow"><span class="kk"><kbd>6</kbd></span><span>HE bombasını ele al</span></div>
+                <div class="keyrow"><span class="kk"><kbd>G</kbd><kbd>F</kbd><kbd>H</kbd></span><span>Bombayı ele al / bırak (atmak için sol tık)</span></div>
+                <div class="keyrow"><span class="kk"><kbd>Tab</kbd></span><span>Skor tablosu (basılı tut)</span></div>
+                <div class="keyrow"><span class="kk"><kbd>R</kbd></span><span>Şarjör değiştir</span></div>
+                <div class="keyrow"><span class="kk"><kbd>Esc</kbd></span><span>Menü aç / kapat (oyun durmaz)</span></div>
+                <div class="keyrow"><span class="kk"><kbd>"</kbd></span><span>Konsol (ayardan aç)</span></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="section-title"><span>FARE VE AWP</span><span>TAKTİK</span></div>
+              <div class="keygrid">
+                <div class="keyrow"><span class="kk"><kbd>Sol tık</kbd></span><span>Ateş · bombayı fırlat · bıçak hızlı hamle</span></div>
+                <div class="keyrow"><span class="kk"><kbd>Sağ tık</kbd></span><span>AWP dürbün · bombayı bırak · bıçak ağır hamle</span></div>
+              </div>
+              <div class="infoblock"><b>Bıçak:</b> sol tık 35 hasar ve hızlı; sağ tık 75 hasar ama 2 kat yavaş. Arkası dönük hedefe sol tık 50, sağ tık tek atış. <b>Bombalar:</b> G/F/H yalnızca ele alır; sol tık nişan yönünde fizik kurallarına göre fırlatır.</div>
+              <div class="infoblock"><b>AWP sürgü döngüsü:</b> Ateş ettiğinde dürbün kapanır, sürgü kolu animasyonu oynar ve kısa süre sonra nişan otomatik olarak geri gelir. Silah değiştirir, şarjör doldurur veya sağ tıkla müdahale edersen otomatik dönüş iptal olur.</div>
+              <div class="infoblock"><b>Doğuş koruması:</b> Yeniden doğduktan sonra 3 saniye boyunca hasar almazsın. Botlar da kendi doğuş noktalarında aynı korumaya sahiptir.</div>
+              <div class="infoblock"><b>Dost ateşi kapalı:</b> Kendi takımına ateş etmek hasar vermez. Botlar da takım arkadaşlarını hedeflemez.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tabpane" data-pane="dev">
+          <div class="pane-head"><div><h2>GELİŞTİRİCİ</h2><p>Hata ayıklama araçları ve canlı maç verileri. Bu ayarlar normal oyuncu deneyimini etkiler.</p></div><div class="chip gold">DEBUG</div></div>
+          <div class="settings-grid">
+            <div class="panel">
+              <div class="section-title"><span>GELİŞTİRİCİ SEÇENEKLERİ</span><span>DİKKAT</span></div>
+              <div class="toggles">
+                <label class="tgl"><span>Geliştirici konsolu<small>Açınca oyun içinde " tuşuyla konsolu aç (oyunu duraklatır)</small></span><span class="switch"><input type="checkbox" id="devconsole"><i></i></span></label>
+                <label class="tgl"><span>Sınırsız şarjör<small>Mermi hiç bitmez (∞)</small></span><span class="switch"><input type="checkbox" id="inf"><i></i></span></label>
+                <label class="tgl"><span>Ölümsüzlük<small>Hasar almazsın (geliştirici)</small></span><span class="switch"><input type="checkbox" id="god"><i></i></span></label>
+              </div>
+              <div class="actions"><button class="btn ghost" id="openConsole">KONSOLU AÇ</button></div>
+              <div class="hint" id="devMsg">Konsol kapalıyken " tuşu çalışmaz. Önce buradan etkinleştir.</div>
+            </div>
+            <div class="panel">
+              <div class="section-title"><span>CANLI DURUM</span><span id="devStateLabel">BEKLİYOR</span></div>
+              <div class="devstate" id="devState">Harita: Dust II
+Takım: Mavi
+Silah: AK-47
+Durum: Lobi</div>
+              <div class="hint">Konsol komut örnekleri: <b>help</b> · <b>sens 1.2</b> · <b>map redline</b> · <b>bots red 10</b> · <b>god 1</b> · <b>tp 0 0</b></div>
+            </div>
+          </div>
+        </section>
+        <section class="tabpane" data-pane="mp">
+          <div class="pane-head"><div><h2>ÇOK OYUNCULU</h2><p>Tek kodla eşler arası lobi: biri odayı açar, diğerleri kodu yazıp bağlanır. 2'den fazla oyuncu aynı lobiye girebilir. İnternet yoksa manuel kod değişimi de çalışır (yerel ağ).</p></div><div class="chip gold">EŞLER ARASI</div></div>
+          <div class="settings-grid">
+            <div class="panel">
+              <div class="section-title"><span>TEK KODLA OYNA</span><span>ÖNERİLEN</span></div>
+              <p><b>Ana makine:</b> kuralları <b>OYNA</b> sekmesinden seç, <b>ODA AÇ</b>'a bas — 6 haneli kod çıkar, arkadaşlarına söylemen yeter.<br><b>Katılımcılar:</b> kodu yazıp <b>KODLA BAĞLAN</b>'a bas, kartlardan takımını seç. Ana makine maçı başlatır.</p>
+              <div class="row" style="margin-top:4px"><span>Oda kodu</span></div>
+              <input class="mpcodein" id="mpRoomCode" maxlength="8" spellcheck="false" placeholder="ABC123">
+              <div class="actions" style="margin-top:9px"><button class="btn primary" id="mpOpenRoom">ODA AÇ (KOD ÜRET)</button><button class="btn primary" id="mpJoinRoom">KODLA BAĞLAN</button><button class="btn ghost" id="mpLeave">AĞDAN AYRIL</button></div>
+              <div class="mpstep">Kod internet üzerinden de çalışır: buluşma aracı sunucu tarafları eşleştirir, veri yine doğrudan şifreli eşler arası akar. Kodu bilen herkes odaya girebilir; ana makine istediğini atabilir veya yasaklayabilir.</div>
+            </div>
+            <div class="panel">
+              <div class="section-title"><span>NASIL ÇALIŞIR</span><span>ROLLER</span></div>
+              <p>Odayı açan <b>ana makine</b> olur: haritayı, botları, skoru, lobi ayarlarını ve maç sonunu işler. Bağlanan her <b>katılımcı</b> takımını kartlardan seçer; takım dengeleme açıksa ana makine sayıları eşitler.</p>
+              <div class="mpstep">Ana makinenin botları katılımcıların ekranında hayalet olarak akar; katılımcılar onlara ve birbirlerine vurabilir, hasar ve skor ana makinede işlenir.</div>
+              <div class="mpstep">Ağ koparsa oyuncu lobiye döner; tek oyunculu oyun bundan etkilenmez.</div>
+            </div>
+          </div>
+          <div class="panel" style="margin-top:11px">
+            <div class="section-title"><span>LOBİ OYUNCULARI</span><span id="mpRosterCount">0 OYUNCU</span></div>
+            <div id="mpRoster" class="mproster"><div class="mpempty">Henüz oyuncu bağlanmadı.</div></div>
+            <label class="tgl" style="margin-top:9px"><span>Takım dengeleme<small>Yeni katılanı insan sayısı az olan takıma yönlendirir · yalnız ana makine</small></span><span class="switch"><input type="checkbox" id="mpBalance"><i></i></span></label>
+            <div class="hint" id="mpLockHint">Lobi ayarlarını yalnızca odayı kuran ana makine değiştirebilir.</div>
+          </div>
+          <div class="hint" id="mpStatus">Durum: hazır. Tek kod modu için internet gerekir (buluşma sunucusu).</div>
+          <details class="mpmanual">
+            <summary>MANUEL KOD DEĞİŞİMİ — çevrimdışı LAN (internet yoksa)</summary>
+            <div class="settings-grid">
+              <div class="panel">
+                <div class="section-title"><span>MAÇ KUR (ANA MAKİNE)</span><span>BOT + SKOR YETKİSİ</span></div>
+                <div class="actions" style="margin-top:6px"><button class="btn primary" id="mpHost">DAVET KODU OLUŞTUR</button></div>
+                <div class="row" style="margin-top:11px"><span>1) Davet kodu — karşıya gönder</span></div>
+                <textarea class="mpcode" id="mpHostCode" rows="4" spellcheck="false" placeholder="Kod burada görünecek…"></textarea>
+                <div class="row"><span>2) Cevap kodu — karşıdan yapıştır</span></div>
+                <textarea class="mpcode" id="mpAnswerCode" rows="4" spellcheck="false" placeholder="Karşıdakinin cevap kodunu buraya yapıştır…"></textarea>
+                <div class="actions" style="margin-top:9px"><button class="btn primary" id="mpAccept">CEVAPLA BAĞLAN</button></div>
+              </div>
+              <div class="panel">
+                <div class="section-title"><span>MAÇA KATIL</span><span>KARŞI TAKIM</span></div>
+                <div class="row" style="margin-top:6px"><span>1) Davet kodu — ana makineden</span></div>
+                <textarea class="mpcode" id="mpJoinCode" rows="4" spellcheck="false" placeholder="Davet kodunu buraya yapıştır…"></textarea>
+                <div class="actions" style="margin-top:9px"><button class="btn primary" id="mpJoin">KATIL → CEVAP KODU AL</button></div>
+                <div class="row" style="margin-top:11px"><span>2) Cevap kodu — ana makineye gönder</span></div>
+                <textarea class="mpcode" id="mpJoinAnswer" rows="4" spellcheck="false" placeholder="Cevap kodu burada görünecek…"></textarea>
+                <div class="actions" style="margin-top:9px"><button class="btn ghost" id="mpLeave2">VAZGEÇ</button></div>
+              </div>
+            </div>
+            <div class="hint" style="color:#7d807a">Bu mod tamamen sunucusuzdur: kodlar bağlantı bilgisini (SDP) taşır, yalnızca yerel ağda çalışır ve tek kullanımlıktır.</div>
+          </details>
+        </section>
+      </main>
+
+      <aside class="brief">
+        <div class="brief-title"><span>MAÇ ÖZETİ</span><span>R7</span></div>
+        <div class="brief-map" id="briefMap">DUST II</div>
+        <div class="brief-sub" id="briefSub">Klasik çöl haritası. A/B bölgeleri, uzun koridor ve tünel.</div>
+        <div class="brief-teams">
+          <div class="brief-team blue"><b id="sumBlue">5</b><small>MAVİ TAKIM</small></div>
+          <div class="brief-team red"><b id="sumRed">4</b><small>KIRMIZI TAKIM</small></div>
+        </div>
+        <div class="brief-rows">
+          <div class="brief-row"><span>Harita</span><b id="sumMap">Dust II</b></div>
+          <div class="brief-row"><span>Senin takımın</span><b id="sumTeam">Mavi</b></div>
+          <div class="brief-row"><span>Bot dengesi</span><b id="sumBots">4v4</b></div>
+          <div class="brief-row"><span>Zorluk</span><b id="sumDiff">Normal</b></div>
+          <div class="brief-row"><span>Hedef</span><b id="sumGoal">30 öldürme</b></div>
+          <div class="brief-row"><span>Süre</span><b id="sumTime">Sınırsız</b></div>
+        </div>
+        <div class="brief-score" id="briefScore">Maç devam ediyor.<br>Skor ve süre üst ortadaki skorbordda.</div>
+        <div class="brief-tip"><b>İPUCU:</b> Yüklemede bir tüfek + bir tabanca seç. Oyun içinde 4/5/6 ile bombayı ele al, sol tıkla at. Bıçakta sağ tık ağır ve güçlü; arkası dönük hedefte tek atış. Tab skor tablosu.</div>
+      </aside>
+    </div>
+
+    <footer class="menu-footer actions" style="margin:0">
+      <div class="footinfo"><i></i><span id="footHint">Lobi hazır · 4 harita · zorunlu yükleme · LAN MP</span></div>
+      <button class="btn ghost pauseOnly" id="toLobby">LOBİYE DÖN</button>
+      <button class="btn primary pauseOnly" id="resume">DEVAM ET</button>
+      <button class="btn primary lobbyOnly" id="play">MAÇI BAŞLAT<span class="ar">▶</span></button>
+    </footer>
+    <div id="error"></div>
+  </div>
+
+  <div id="endcard">
+    <div class="end-eyebrow">MAÇ SONU · TAKIM SAVAŞI</div>
+    <div id="endWinner">MAVİ TAKIM KAZANDI</div>
+    <div id="endReason">Skor limiti doldu</div>
+    <div class="endscore">
+      <div class="es blue"><b id="endBlue">30</b><small>MAVİ</small></div>
+      <div class="ecolon">:</div>
+      <div class="es red"><b id="endRed">18</b><small>KIRMIZI</small></div>
+    </div>
+    <div class="endstats">
+      <div><small>HARİTA</small><b id="endMap">Dust II</b></div>
+      <div><small>ÖLDÜRME</small><b id="endKills">0</b></div>
+      <div><small>KAFA</small><b id="endHeadshots">0</b></div>
+    </div>
+    <div class="actions"><button class="btn primary" id="rematch">YENİ MAÇ</button><button class="btn ghost" id="endLobby">LOBİYE DÖN</button></div>
+  </div>
+</div>
+
+<div id="mpTeamPick">
+  <div class="mtp-card">
+    <div class="mtp-eyebrow">LOBİYE BAĞLANDIN</div>
+    <h2>TAKIMINI SEÇ</h2>
+    <p>Maça katılmak için iki takımdan birini seç. Ana makine takım dengelemesi açıksa seni dengeli tarafa yönlendirebilir.</p>
+    <div class="mtp-teams">
+      <button class="mtp-team blue" data-team="blue"><b>MAVİ TAKIM</b><small>Güney doğuşu · saldırı</small><span>MAVİ SEÇ →</span></button>
+      <button class="mtp-team red" data-team="red"><b>KIRMIZI TAKIM</b><small>Kuzey doğuşu · savunma</small><span>KIRMIZI SEÇ →</span></button>
+    </div>
+    <div id="mpTeamPickStatus">Takım seçimi ana makineye gönderilecek.</div>
+  </div>
+</div>
+
+<div id="devpanel">
+  <div class="dcbar"><b>GELİŞTİRİCİ KONSOLU</b><span>kapat: " veya Esc · geçmiş: ↑/↓</span></div>
+  <div id="dcOut"></div>
+  <div id="dcRow"><span class="prompt">&gt;</span><input id="dcIn" type="text" autocomplete="off" spellcheck="false" placeholder='komut yaz (örnek: help · map redline · bots blue 8 · sens 1.2)'></div>
+  <div class="dchint">Örnekler: help · sens 1.2 · brightness 1.1 · crosshair color #00ff66 · map village · team red · bots red 10 · god 1 · tp 0 0 · stats · exit</div>
+</div>
+
+<script src="libs/three.min.js"></script>
+<script>window.THREE || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');</script>
+<script src="game.js"></script>
+</body>
+</html>
