@@ -197,10 +197,10 @@
         <div class="lobbyOnly">
           <div class="section-title"><span>HARİTA SEÇ</span><span id="mapnote" style="letter-spacing:0;font-size:10px"></span></div>
           <div class="maps">
-            <button class="mcard" data-map="dust2">
+            <button class="mcard" data-map="dust2_flat">
               <span class="mthumb dust"></span>
-              <span class="mname">Dust II</span>
-              <span class="mdesc">A/B bölgeleri · uzun, mid, tünel</span>
+              <span class="mname">Dust II Flat</span>
+              <span class="mdesc">Radar düzeni · düz harita · A/B, Long, Tünel</span>
             </button>
             <button class="mcard" data-map="redline">
               <span class="mthumb aim"></span>
@@ -335,7 +335,7 @@
 (function () {
   var d = window.__dust2;
   try {
-    d.selectMap('dust2', false);
+    d.selectMap('dust2_flat', false);
     d.setTeam('blue');
     d.setBotCounts('blue', 4);
     d.setBotCounts('red', 4);
