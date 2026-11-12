@@ -61,6 +61,7 @@
   .kf .kfw{color:#c9c2b4;font-size:8.5px;font-weight:800;letter-spacing:.6px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);padding:1px 4px;border-radius:2px;white-space:nowrap}
   .kf .kfns{color:#ffd36e;font-size:8px;font-weight:800;letter-spacing:.5px;border:1px solid rgba(255,205,90,.5);background:rgba(255,200,70,.1);padding:0 3px;border-radius:2px;white-space:nowrap}
   .kf .kfsm{color:#cfd6dd;font-size:8px;font-weight:800;letter-spacing:.5px;border:1px solid rgba(200,210,220,.4);background:rgba(200,210,220,.12);padding:0 3px;border-radius:2px;white-space:nowrap}
+  .kf .kfblind{color:#c9a6ff;font-size:10px;font-weight:800;line-height:1;border:1px solid rgba(180,140,255,.5);background:rgba(150,110,255,.14);padding:0 3px;border-radius:2px;white-space:nowrap}
   @keyframes kfin{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
   #dmgflash{position:fixed;inset:0;z-index:8;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 50%, rgba(160,20,10,0) 35%, rgba(150,18,8,.85) 100%);transition:opacity .1s linear}
   #flashov{position:fixed;inset:0;z-index:7;pointer-events:none;background:#fdfcf7;opacity:0}
@@ -445,7 +446,7 @@
   .sb-scores .s{display:flex;align-items:baseline;gap:7px;font-size:25px;font-weight:900}
   .sb-scores .s small{font-size:8px;letter-spacing:1.4px;color:#85877f;font-weight:700}
   .sb-scores .blue{color:#a9d4ff}.sb-scores .red{color:#ffb9b0}.sb-scores .colon{color:#5e5b52;font-size:17px}
-  .sb-headrow,.sb-row{display:grid;grid-template-columns:1.6fr .5fr .5fr .6fr .55fr .5fr .8fr;gap:6px;align-items:center;padding:5px 14px;font-size:10.5px}
+  .sb-headrow,.sb-row{display:grid;grid-template-columns:1.6fr .5fr .5fr .5fr .6fr .55fr .5fr .8fr;gap:6px;align-items:center;padding:5px 14px;font-size:10.5px}
   .sb-headrow{font-size:8px;letter-spacing:1.1px;color:#777f86;border-bottom:1px solid var(--line2);background:rgba(255,255,255,.02)}
   .sb-headrow span:not(:first-child),.sb-row span:not(:first-child){text-align:center}
   #sbTeams{overflow-y:auto;padding-bottom:4px}
@@ -625,7 +626,7 @@
       <div class="colon">:</div>
       <div class="s red"><b id="sbRed">0</b><small>KIRMIZI</small></div>
     </div>
-    <div class="sb-headrow"><span>OYUNCU</span><span>ÖLD.</span><span>ÖLÜM</span><span>K/D</span><span>PING</span><span>CAN</span><span>DURUM</span></div>
+    <div class="sb-headrow"><span>OYUNCU</span><span>ÖLD.</span><span>ÖLÜM</span><span>ASİST</span><span>K/D</span><span>PING</span><span>CAN</span><span>DURUM</span></div>
     <div id="sbTeams"></div>
     <div class="sb-foot">TAB basılı tut · skor tablosu · K/D ve ping canlı güncellenir · rakip canı gizli</div>
   </div>
