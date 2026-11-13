@@ -411,6 +411,8 @@
   .mpstep b{color:#d6b16d}
   .mpcodein{width:100%;background:#0a0d10;border:1px solid rgba(255,255,255,.13);border-radius:1px;color:#ffd89e;font-family:Consolas,monospace;font-size:15px;font-weight:700;letter-spacing:3px;text-align:center;padding:9px 8px;margin-top:5px;display:block;box-sizing:border-box;text-transform:uppercase}
   .mpcodein:focus{outline:none;border-color:rgba(240,162,51,.6);box-shadow:0 0 0 2px rgba(240,162,51,.1)}
+  .mppassin{text-transform:none;letter-spacing:1px;font-size:13px;font-weight:600}
+  .mpLobbyInfo{font-size:9px;color:#d6b16d;margin-top:6px;letter-spacing:.5px}
   .mpmanual{margin-top:10px;border:1px solid rgba(255,255,255,.09);border-radius:1px;background:rgba(9,12,15,.58)}
   .mpmanual summary{cursor:pointer;font-size:10px;font-weight:800;letter-spacing:.5px;color:#a9a79f;padding:9px 11px;user-select:none}
   .mpmanual summary:hover{color:#e9e4da}
@@ -425,6 +427,11 @@
   .mprow .mptag{font-size:8px;letter-spacing:.8px;color:#8d9088;border:1px solid rgba(255,255,255,.12);padding:1px 4px;border-radius:1px;white-space:nowrap}
   .mprow .mpteam{font-size:8.5px;font-weight:800;letter-spacing:.6px;color:#8ec7ff}
   .mprow.red .mpteam{color:#ff9f92}
+  .mprow .mpteamsw{display:flex;gap:3px;flex:0 0 auto}
+  .mprow .mpteamsw button{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);color:#8f9aa3;font-size:7.5px;font-weight:800;letter-spacing:.4px;padding:2px 5px;border-radius:1px;cursor:pointer;line-height:1.2}
+  .mprow .mpteamsw button:hover{border-color:rgba(240,162,51,.45);color:#ffe4b3}
+  .mprow .mpteamsw button.on{border-color:rgba(120,180,250,.55);background:rgba(70,130,200,.22);color:#dff0ff}
+  .mprow .mpteamsw button.on[data-team="red"]{border-color:rgba(255,120,100,.55);background:rgba(190,70,55,.22);color:#ffd8d1}
   .mprow .mpact{display:flex;gap:4px}
   .mprow .mpact button{appearance:none;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.04);color:#c9c4b8;font-size:8px;font-weight:800;letter-spacing:.4px;padding:2px 6px;border-radius:1px;cursor:pointer}
   .mprow .mpact button:hover{border-color:rgba(240,162,51,.45);color:#ffe4b3}
@@ -502,6 +509,18 @@
   .mtp-team.red.sel{background:rgba(190,60,45,.22);border-color:rgba(255,120,100,.8)}
   #mpTeamPickStatus{margin-top:14px;font-size:9.5px;color:#a69a83;min-height:15px}
   #mpTeamPickStatus b{color:#ffd89e}
+  /* lobi soru penceresi (oda aç / şifre sor) */
+  #mpAsk{position:fixed;inset:0;z-index:46;display:none;align-items:center;justify-content:center;background:rgba(4,6,9,.82);backdrop-filter:blur(4px)}
+  #mpAsk.on{display:flex}
+  .mpask-card{width:min(430px,92vw);background:linear-gradient(160deg,rgba(20,24,28,.99),rgba(8,10,12,.995));border:1px solid rgba(255,255,255,.14);border-radius:2px;padding:24px 26px 20px;box-shadow:0 30px 90px rgba(0,0,0,.8);text-align:left;position:relative}
+  .mpask-eyebrow{font-size:8px;letter-spacing:3px;color:#9a8f7c;text-transform:uppercase}
+  #mpAsk h2{margin:7px 0 3px;font-size:23px;letter-spacing:2px;color:#fff;text-transform:uppercase}
+  #mpAskSub{margin:0 0 8px;font-size:10px;color:#8f918a;line-height:1.5}
+  .mpask-label{display:block;margin-top:11px;font-size:8.5px;letter-spacing:1.5px;color:#a69a83;text-transform:uppercase}
+  .mpask-label small{color:#726d63;letter-spacing:.5px;text-transform:none}
+  #mpAsk .mpcodein{margin-top:5px}
+  #mpAskErr{min-height:14px;margin-top:8px;font-size:9px;color:#ff9c8a;letter-spacing:.5px}
+  #mpAsk .actions{margin-top:6px}
 
   /* geliştirici konsolu */
   #devpanel{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;justify-content:flex-end;padding:14px 18px 18px;background:rgba(3,8,5,.8);font:12.5px/1.45 Consolas,"Courier New",monospace;color:#b8ffc8;backdrop-filter:blur(2px)}
@@ -751,6 +770,7 @@
             <button class="mcard" data-map="redline"><span class="mthumb"><img src="previews/redline.jpg" alt="Aim Redline"></span><span class="mname">Aim Redline</span><span class="mdesc">Depo salonu · kasa düelloları · hızlı tempo</span></button>
             <button class="mcard" data-map="awp_lego_2"><span class="mthumb"><img src="previews/awp_lego_2.jpg" alt="AWP Lego 2"></span><span class="mname">AWP Lego 2</span><span class="mdesc">Lego kalesi · rampa, kule, tünel · AWP + Deagle</span></button>
             <button class="mcard" data-map="village"><span class="mthumb"><img src="previews/village.jpg" alt="Meydan Köy"></span><span class="mname">Meydan Köy</span><span class="mdesc">Özel tasarım · çeşme, pazar, iki avlu</span></button>
+            <button class="mcard" data-map="banana_1v1"><span class="mthumb"><img src="previews/banana_1v1.jpg" alt="Banana 1v1"></span><span class="mname">Banana 1v1</span><span class="mdesc">2 kişilik muz sokağı · turlu düello · doğuşlar yer değiştirir</span></button>
           </div>
           <div class="mapnote" id="mapdesc">Depo salonu: beyaz tuğla duvarlar, çelik makaslar, asma lambalar ve kasa düelloları.</div>
         </section>
@@ -941,11 +961,12 @@ Durum: Lobi</div>
           <div class="settings-grid">
             <div class="panel">
               <div class="section-title"><span>TEK KODLA OYNA</span><span>ÖNERİLEN</span></div>
-              <p><b>Ana makine:</b> kuralları <b>OYNA</b> sekmesinden seç, <b>ODA AÇ</b>'a bas — 6 haneli kod çıkar, arkadaşlarına söylemen yeter.<br><b>Katılımcılar:</b> kodu yazıp <b>KODLA BAĞLAN</b>'a bas, kartlardan takımını seç. Ana makine maçı başlatır.</p>
+              <p><b>Ana makine:</b> kuralları <b>OYNA</b> sekmesinden seç, <b>ODA AÇ</b>'a bas — açılan pencerede lobi adı ve şifre sorulur, boş bırakırsan oda adlandırılmadan ve şifresiz açılır. 6 haneli kod çıkar, arkadaşlarına söylemen yeter.<br><b>Katılımcılar:</b> kodu yazıp <b>KODLA BAĞLAN</b>'a bas; oda şifreliyse şifre o anda sorulur, şifresizse hiç sorulmaz. Kartlardan takımını seç. Ana makine maçı başlatır.</p>
               <div class="row" style="margin-top:4px"><span>Oda kodu</span></div>
               <input class="mpcodein" id="mpRoomCode" maxlength="8" spellcheck="false" placeholder="ABC123">
               <div class="actions" style="margin-top:9px"><button class="btn primary" id="mpOpenRoom">ODA AÇ (KOD ÜRET)</button><button class="btn primary" id="mpJoinRoom">KODLA BAĞLAN</button><button class="btn ghost" id="mpLeave">AĞDAN AYRIL</button></div>
-              <div class="mpstep">Kod internet üzerinden de çalışır: buluşma aracı sunucu tarafları eşleştirir, veri yine doğrudan şifreli eşler arası akar. Kodu bilen herkes odaya girebilir; ana makine istediğini atabilir veya yasaklayabilir.</div>
+              <div class="mpLobbyInfo" id="mpLobbyInfo" style="display:none"></div>
+              <div class="mpstep">Kod internet üzerinden de çalışır: buluşma aracı sunucu tarafları eşleştirir, veri yine doğrudan şifreli eşler arası akar. Şifre koyarsan yalnızca şifreyi bilenler odaya girebilir; ana makine istediğini atabilir veya yasaklayabilir.</div>
             </div>
             <div class="panel">
               <div class="section-title"><span>NASIL ÇALIŞIR</span><span>ROLLER</span></div>
@@ -1030,9 +1051,9 @@ Durum: Lobi</div>
         </div>
 
         <div class="sp-block nameblock">
-          <div class="sp-label"><span>OYUNCU ADI</span><span>ZORUNLU</span></div>
+          <div class="sp-label"><span>OYUNCU ADI</span><span>OTOMATİK</span></div>
           <div class="namefield">
-            <input id="playerName" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Kullanıcı adı gir">
+            <input id="playerName" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="İsteğe bağlı · boş = OYUNCU##">
           </div>
           <button class="btn ghost" id="playerNameSave">KAYDET</button>
           <div class="sp-label" style="margin-top:9px"><span>AVATAR</span><span id="avatarPickState">OTOMATİK</span></div>
@@ -1046,7 +1067,7 @@ Durum: Lobi</div>
     </div>
 
     <footer class="menu-footer">
-      <div class="footinfo"><i></i><span id="footHint">Lobi hazır · 4 harita · zorunlu yükleme · LAN MP</span></div>
+      <div class="footinfo"><i></i><span id="footHint">Lobi hazır · 5 harita · zorunlu yükleme · LAN MP</span></div>
       <button class="btn ghost pauseOnly" id="toLobby">LOBİYE DÖN</button>
       <button class="btn ghost pauseOnly" id="resume">DEVAM ET</button>
       <button class="btn primary lobbyOnly" id="play">OYNA<span class="ar">▶</span></button>
@@ -1082,6 +1103,24 @@ Durum: Lobi</div>
       <button class="mtp-team red" data-team="red"><b>KIRMIZI TAKIM</b><small>Kuzey doğuşu · savunma</small><span>KIRMIZI SEÇ →</span></button>
     </div>
     <div id="mpTeamPickStatus">Takım seçimi ana makineye gönderilecek.</div>
+  </div>
+</div>
+
+<div id="mpAsk">
+  <div class="mpask-card">
+    <div class="mpask-eyebrow" id="mpAskEyebrow">ÇOK OYUNCULU</div>
+    <h2 id="mpAskTitle">ODA AÇ</h2>
+    <p id="mpAskSub"></p>
+    <div id="mpAskNameWrap">
+      <label class="mpask-label" for="mpAskName">Lobi adı <small>isteğe bağlı</small></label>
+      <input class="mpcodein" id="mpAskName" maxlength="20" spellcheck="false" placeholder="ÖRN. GECE VURUŞMASI">
+    </div>
+    <div id="mpAskPassWrap">
+      <label class="mpask-label" for="mpAskPass">Lobi şifresi <small id="mpAskPassHint">isteğe bağlı · boş = şifresiz</small></label>
+      <input class="mpcodein mppassin" id="mpAskPass" maxlength="16" spellcheck="false" autocomplete="off" placeholder="Şifre">
+    </div>
+    <div id="mpAskErr"></div>
+    <div class="actions"><button class="btn primary" id="mpAskOk">ODA AÇ</button><button class="btn ghost" id="mpAskCancel">VAZGEÇ</button></div>
   </div>
 </div>
 

@@ -131,6 +131,34 @@
     return tex(o.c);
   }
 
+  function woodBarrelTexture() {
+    var o = canvas2d(256, 256), g = o.g, i, k, x, y, v;
+    g.fillStyle = '#4f3319'; g.fillRect(0, 0, 256, 256);
+    for (i = 0; i < 10; i++) {
+      x = i * 26;
+      v = 92 + Math.random() * 34 | 0;
+      g.fillStyle = 'rgb(' + v + ',' + (v * 0.66 | 0) + ',' + (v * 0.42 | 0) + ')';
+      g.fillRect(x + 1, 0, 24, 256);
+      g.fillStyle = 'rgba(30,18,8,0.8)'; g.fillRect(x, 0, 2, 256);
+      for (k = 0; k < 30; k++) {
+        g.fillStyle = 'rgba(30,18,7,' + (0.05 + Math.random() * 0.1).toFixed(3) + ')';
+        g.fillRect(x + 3 + Math.random() * 19, Math.random() * 256, 1.4, 8 + Math.random() * 38);
+      }
+    }
+    var bands = [0.08, 0.3, 0.7, 0.92];
+    for (i = 0; i < bands.length; i++) {
+      y = bands[i] * 256;
+      g.fillStyle = '#33322e'; g.fillRect(0, y - 7, 256, 14);
+      g.fillStyle = 'rgba(150,146,136,0.35)'; g.fillRect(0, y - 7, 256, 3);
+      g.fillStyle = 'rgba(18,17,15,0.85)'; g.fillRect(0, y + 4, 256, 3);
+    }
+    for (i = 0; i < 900; i++) {
+      g.fillStyle = Math.random() < 0.5 ? 'rgba(30,18,8,0.10)' : 'rgba(214,176,128,0.07)';
+      g.fillRect(Math.random() * 256, Math.random() * 256, 1.5, 3);
+    }
+    return tex(o.c);
+  }
+
   function letterTexture(ch) {
     var o = canvas2d(256, 256), g = o.g;
     g.clearRect(0, 0, 256, 256);
@@ -535,6 +563,132 @@
     return tex(o.c);
   }
 
+  /* ---------- İtalyan köy sokağı dokuları ---------- */
+  function ashlarTexture() {
+    var o = canvas2d(512, 512), g = o.g, i, x, y = 0, bw, rh, v;
+    g.fillStyle = '#615d53'; g.fillRect(0, 0, 512, 512);
+    while (y < 512) {
+      rh = 52 + Math.random() * 24;
+      x = -Math.random() * 90;
+      while (x < 512) {
+        bw = 76 + Math.random() * 112;
+        v = 106 + Math.random() * 34 | 0;
+        g.fillStyle = 'rgb(' + v + ',' + (v - 5) + ',' + (v - 16) + ')';
+        g.fillRect(x + 2, y + 2, bw - 4, rh - 4);
+        g.fillStyle = 'rgba(255,255,248,0.15)'; g.fillRect(x + 2, y + 2, bw - 4, 3);
+        g.fillStyle = 'rgba(58,54,46,0.20)'; g.fillRect(x + 2, y + rh - 5, bw - 4, 3);
+        for (i = 0; i < 60; i++) {
+          g.fillStyle = Math.random() < 0.5 ? 'rgba(66,62,54,0.10)' : 'rgba(232,228,216,0.10)';
+          g.fillRect(x + Math.random() * bw, y + Math.random() * rh, 2, 2);
+        }
+        x += bw;
+      }
+      y += rh;
+    }
+    return tex(o.c);
+  }
+  function roofTileTexture() {
+    var o = canvas2d(512, 512), g = o.g, x, y, tw = 34, th = 42, v;
+    g.fillStyle = '#7c4229'; g.fillRect(0, 0, 512, 512);
+    for (y = 0; y < 512; y += th) {
+      for (x = ((y / th) % 2) * (tw / 2) - tw; x < 512; x += tw) {
+        v = 138 + Math.random() * 46 | 0;
+        g.fillStyle = 'rgb(' + v + ',' + (78 + Math.random() * 26 | 0) + ',' + (55 + Math.random() * 20 | 0) + ')';
+        g.beginPath();
+        g.moveTo(x + 1, y + 1); g.lineTo(x + tw - 1, y + 1);
+        g.lineTo(x + tw - 5, y + th - 2); g.lineTo(x + 5, y + th - 2);
+        g.closePath(); g.fill();
+        g.fillStyle = 'rgba(52,22,12,0.35)'; g.fillRect(x + 1, y + th - 5, tw - 2, 3);
+        g.fillStyle = 'rgba(255,206,166,0.13)'; g.fillRect(x + 5, y + 2, tw - 11, 4);
+      }
+    }
+    return tex(o.c);
+  }
+  function doorWoodTexture() {
+    var o = canvas2d(256, 256), g = o.g, i, k, x;
+    g.fillStyle = '#5f3d21'; g.fillRect(0, 0, 256, 256);
+    for (i = 0; i < 5; i++) {
+      x = i * 51;
+      g.fillStyle = 'rgba(' + (92 + Math.random() * 30 | 0) + ',' + (58 + Math.random() * 20 | 0) + ',' + (30 + Math.random() * 14 | 0) + ',0.92)';
+      g.fillRect(x + 2, 0, 47, 256);
+      g.fillStyle = 'rgba(34,20,8,0.65)'; g.fillRect(x, 0, 2, 256);
+      for (k = 0; k < 34; k++) {
+        g.fillStyle = 'rgba(34,20,8,' + (0.05 + Math.random() * 0.12).toFixed(3) + ')';
+        g.fillRect(x + 4 + Math.random() * 42, Math.random() * 256, 1.4, 6 + Math.random() * 42);
+      }
+    }
+    return tex(o.c);
+  }
+  function streetCobbleTexture() {
+    var o = canvas2d(512, 512), g = o.g, i, x, y, w, h, v;
+    g.fillStyle = '#3c3a36'; g.fillRect(0, 0, 512, 512);
+    for (i = 0; i < 120; i++) {
+      x = Math.random() * 512; y = Math.random() * 512;
+      w = 30 + Math.random() * 76; h = 24 + Math.random() * 48;
+      v = 64 + Math.random() * 26 | 0;
+      g.fillStyle = 'rgb(' + v + ',' + (v - 3) + ',' + (v - 9) + ')';
+      g.beginPath();
+      g.moveTo(x + w * 0.12, y); g.lineTo(x + w, y + h * 0.18);
+      g.lineTo(x + w * 0.88, y + h); g.lineTo(x, y + h * 0.82);
+      g.closePath(); g.fill();
+      g.strokeStyle = 'rgba(24,23,20,0.6)'; g.lineWidth = 3; g.stroke();
+      g.fillStyle = 'rgba(255,255,248,0.05)'; g.fillRect(x + w * 0.16, y + 2, w * 0.58, 3);
+    }
+    for (i = 0; i < 8000; i++) {
+      g.fillStyle = Math.random() < 0.5 ? 'rgba(36,34,31,0.11)' : 'rgba(212,206,192,0.07)';
+      g.fillRect(Math.random() * 512, Math.random() * 512, 1.6, 1.6);
+    }
+    return tex(o.c);
+  }
+  function plasterTintTexture(base, lo, hi) {
+    var o = canvas2d(512, 512), g = o.g, i, x, y, r, grd;
+    g.fillStyle = base; g.fillRect(0, 0, 512, 512);
+    g.globalAlpha = 0.32;
+    for (i = 0; i < 90; i++) {
+      x = Math.random() * 512; y = Math.random() * 512; r = 6 + Math.random() * 24;
+      grd = g.createRadialGradient(x, y, 2, x, y, r);
+      grd.addColorStop(0, Math.random() < 0.55 ? lo : hi);
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = grd; g.beginPath(); g.arc(x, y, r, 0, 6.283); g.fill();
+    }
+    g.globalAlpha = 1;
+    for (i = 0; i < 3400; i++) {
+      g.fillStyle = Math.random() < 0.5 ? 'rgba(120,104,82,0.07)' : 'rgba(255,250,238,0.08)';
+      g.fillRect(Math.random() * 512, Math.random() * 512, 1.7, 1.7);
+    }
+    return tex(o.c);
+  }
+  function grateTexture() {
+    var o = canvas2d(128, 128), g = o.g, i;
+    g.fillStyle = '#2b2c2c'; g.fillRect(0, 0, 128, 128);
+    g.fillStyle = '#0c0d0d';
+    for (i = 0; i < 7; i++) g.fillRect(12 + i * 16, 10, 7, 108);
+    g.fillStyle = 'rgba(150,150,144,0.45)';
+    g.fillRect(4, 4, 120, 3); g.fillRect(4, 121, 120, 3);
+    g.fillRect(4, 4, 3, 120); g.fillRect(121, 4, 3, 120);
+    return tex(o.c);
+  }
+  function sandbagTexture() {
+    var o = canvas2d(256, 256), g = o.g, i, x, y, r, grd;
+    g.fillStyle = '#6f6244'; g.fillRect(0, 0, 256, 256);
+    for (i = 0; i < 8; i++) {
+      g.fillStyle = 'rgba(70,60,38,0.22)'; g.fillRect(0, i * 32 + 5, 256, 3);
+      g.fillStyle = 'rgba(176,158,116,0.14)'; g.fillRect(0, i * 32 + 9, 256, 4);
+      g.fillStyle = 'rgba(46,38,24,0.6)'; g.fillRect(0, i * 32, 256, 2);
+    }
+    for (i = 0; i < 2400; i++) {
+      g.fillStyle = Math.random() < 0.5 ? 'rgba(58,48,30,0.12)' : 'rgba(178,162,120,0.10)';
+      g.fillRect(Math.random() * 256, Math.random() * 256, 1.5, 3);
+    }
+    for (i = 0; i < 12; i++) {
+      x = Math.random() * 256; y = Math.random() * 256; r = 8 + Math.random() * 28;
+      grd = g.createRadialGradient(x, y, 1, x, y, r);
+      grd.addColorStop(0, 'rgba(52,42,26,0.18)'); grd.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = grd; g.beginPath(); g.arc(x, y, r, 0, 6.283); g.fill();
+    }
+    return tex(o.c);
+  }
+
   var texWall = wallTexture(), texFloor = floorTexture(), texCrate = crateTexture(), texBarrel = barrelTexture();
   var texConcrete = concreteTexture(), texAsphalt = asphaltTexture();
   var texBrickWhite = brickWhiteTexture(), texWarehouseFloor = warehouseFloorTexture();
@@ -542,6 +696,13 @@
   var texLegoWall = legoWallTexture(), texLegoFloor = legoFloorTexture(), texLegoCrate = legoCrateTexture();
   var texLegoPlate = legoPlateTexture(), texLegoGold = legoGoldTexture(), texWhiteBrickBig = whiteBrickBigTexture();
   var texPlaster = plasterTexture(), texCobble = cobbleTexture(), texGrass = grassTexture();
+  var texAshlar = ashlarTexture(), texRoofTile = roofTileTexture(), texDoorWood = doorWoodTexture();
+  var texStreet = streetCobbleTexture(), texGrate = grateTexture(), texSandbag = sandbagTexture();
+  var texWoodBarrel = woodBarrelTexture();
+  var texPlasterYellow = plasterTintTexture('#dcb066', 'rgba(166,118,44,0.20)', 'rgba(246,228,174,0.26)');
+  var texPlasterOchre = plasterTintTexture('#cc9a65', 'rgba(146,92,44,0.22)', 'rgba(240,212,168,0.24)');
+  var texPlasterRust = plasterTintTexture('#b46c54', 'rgba(118,58,38,0.22)', 'rgba(226,176,142,0.22)');
+  var texPlasterGrey = plasterTintTexture('#b8b3a7', 'rgba(126,120,110,0.20)', 'rgba(228,223,212,0.26)');
 
   /* ---------- render & sahne ---------- */
   var renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -1522,6 +1683,513 @@
     groundDecal(labelTexture('MEYDAN'), 12, 0, 6, 0, true);
   }
 
+  /* ---------------- HARİTA 5: BANANA 1V1 ---------------- */
+  // radar düzeni: sağ üstte mavi doğuş, sol altta kırmızı doğuş, arada muz kavisli sokak
+  function bananaPallet(x, z, rot) {
+    var wood = new THREE.MeshLambertMaterial({ map: texDoorWood });
+    var bag = new THREE.MeshLambertMaterial({ map: texSandbag });
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rot || 0;
+    var i, j, b;
+    for (i = 0; i < 4; i++) {
+      b = new THREE.Mesh(new THREE.BoxGeometry(1.84, 0.06, 0.22), wood);
+      b.position.set(0, 0.05, -0.54 + i * 0.36);
+      b.receiveShadow = true; g.add(b);
+    }
+    for (i = -1; i <= 1; i += 2) {
+      b = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.1, 1.26), wood);
+      b.position.set(i * 0.78, 0.03, 0); g.add(b);
+    }
+    var sackGeo = new THREE.SphereGeometry(0.5, 8, 6);
+    for (j = 0; j < 4; j++) for (i = 0; i < 2; i++) {
+      b = new THREE.Mesh(sackGeo, bag);
+      b.scale.set(0.92, 0.26, 0.58);
+      b.position.set((i - 0.5) * 0.88 + (j % 2 ? 0.05 : -0.04), 0.16 + j * 0.17, (j % 2 ? 0.03 : -0.02));
+      b.rotation.y = (j % 2 ? 0.06 : -0.05);
+      b.castShadow = true; b.receiveShadow = true; g.add(b);
+    }
+    b = new THREE.Mesh(sackGeo, bag);
+    b.scale.set(0.86, 0.26, 0.54);
+    b.position.set(0.04, 0.88, 0.01);
+    b.rotation.y = 0.12;
+    b.castShadow = true; g.add(b);
+    worldRoot.add(g);
+    var turned = rot && Math.abs(Math.sin(rot)) > 0.5;
+    var hx = turned ? 0.66 : 0.94, hz = turned ? 0.94 : 0.66;
+    props.push({ x0: x - hx, x1: x + hx, z0: z - hz, z1: z + hz, y0: 0, y1: 1.03 });
+  }
+  function bananaHash(a, b, c) {
+    var h = (Math.imul(a | 0, 374761393) + Math.imul(b | 0, 668265263) + Math.imul(c | 0, 2246822519)) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+  }
+  function bananaLowWall(x, z, len, alongX, h) {
+    h = h || 1.0;
+    var w = alongX ? len : 0.5, d = alongX ? 0.5 : len;
+    var body = new THREE.Mesh(boxGeo(w, h, d, 0.55), new THREE.MeshLambertMaterial({ map: texAshlar }));
+    body.position.set(x + w / 2, h / 2, z + d / 2);
+    body.castShadow = true; body.receiveShadow = true;
+    worldRoot.add(body);
+    var cap = new THREE.Mesh(boxGeo(w + 0.16, 0.12, d + 0.16, 1.6), new THREE.MeshLambertMaterial({ map: texAshlar, color: 0x8f8a7c }));
+    cap.position.set(x + w / 2, h + 0.06, z + d / 2);
+    cap.castShadow = true; cap.userData.noHit = true;
+    worldRoot.add(cap);
+    props.push({ x0: x, x1: x + w, z0: z, z1: z + d, y0: 0, y1: h + 0.12 });
+  }
+  function bananaPillar(x, z, h) {
+    h = h || 2.4;
+    var stone = new THREE.MeshLambertMaterial({ map: texAshlar });
+    var body = new THREE.Mesh(boxGeo(0.68, h, 0.68, 0.6), stone);
+    body.position.set(x, h / 2, z);
+    body.castShadow = true; body.receiveShadow = true;
+    worldRoot.add(body);
+    var cap = new THREE.Mesh(boxGeo(0.9, 0.14, 0.9, 1.6), new THREE.MeshLambertMaterial({ map: texAshlar, color: 0x8f8a7c }));
+    cap.position.set(x, h + 0.07, z);
+    cap.castShadow = true; cap.userData.noHit = true;
+    worldRoot.add(cap);
+    props.push({ x0: x - 0.34, x1: x + 0.34, z0: z - 0.34, z1: z + 0.34, y0: 0, y1: h + 0.14 });
+  }
+  function bananaLeanPallet(x, z, rotY) {
+    var wood = new THREE.MeshLambertMaterial({ map: texDoorWood });
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rotY || 0;
+    var lean = 0.2, i;
+    for (i = 0; i < 5; i++) {
+      var p = new THREE.Mesh(new THREE.BoxGeometry(0.26, 1.3, 0.06), wood);
+      p.position.set(-0.56 + i * 0.28, 0.63, 0.1);
+      p.rotation.x = lean;
+      p.castShadow = true; g.add(p);
+    }
+    for (i = 0; i < 3; i++) {
+      var bat = new THREE.Mesh(new THREE.BoxGeometry(1.38, 0.1, 0.05), wood);
+      bat.position.set(0, 0.33 + i * 0.4, -0.02);
+      bat.rotation.x = lean;
+      g.add(bat);
+    }
+    g.traverse(function (o) { if (o.isMesh) o.userData.noHit = true; });
+    worldRoot.add(g);
+  }
+  function bananaLaundry(x1, z1, x2, z2, y) {
+    var dx = x2 - x1, dz = z2 - z1;
+    var len = Math.sqrt(dx * dx + dz * dz);
+    var dir = new THREE.Vector3(dx, 0, dz).normalize();
+    var line = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, len - 0.2, 4),
+      new THREE.MeshLambertMaterial({ color: 0x3a3936 }));
+    line.position.set((x1 + x2) / 2, y, (z1 + z2) / 2);
+    line.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+    line.userData.noHit = true;
+    worldRoot.add(line);
+    var cols = [0xdfe3e6, 0x7b95a8, 0xc9b981];
+    for (var i = 0; i < 3; i++) {
+      var t = 0.28 + i * 0.22;
+      var cx = x1 + dx * t, cz = z1 + dz * t;
+      var cloth = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.56, 0.03),
+        new THREE.MeshLambertMaterial({ color: cols[i] }));
+      cloth.position.set(cx, y - 0.32, cz);
+      cloth.rotation.y = Math.atan2(-dir.z, dir.x);
+      cloth.rotation.z = (i - 1) * 0.05;
+      cloth.userData.noHit = true;
+      worldRoot.add(cloth);
+    }
+  }
+  function bananaBigDoor(x, z, rotY, double, arched) {
+    var stone = new THREE.MeshLambertMaterial({ map: texAshlar });
+    var wood = new THREE.MeshLambertMaterial({ map: texDoorWood });
+    var iron = new THREE.MeshLambertMaterial({ color: 0x2c3032 });
+    var glow = new THREE.MeshBasicMaterial({ color: 0xffd58a });
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rotY || 0;
+    var dw = double ? 1.78 : 1.06, dh = double ? 2.5 : 2.24;
+    var i;
+    var step = new THREE.Mesh(boxGeo(dw + 0.5, 0.12, 0.42, 1), stone);
+    step.position.set(0, 0.06, 0.16); step.receiveShadow = true; g.add(step);
+    var leaf = new THREE.Mesh(new THREE.BoxGeometry(dw, dh, 0.09), wood);
+    leaf.position.set(0, dh / 2 + 0.06, 0.03); g.add(leaf);
+    for (i = 1; i < (double ? 6 : 4); i++) {
+      var pl = new THREE.Mesh(new THREE.BoxGeometry(0.035, dh - 0.12, 0.02), new THREE.MeshLambertMaterial({ color: 0x3e2814 }));
+      pl.position.set(-dw / 2 + dw * i / (double ? 6 : 4), dh / 2 + 0.06, 0.085); g.add(pl);
+    }
+    if (double) {
+      var seam = new THREE.Mesh(new THREE.BoxGeometry(0.05, dh, 0.03), iron);
+      seam.position.set(0, dh / 2 + 0.06, 0.09); g.add(seam);
+    }
+    for (i = -1; i <= 1; i += 2) {
+      var jamb = new THREE.Mesh(boxGeo(0.2, dh + 0.2, 0.14, 0.8), stone);
+      jamb.position.set(i * (dw / 2 + 0.12), (dh + 0.2) / 2, 0.05); g.add(jamb);
+    }
+    var lintel = new THREE.Mesh(boxGeo(dw + 0.55, 0.2, 0.18, 0.8), stone);
+    lintel.position.set(0, dh + 0.16, 0.05); g.add(lintel);
+    if (arched) {
+      var arch = new THREE.Mesh(new THREE.TorusGeometry(dw / 2 + 0.1, 0.11, 6, 16, Math.PI), stone);
+      arch.position.set(0, dh + 0.26, 0.05); g.add(arch);
+      var key = new THREE.Mesh(boxGeo(0.26, 0.3, 0.16, 1), stone);
+      key.position.set(0, dh + 0.42, 0.06); g.add(key);
+    }
+    var bracket = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.1, 0.3), iron);
+    bracket.position.set(dw / 2 + 0.5, 2.95, 0.12); g.add(bracket);
+    var lamp = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.24, 0.18), glow);
+    lamp.position.set(dw / 2 + 0.5, 2.78, 0.2); g.add(lamp);
+    var hood = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.06, 0.24), iron);
+    hood.position.set(dw / 2 + 0.5, 2.92, 0.2); g.add(hood);
+    g.traverse(function (o) { if (o.isMesh) { o.userData.noHit = true; o.castShadow = true; } });
+    worldRoot.add(g);
+  }
+  /* Sokağa bakan duvar yüzeylerine İtalyan köy cephesi giydirir:
+     taş taban, boyalı sıva, kepenkli pencereler, saksılar, kapılar,
+     balkonlar, saçaklar ve çatılar tek geçişte toplanıp birleştirilir. */
+  function bananaStreetScene() {
+    var mats = {
+      stone: new THREE.MeshLambertMaterial({ map: texAshlar }),
+      quoin: new THREE.MeshLambertMaterial({ map: texAshlar, color: 0xb4ae9f }),
+      trim: new THREE.MeshLambertMaterial({ map: texAshlar, color: 0xd8d2c3 }),
+      yellow: new THREE.MeshLambertMaterial({ map: texPlasterYellow }),
+      ochre: new THREE.MeshLambertMaterial({ map: texPlasterOchre }),
+      rust: new THREE.MeshLambertMaterial({ map: texPlasterRust }),
+      grey: new THREE.MeshLambertMaterial({ map: texPlasterGrey }),
+      cream: new THREE.MeshLambertMaterial({ map: texPlaster }),
+      roof: new THREE.MeshLambertMaterial({ map: texRoofTile }),
+      wood: new THREE.MeshLambertMaterial({ map: texDoorWood }),
+      woodDark: new THREE.MeshLambertMaterial({ color: 0x150c04 }),
+      iron: new THREE.MeshLambertMaterial({ color: 0x2b2f30 }),
+      glass: new THREE.MeshBasicMaterial({ color: 0x04080b }),
+      shutterG: new THREE.MeshLambertMaterial({ color: 0x2b4232 }),
+      shutterB: new THREE.MeshLambertMaterial({ color: 0x452c17 }),
+      leaf: new THREE.MeshLambertMaterial({ color: 0x1b3a12 }),
+      bloom: new THREE.MeshLambertMaterial({ color: 0x4d100a }),
+      glow: new THREE.MeshBasicMaterial({ color: 0xffd58a }),
+      zinc: new THREE.MeshLambertMaterial({ color: 0x6d7274 })
+    };
+    var FB = {}, up = new THREE.Vector3(0, 1, 0), tmpG;
+    function fb(key, w, h, d, lx, ly, lz, uv, rx, F) {
+      tmpG = boxGeo(w, h, d, uv || 0.3);
+      if (rx) tmpG.rotateX(rx);
+      tmpG.translate(lx, ly, lz);
+      tmpG.applyMatrix4(F);
+      (FB[key] || (FB[key] = [])).push(tmpG);
+    }
+    function fcyl(key, r, h, lx, ly, lz, F) {
+      tmpG = new THREE.CylinderGeometry(r, r, h, 7);
+      tmpG.translate(lx, ly, lz);
+      tmpG.applyMatrix4(F);
+      (FB[key] || (FB[key] = [])).push(tmpG);
+    }
+    function ftorus(key, rad, tube, lx, ly, lz, F) {
+      tmpG = new THREE.TorusGeometry(rad, tube, 6, 14, Math.PI);
+      tmpG.translate(lx, ly, lz);
+      tmpG.applyMatrix4(F);
+      (FB[key] || (FB[key] = [])).push(tmpG);
+    }
+    var manualDoors = [[-7.0, 21.5], [7.0, -21.5], [-19.7, 11.6]];
+    function nearManualDoor(wx, wz) {
+      for (var mi = 0; mi < manualDoors.length; mi++) {
+        var ddx = wx - manualDoors[mi][0], ddz = wz - manualDoors[mi][1];
+        if (ddx * ddx + ddz * ddz < 5.5) return true;
+      }
+      return false;
+    }
+    var segs = [], i2, j2, j0, i0, len, wl, wr, wn, ws;
+    for (i2 = GX; i2 <= GX + GW; i2++) {
+      j2 = GZ;
+      while (j2 < GZ + GD) {
+        wl = walkable(i2 - 1, j2); wr = walkable(i2, j2);
+        if (wl !== wr) {
+          j0 = j2;
+          while (j2 < GZ + GD && (walkable(i2 - 1, j2) !== walkable(i2, j2))) j2++;
+          len = j2 - j0;
+          if (wl) segs.push({ ox: i2 - WALL_T / 2, oz: j0, dx: 0, dz: 1, nx: -1, nz: 0, len: len });
+          else segs.push({ ox: i2 + WALL_T / 2, oz: j2, dx: 0, dz: -1, nx: 1, nz: 0, len: len });
+        } else j2++;
+      }
+    }
+    for (j2 = GZ; j2 <= GZ + GD; j2++) {
+      i2 = GX;
+      while (i2 < GX + GW) {
+        wn = walkable(i2, j2 - 1); ws = walkable(i2, j2);
+        if (wn !== ws) {
+          i0 = i2;
+          while (i2 < GX + GW && (walkable(i2, j2 - 1) !== walkable(i2, j2))) i2++;
+          len = i2 - i0;
+          if (wn) segs.push({ ox: i2, oz: j2 - WALL_T / 2, dx: -1, dz: 0, nx: 0, nz: -1, len: len });
+          else segs.push({ ox: i0, oz: j2 + WALL_T / 2, dx: 1, dz: 0, nx: 0, nz: 1, len: len });
+        } else i2++;
+      }
+    }
+    var si, ci, t, chW, seg, F, lC, rA, rB, rC, pk, stoneBuild;
+    var plasterKeys = ['yellow', 'ochre', 'cream', 'grey', 'rust'];
+    for (si = 0; si < segs.length; si++) {
+      seg = segs[si];
+      F = new THREE.Matrix4();
+      F.makeBasis(new THREE.Vector3(seg.dx, 0, seg.dz), up, new THREE.Vector3(seg.nx, 0, seg.nz));
+      F.setPosition(seg.ox, 0, seg.oz);
+      t = 0; ci = 0;
+      while (t < seg.len - 0.05) {
+        chW = 3.6 + bananaHash(si * 17 + seg.ox, seg.oz * 3 + ci, 7) * 3.2;
+        if (chW > seg.len - t) chW = seg.len - t;
+        if (seg.len - t - chW < 2.0) chW = seg.len - t;
+        rA = bananaHash(si * 13 + ci * 7, ci, si);
+        rB = bananaHash(ci * 31 + 5, si * 17, 3);
+        rC = bananaHash(si + 101, ci + 7, 11);
+        lC = t + chW / 2;
+        stoneBuild = rA > 0.8;
+        pk = stoneBuild ? 'stone' : plasterKeys[Math.floor(rB * plasterKeys.length)];
+        var wx0 = seg.ox + seg.dx * lC, wz0 = seg.oz + seg.dz * lC;
+        var shutKey = rC < 0.55 ? 'shutterG' : 'shutterB';
+        var winY = 4.85;
+        // taş taban + sıva gövde
+        fb('stone', chW - 0.03, 1.05, 0.1, lC, 0.525, 0.05, 0.3, 0, F);
+        if (stoneBuild) fb('stone', chW - 0.03, WALL_H - 1.02, 0.075, lC, 1.02 + (WALL_H - 1.02) / 2, 0.038, 0.2, 0, F);
+        else {
+          fb(pk, chW - 0.08, WALL_H - 1.37, 0.06, lC, 1.02 + (WALL_H - 1.37) / 2, 0.03, 0.42, 0, F);
+          fb('trim', chW - 0.06, 0.12, 0.1, lC, 3.62, 0.05, 0.5, 0, F);
+        }
+        // köşe taşları (yalnızca parsel uçlarında)
+        var segEnd = t + chW >= seg.len - 0.08;
+        if (stoneBuild) {
+          var endsX = [];
+          if (ci === 0) endsX.push(t + 0.3);
+          if (segEnd) endsX.push(t + chW - 0.3);
+          for (var ei = 0; ei < endsX.length; ei++) {
+            for (var qy = 0.36; qy < WALL_H - 0.55; qy += 0.62) {
+              var qw = (Math.round(qy / 0.62) % 2) ? 0.56 : 0.38;
+              fb('quoin', qw, 0.28, 0.07, endsX[ei], qy, 0.055, 0.9, 0, F);
+            }
+          }
+        }
+        // pencere
+        var winAt = function (wxw, wyw, wide) {
+          var ww = wide ? 1.02 : 0.86, wh = wide ? 1.32 : 1.14;
+          fb('trim', 0.14, wh + 0.26, 0.1, wxw - ww / 2 - 0.07, wyw, 0.05, 1, 0, F);
+          fb('trim', 0.14, wh + 0.26, 0.1, wxw + ww / 2 + 0.07, wyw, 0.05, 1, 0, F);
+          fb('trim', ww + 0.28, 0.14, 0.1, wxw, wyw + wh / 2 + 0.07, 0.05, 1, 0, F);
+          fb('trim', ww + 0.28, 0.14, 0.1, wxw, wyw - wh / 2 - 0.07, 0.05, 1, 0, F);
+          fb('glass', ww, wh, 0.03, wxw, wyw, 0.075, 1, 0, F);
+          fb('woodDark', 0.045, wh, 0.02, wxw, wyw, 0.085, 1, 0, F);
+          fb('woodDark', ww, 0.045, 0.02, wxw, wyw, 0.085, 1, 0, F);
+          fb(shutKey, 0.4, wh + 0.08, 0.05, wxw - ww / 2 - 0.28, wyw, 0.09, 1, 0, F);
+          fb(shutKey, 0.4, wh + 0.08, 0.05, wxw + ww / 2 + 0.28, wyw, 0.09, 1, 0, F);
+          fb('trim', ww + 0.42, 0.1, 0.24, wxw, wyw - wh / 2 - 0.2, 0.1, 1, 0, F);
+          if (bananaHash(si, ci, Math.round(wxw * 7)) < 0.68) {
+            fb('woodDark', ww + 0.2, 0.22, 0.24, wxw, wyw - wh / 2 - 0.36, 0.16, 1, 0, F);
+            for (var fi = -1; fi <= 1; fi++) {
+              fb('leaf', 0.16, 0.16, 0.16, wxw + fi * 0.24, wyw - wh / 2 - 0.22, 0.24, 1, 0, F);
+              if (fi === 0) fb('bloom', 0.13, 0.13, 0.13, wxw, wyw - wh / 2 - 0.14, 0.26, 1, 0, F);
+            }
+          }
+        };
+        // kapı (bazı parsellerde)
+        if (rA < 0.24 && chW >= 3.2 && !nearManualDoor(wx0, wz0)) {
+          var dwx = lC + (rC - 0.5) * Math.max(0, chW - 3.0) * 0.3;
+          var dbl = rC > 0.62, darc = rC > 0.84;
+          var dw2 = dbl ? 1.72 : 1.06, dh2 = dbl ? 2.45 : 2.24, pi;
+          fb('wood', dw2, dh2, 0.08, dwx, dh2 / 2, 0.1, 0.6, 0, F);
+          for (pi = 1; pi < (dbl ? 6 : 4); pi++)
+            fb('woodDark', 0.035, dh2 - 0.1, 0.02, dwx - dw2 / 2 + dw2 * pi / (dbl ? 6 : 4), dh2 / 2, 0.15, 1, 0, F);
+          fb('trim', 0.16, dh2 + 0.16, 0.12, dwx - dw2 / 2 - 0.09, dh2 / 2, 0.12, 1, 0, F);
+          fb('trim', 0.16, dh2 + 0.16, 0.12, dwx + dw2 / 2 + 0.09, dh2 / 2, 0.12, 1, 0, F);
+          fb('trim', dw2 + 0.42, 0.18, 0.16, dwx, dh2 + 0.08, 0.12, 1, 0, F);
+          fb('trim', dw2 + 0.5, 0.09, 0.4, dwx, 0.045, 0.2, 0.8, 0, F);
+          if (darc) ftorus('trim', dw2 / 2 + 0.08, 0.1, dwx, dh2 + 0.18, 0.11, F);
+          fb('iron', 0.07, 0.1, 0.26, dwx + dw2 / 2 + 0.45, 2.86, 0.1, 1, 0, F);
+          fb('glow', 0.16, 0.22, 0.16, dwx + dw2 / 2 + 0.45, 2.72, 0.2, 1, 0, F);
+        } else if (rB > 0.42 && chW >= 3.4) {
+          winAt(lC, 2.35, false);
+          if (chW >= 5.4) winAt(lC + chW * 0.26, 2.35, false);
+        }
+        // üst kat pencereleri
+        if (chW >= 5.4) {
+          winAt(lC - chW * 0.23, winY, true);
+          winAt(lC + chW * 0.23, winY, true);
+        } else if (chW >= 3.2) winAt(lC, winY, false);
+        // balkon
+        if (rC > 0.78 && chW >= 4.4) {
+          var balX = chW >= 5.4 ? lC - chW * 0.23 : lC;
+          fb('trim', 2.0, 0.13, 0.85, balX, winY - 0.8, 0.4, 1, 0, F);
+          fb('trim', 2.0, 0.1, 0.1, balX, winY - 0.82, 0.78, 1, 0, F);
+          for (var bi = 0; bi < 7; bi++)
+            fb('iron', 0.045, 1.0, 0.045, balX - 0.88 + bi * 0.293, winY - 0.24, 0.74, 1, 0, F);
+          fb('iron', 1.9, 0.06, 0.06, balX, winY + 0.26, 0.74, 1, 0, F);
+          fb('iron', 1.9, 0.05, 0.05, balX, winY + 0.02, 0.74, 1, 0, F);
+          fb('leaf', 0.42, 0.2, 0.2, balX - 0.55, winY - 0.68, 0.8, 1, 0, F);
+          fb('bloom', 0.16, 0.14, 0.16, balX + 0.5, winY - 0.64, 0.8, 1, 0, F);
+        }
+        // saçak + kiremit çatı
+        fb('trim', chW, 0.24, 0.18, lC, WALL_H - 0.31, 0.07, 0.7, 0, F);
+        fb('roof', chW + 0.1, 0.12, 2.6, lC, WALL_H + 0.2, -0.55, 0.55, 0.3, F);
+        // çatı katı + anten
+        if (rB > 0.55) {
+          var ah = 0.9 + rC * 1.5;
+          fb(pk, chW - 0.3, ah, 2.3, lC, WALL_H + ah / 2, -1.28, 0.4, 0, F);
+          fb('roof', chW - 0.1, 0.12, 2.6, lC, WALL_H + ah + 0.14, -1.35, 0.55, 0.28, F);
+          if (rA > 0.5) {
+            fcyl('zinc', 0.035, 2.0, lC + chW * 0.18, WALL_H + ah + 1.05, -1.3, F);
+            for (var ai = 0; ai < 4; ai++)
+              fb('zinc', 0.9 - ai * 0.12, 0.03, 0.03, lC + chW * 0.18, WALL_H + ah + 1.5 + ai * 0.22, -1.3, 1, 0, F);
+          }
+        }
+        // yağmur borusu
+        if (rC < 0.35) fcyl('zinc', 0.055, WALL_H - 0.5, t + 0.24, (WALL_H - 0.5) / 2, 0.1, F);
+        // duvar feneri
+        if (rA > 0.86) {
+          fb('iron', 0.07, 0.08, 0.24, lC, 3.9, 0.1, 1, 0, F);
+          fb('glow', 0.15, 0.2, 0.15, lC, 3.76, 0.2, 1, 0, F);
+          fb('iron', 0.2, 0.05, 0.2, lC, 3.88, 0.2, 1, 0, F);
+        }
+        t += chW; ci++;
+      }
+    }
+    for (var mk in FB) {
+      if (!FB[mk].length) continue;
+      var mesh = new THREE.Mesh(mergeGeos(FB[mk]), mats[mk]);
+      mesh.userData.noHit = true;
+      mesh.receiveShadow = true;
+      worldRoot.add(mesh);
+    }
+  }
+  function bananaPlanter(x, z, rotY) {
+    var wood = new THREE.MeshLambertMaterial({ color: 0x6f4a2c });
+    var leaf = new THREE.MeshLambertMaterial({ color: 0x1b3a12 });
+    var bloom = new THREE.MeshLambertMaterial({ color: 0x4d100a });
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rotY || 0;
+    var box = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.42, 0.46), wood);
+    box.position.set(0, 0.21, 0); box.castShadow = true; box.receiveShadow = true; g.add(box);
+    for (var i = 0; i < 5; i++) {
+      var s = new THREE.Mesh(new THREE.SphereGeometry(0.17, 8, 6), (i % 3 === 0 ? bloom : leaf));
+      s.position.set(-0.42 + i * 0.21, 0.5 + (i % 2) * 0.05, (i % 2 ? 0.1 : -0.09));
+      s.castShadow = true; g.add(s);
+    }
+    g.traverse(function (o) { if (o.isMesh) o.userData.noHit = true; });
+    worldRoot.add(g);
+  }
+  function bananaGate(x, z, rotY) {
+    var iron = new THREE.MeshLambertMaterial({ color: 0x2c3032 });
+    var red = new THREE.MeshLambertMaterial({ color: 0x87281f });
+    var white = new THREE.MeshLambertMaterial({ color: 0xe8e2d2 });
+    var stone = new THREE.MeshLambertMaterial({ map: texAshlar });
+    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rotY || 0;
+    var i;
+    for (i = -1; i <= 1; i += 2) {
+      var post = new THREE.Mesh(boxGeo(0.4, 2.9, 0.4, 0.6), stone);
+      post.position.set(i * 1.6, 1.45, 0);
+      post.castShadow = true; post.receiveShadow = true; g.add(post);
+      var cap = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.12, 0.52), stone);
+      cap.position.set(i * 1.6, 2.96, 0); g.add(cap);
+    }
+    var rail = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.09, 0.1), iron);
+    rail.position.set(0, 2.78, 0); g.add(rail);
+    rail = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.09, 0.1), iron);
+    rail.position.set(0, 0.14, 0); g.add(rail);
+    for (i = -3; i <= 3; i++) {
+      var bar = new THREE.Mesh(new THREE.BoxGeometry(0.055, 2.6, 0.09), iron);
+      bar.position.set(i * 0.36, 1.46, 0.01); g.add(bar);
+      var tip = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.17, 5), iron);
+      tip.position.set(i * 0.36, 2.88, 0.01); g.add(tip);
+    }
+    for (i = -1; i <= 1; i += 2) {
+      var scroll = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.032, 5, 10, Math.PI), iron);
+      scroll.position.set(i * 0.98, 1.92, 0.03); g.add(scroll);
+    }
+    var ring = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.085, 8, 20), red);
+    ring.position.set(0.85, 1.5, 0.1); g.add(ring);
+    for (i = 0; i < 4; i++) {
+      var stripe = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.2, 0.1), white);
+      stripe.position.set(0.85 + Math.cos(i * Math.PI / 2) * 0.35, 1.5 + Math.sin(i * Math.PI / 2) * 0.35, 0.11);
+      stripe.rotation.z = i * Math.PI / 2;
+      g.add(stripe);
+    }
+    g.traverse(function (o) { if (o.isMesh) { o.userData.noHit = true; o.castShadow = false; } });
+    worldRoot.add(g);
+  }
+  function buildBanana1v1() {
+    worldMats.barrel = new THREE.MeshLambertMaterial({ map: texWoodBarrel });
+    // dış hat: mavi geçit (kuzey-doğu), üst avlu, kavisli muz yolu, alt kavşak, kırmızı geçit (güney-batı)
+    addRoom(7, -25, 8, 8, 'Mavi Geçit');
+    addRoom(-4, -17, 21, 12, 'Üst Avlu');
+    addRoom(17, -12, 3, 7, 'Doğu Niş');
+    addRoom(-4, -5, 8, 4, 'Muz Yolu 1');
+    addRoom(-6, -1, 8, 4, 'Muz Yolu 2');
+    addRoom(-8, 3, 8, 4, 'Muz Yolu 3');
+    addRoom(-13, 7, 7, 2, 'Muz Yolu 4');
+    addRoom(-14, 9, 9, 5, 'Alt Kavşak');
+    addRoom(-20, 10, 6, 4, 'Sol Çıkmaz');
+    addRoom(-15, 14, 8, 10, 'Kırmızı Geçit');
+
+    // zemin: takım alanları ve doğuş yazıları
+    groundTint(6.4, 6.4, 10, -22, 0x3d7fd4, 0.2);
+    groundTint(6.4, 6.4, -11, 20, 0xa33b30, 0.2);
+    groundDecal(labelTexture('MAVİ'), 3.4, 10, -22, 0, true);
+    groundDecal(labelTexture('KIRMIZI'), 3.8, -11, 20, 0, true);
+
+    // ana siperler
+    addCrate(5.0, -9.5, 2.2, 2.2, 1.6);
+    addCrate(-7.2, 9.4, 1.6, 1.6, 1.1);
+    bananaPallet(-3.0, -16.2);
+    bananaPallet(-3.0, -3.5);
+    bananaPallet(-12.0, 7.6);
+    bananaPallet(-17.4, 10.75);
+    bananaPallet(-13.6, 16.3);
+    addBarrel(14.0, -18.1);
+    addBarrel(18.6, -7.0);
+    addBarrel(-16.4, 12.8);
+    addBarrel(-8.2, 18.4);
+    addBarrel(13.8, -11.8);
+    addBarrel(-14.2, 15.1);
+    addBarrel(-8.1, 22.5);
+
+    // taş sütun ve alçak duvarlar (radardaki çıkıntılar)
+    bananaPillar(1.2, -10.6, 2.5);
+    bananaPillar(-3.6, 4.6, 2.4);
+    bananaLowWall(-13.7, 9.4, 3.0, true, 0.95);
+    bananaLowWall(16.1, -16.6, 2.6, false, 0.95);
+    bananaLowWall(-13.7, 22.8, 4.6, true, 0.9);
+
+    // cephe detayları: saksı, demir kapı, kemerli çift kapılar, yaslanmış paletler
+    bananaPlanter(3.0, -16.4, 0);
+    bananaPlanter(11.4, -16.4, 0);
+    bananaPlanter(-3.55, -1.6, Math.PI / 2);
+    bananaPlanter(-13.55, 13.2, -Math.PI / 2);
+    bananaGate(-19.6, 11.6, Math.PI / 2);
+    bananaBigDoor(-7.34, 21.6, -Math.PI / 2, true, true);
+    bananaBigDoor(7.34, -21.6, Math.PI / 2, true, true);
+    bananaLeanPallet(-3.62, -13.4, -Math.PI / 2);
+    bananaLeanPallet(12.9, -16.45, Math.PI);
+    bananaLeanPallet(-14.45, 17.3, -Math.PI / 2);
+    bananaLeanPallet(-19.45, 13.3, -Math.PI / 2);
+
+    // sokak detayları: çamaşır ipleri ve mazgallar
+    bananaLaundry(-3.7, -3.2, 3.7, -3.2, 4.55);
+    bananaLaundry(-5.7, 1.1, 1.7, 1.1, 4.4);
+    groundDecal(texGrate, 0.95, 2.6, -6.4, 0.2, true);
+    groundDecal(texGrate, 0.95, -8.4, 10.4, 0, true);
+    groundDecal(texGrate, 1.15, 9.6, -19.8, 0, true);
+    groundDecal(texGrate, 0.9, -11.8, 18.2, 0, true);
+    groundDecal(texGrate, 2.0, -10.8, 12.6, 0.15, true);
+
+    // çevredeki köy evleri ve ağaçlar (yürünebilir alanın dışında)
+    house(10, -33, 12, 9, 7.6, '#d9ccb2', '#8a4b32');
+    house(-12, -25, 9, 8, 7.4, '#d6c6a8', '#7c3f2a');
+    house(27, -12, 10, 10, 7.2, '#cfc0a2', '#8a4b32');
+    house(25, 3, 8, 9, 7.0, '#d9ccb2', '#7c3f2a');
+    house(-27, -2, 8, 10, 7.4, '#c9b795', '#8a4b32');
+    house(23, 24, 10, 9, 7.2, '#d6c6a8', '#7c3f2a');
+    house(-29, 21, 9, 10, 7.4, '#d9ccb2', '#8a4b32');
+    house(1, -42, 14, 9, 8.0, '#cfc0a2', '#8a4b32');
+    tree(20.5, -1.5, 1.1);
+    tree(-24, 17, 1.0);
+    tree(6.5, -30.5, 1.05);
+    tree(-25, 6, 0.95);
+  }
+  function bananaRoutes() {
+    var blue = [
+      [[10, -22], [10, -18], [6, -14], [1, -9], [-1, -3], [-4, 1], [-7, 5], [-9.5, 8], [-10, 11], [-11, 17], [-11, 20]],
+      [[10, -22], [13, -19], [8, -13], [3, -7], [-2, -2], [-6, 2], [-9, 6], [-12, 8], [-12, 12], [-11, 18], [-11, 20]],
+      [[10, -22], [8, -20], [5, -15], [0, -8], [-3, -2], [-5, 1], [-8, 4], [-12, 7], [-17, 11], [-14, 13], [-11, 19]]
+    ];
+    var red = [], i, j, r;
+    for (i = 0; i < blue.length; i++) {
+      r = [];
+      for (j = blue[i].length - 1; j >= 0; j--) r.push(blue[i][j]);
+      red.push(r);
+    }
+    return { blue: blue, red: red };
+  }
+
   var MAP_DEFS = {
     dust2_flat: {
       name: 'Dust II Flat', desc: 'Radar düzeni · düz zemin · A/B, Long, Mid, Tünel hatları', theme: 'sand',
@@ -1594,6 +2262,16 @@
           [[0, -18], [0, -12], [-11, -10], [-13, -4], [-12, 4]]
         ]
       }
+    },
+    banana_1v1: {
+      name: 'Banana 1v1', desc: '2 kişilik muz sokak düellosu · turlu · her turda doğuşlar yer değiştirir', theme: 'village',
+      wallH: 6.8, restricted: false, build: buildBanana1v1, duel: true, street: true, postBuild: bananaStreetScene,
+      spawns: {
+        blue: { x: 10, z: -22, yaw: Math.PI, name: 'Mavi Doğuş' },
+        red: { x: -11, z: 20, yaw: 0, name: 'Kırmızı Doğuş' }
+      },
+      miniLabels: [{ t: 'MAVİ', x: 10, z: -23.4 }, { t: 'KIRMIZI', x: -11, z: 21.4 }, { t: 'ORTA', x: -7, z: 6 }],
+      routes: bananaRoutes()
     }
   };
 
@@ -1631,6 +2309,7 @@
 
     if (currentMap.theme === 'village') {
       var fw = GW + 70, fd = GD + 70;
+      var padTex = currentMap.street ? texStreet : texCobble;
       texGrass.repeat.set(fw / 9, fd / 9);
       floor = new THREE.Mesh(new THREE.PlaneGeometry(fw, fd), worldMats.floor);
       floor.rotation.x = -Math.PI / 2;
@@ -1639,10 +2318,10 @@
       worldRoot.add(floor);
       for (var r = 0; r < ROOMS.length; r++) {
         var room = ROOMS[r];
-        var ct = texCobble.clone();
+        var ct = padTex.clone();
         ct.needsUpdate = true;
         ct.wrapS = ct.wrapT = THREE.RepeatWrapping;
-        ct.repeat.set(room.w / 3.2, room.d / 3.2);
+        ct.repeat.set(room.w / 2.4, room.d / 2.4);
         var padMat = new THREE.MeshLambertMaterial({ map: ct });
         padMat.userData.ownMap = true;
         var pad = new THREE.Mesh(new THREE.PlaneGeometry(room.w, room.d), padMat);
@@ -1661,6 +2340,7 @@
       floor.receiveShadow = true;
       worldRoot.add(floor);
     }
+    if (currentMap.postBuild) currentMap.postBuild();
   }
 
   function buildMinimap() {
@@ -1742,6 +2422,7 @@
     currentMap = def;
     currentMapId = MAP_DEFS[id] ? id : 'dust2_flat';
     if (def.restricted) applyRestrictedLoadout();
+    if (def.duel) { duelSwap = 0; duelRound = 1; duelRoundOver = false; duelEndT = 0; }
     WALL_H = def.wallH || 4.6;
     clearWorld();
     worldMats = makeWorldMaterials(def.theme);
@@ -1751,14 +2432,7 @@
     buildGrid();
     buildWallsAndFloor();
     buildMinimap();
-    if (def.spawnsFn) {
-      var cs = def.spawnsFn();
-      mapSpawns.blue = cs.blue;
-      mapSpawns.red = cs.red;
-    } else {
-      mapSpawns.blue = makeSpawnList(def.spawns.blue, 15);
-      mapSpawns.red = makeSpawnList(def.spawns.red, 15);
-    }
+    rebuildMapSpawns();
     if (typeof respawn === 'function') respawn();
     rebuildHittables();
     if (typeof updateMapHud === 'function') updateMapHud();
@@ -1768,7 +2442,67 @@
   var PR = 0.42, PH = 1.8, EYE = 1.62;
   var GRAV = 20, JUMP = 6.4, RUN = 4.7, WALK = 2.5, CLIMB = 2.4;
   var SPAWN_PROTECT = 3, RESPAWN_DELAY = 5;
+  var DUEL_ROUND_DELAY = 2.6;
+  var duelSwap = 0, duelRound = 1, duelRoundOver = false, duelEndT = 0, preDuelBots = null;
   var noclip = false;
+
+  function duelMap() { return !!(currentMap && currentMap.duel); }
+  function duelBaseDef(team) {
+    if (!currentMap) return { x: 0, z: 0, yaw: 0, name: 'Spawn' };
+    var base = team;
+    if (duelMap() && duelSwap) base = (team === 'blue' ? 'red' : 'blue');
+    return currentMap.spawns[base] || currentMap.spawns[team];
+  }
+  function rebuildMapSpawns() {
+    if (!currentMap) return;
+    if (currentMap.duel) {
+      var b = duelBaseDef('blue'), r = duelBaseDef('red');
+      mapSpawns.blue = [{ x: b.x, z: b.z, yaw: b.yaw || 0 }];
+      mapSpawns.red = [{ x: r.x, z: r.z, yaw: r.yaw || 0 }];
+      return;
+    }
+    if (currentMap.spawnsFn) {
+      var cs = currentMap.spawnsFn();
+      mapSpawns.blue = cs.blue;
+      mapSpawns.red = cs.red;
+    } else {
+      mapSpawns.blue = makeSpawnList(currentMap.spawns.blue, 15);
+      mapSpawns.red = makeSpawnList(currentMap.spawns.red, 15);
+    }
+  }
+  function duelNoteDeath() {
+    if (!duelMap() || !startedOnce || matchEnded) return;
+    if (duelRoundOver) return;
+    duelRoundOver = true;
+    duelEndT = DUEL_ROUND_DELAY;
+  }
+  function duelCountdownText() {
+    return 'Tur ' + duelRound + ' bitti · yeni tur ' + Math.max(1, Math.ceil(duelEndT)) + ' sn · doğuşlar değişecek';
+  }
+  function duelRestartRound() {
+    if (!duelMap() || matchEnded || duelRoundOver === false) return;
+    duelRound++;
+    duelSwap = duelSwap ? 0 : 1;
+    duelRoundOver = false;
+    duelEndT = 0;
+    rebuildMapSpawns();
+    if (!mpRole) { clearBots(); spawnBotsForMatch(); }
+    if (mpRole === 'host' && mpConnected) {
+      var now = performance.now();
+      for (var id in mpGuests) {
+        var g = mpGuests[id];
+        g.hp = 100; g.ar = 100; g.dead = false; g.deadAt = 0; g.hpAt = 0;
+        g.duelGraceUntil = now + 900;
+        if (g.last) { g.last.hp = 100; g.last.ar = 100; }
+      }
+      mpRefreshAvatars();
+      mpBroadcast({ t: 'duel', swap: duelSwap, round: duelRound });
+    }
+    respawn();
+    updateHudHealth();
+    syncLobbyUI();
+    chatAddSystem('Tur ' + duelRound + ' · doğuşlar yer değiştirdi');
+  }
 
   var player = {
     x: 0, y: 0, z: 0,
@@ -1827,6 +2561,7 @@
     return g;
   }
   function teamSpawnDef(team) {
+    if (currentMap && currentMap.duel) return duelBaseDef(team);
     if (currentMap && currentMap.spawns[team]) return currentMap.spawns[team];
     if (currentMap && currentMap.spawns.blue) return currentMap.spawns.blue;
     return { x: 0, z: 0, yaw: 0, name: 'Spawn' };
@@ -1848,7 +2583,7 @@
     reloading = false;
     triggerHeavyQueued = false;
     gadgetAutoOff = 0;
-    player.protectUntil = performance.now() / 1000 + SPAWN_PROTECT;
+    player.protectUntil = duelMap() ? 0 : performance.now() / 1000 + SPAWN_PROTECT;
     if (typeof deathT !== 'undefined') deathT = 0;
     if (typeof deathEl !== 'undefined' && deathEl) deathEl.style.display = 'none';
     if (typeof cancelSniperBolt === 'function') cancelSniperBolt();
@@ -3509,7 +4244,7 @@
         var bot = makeNPC(path, 1.35 + Math.random() * 0.55, team);
         bot.spawnPos = { x: spot.x, z: spot.z };
         bot.spawnYaw = spot.yaw;
-        bot.protectUntil = performance.now() / 1000 + SPAWN_PROTECT;
+        bot.protectUntil = duelMap() ? 0 : performance.now() / 1000 + SPAWN_PROTECT;
         bot.wp = 1;
       }
     }
@@ -3752,6 +4487,7 @@
         addTeamScore(kTeam, 1);
       }
       drawBotBar(t);
+      if (duelMap()) duelNoteDeath();
       return;
     }
     if (byPlayer) {
@@ -4001,7 +4737,7 @@
     }
     if (t.handL && t.handLBase) t.handL.position.set(t.handLBase.x, t.handLBase.y, t.handLBase.z);
     t.crouchAmt = 0; t.reloadAmt = 0; t.netReload = 0;
-    t.protectUntil = nowS + SPAWN_PROTECT;
+    t.protectUntil = duelMap() ? 0 : nowS + SPAWN_PROTECT;
     t.target = null; t.burstLeft = 0; t.nextShot = nowS + 1.2;
     t.recoil = 0; t.flashT = 0; t.aimPitch = 0; t.stuckT = 0;
     t.lastSeenT = 0; t.retreatT = 0; t.stunT = 0; t.scanA = 0; t.moveSpread = 0; t.strafeT = 0;
@@ -4714,17 +5450,20 @@
   }
   function playerDie() {
     player.hp = 0;
-    deathT = RESPAWN_DELAY;
+    deathT = duelMap() ? DUEL_ROUND_DELAY : RESPAWN_DELAY;
     triggerHeld = false; triggerQueued = false; triggerHeavyQueued = false;
     if (gadgetSel) { gadgetSel = null; gadgetAutoOff = 0; }
     updateViewModelVisibility();
     if (deathEl) deathEl.style.display = 'block';
-    if (deathCountEl) deathCountEl.textContent = 'Yeniden doğuş: ' + Math.ceil(deathT) + ' sn · ' + teamSpawnDef(player.team).name;
+    if (deathCountEl) deathCountEl.textContent = duelMap()
+      ? duelCountdownText()
+      : ('Yeniden doğuş: ' + Math.ceil(deathT) + ' sn · ' + teamSpawnDef(player.team).name);
     cancelSniperBolt();
     scopeLevel = 0; applyScope();
     if (typeof syncSpawnPick === 'function') syncSpawnPick();
     updateHudHealth();
     stats.deaths = (stats.deaths || 0) + 1;
+    if (duelMap()) duelNoteDeath();
   }
 
   function updateWeapon(dt) {
@@ -5110,6 +5849,16 @@
   if (stored.killLimit === 0 || stored.killLimit === 15 || stored.killLimit === 30 || stored.killLimit === 50) killLimit = stored.killLimit;
   if (stored.timeLimit === 0 || stored.timeLimit === 5 || stored.timeLimit === 10 || stored.timeLimit === 15) timeLimit = stored.timeLimit;
   function clampBotCounts() {
+    var mapDef = currentMap || MAP_DEFS[selectedMapId];
+    if (mapDef && mapDef.duel) {
+      if (mpRole === 'host' || mpRole === 'guest') { matchBots.blue = 0; matchBots.red = 0; }
+      else {
+        var oppD = matchTeam === 'blue' ? 'red' : 'blue';
+        matchBots[matchTeam] = 0;
+        matchBots[oppD] = 1;
+      }
+      return;
+    }
     var mb = matchTeam === 'blue' ? 14 : 15;
     var mr = matchTeam === 'red' ? 14 : 15;
     matchBots.blue = Math.max(0, Math.min(mb, matchBots.blue | 0));
@@ -5214,7 +5963,6 @@
     updateLoadoutDetail();
   }
   function profileMissing() {
-    if (!userName || userName.length < 2) return 'name';
     if (!rifleChosen || !pistolChosen) return 'loadout';
     return '';
   }
@@ -5232,10 +5980,8 @@
     syncAvatarUI();
     var miss = profileMissing();
     if (nameHintEl) {
-      nameHintEl.textContent = miss === 'name'
-        ? 'Zorunlu: maça başlamak için 2–16 karakterlik bir kullanıcı adı gir.'
-        : 'Ad; skorbordda, öldürme akışında ve çok oyunculu eşleşmede görünür.';
-      nameHintEl.classList.toggle('warn', miss === 'name');
+      nameHintEl.textContent = 'Ad; skorbordda, öldürme akışında ve çok oyunculu eşleşmede görünür. Boş bırakırsan "OYUNCU##" otomatik atanır.';
+      nameHintEl.classList.remove('warn');
     }
     if (loadoutReqEl) {
       var needR = !rifleChosen, needP = !pistolChosen;
@@ -5247,19 +5993,25 @@
     if (playEl) playEl.classList.toggle('needsSetup', !!miss);
   }
   function requireProfile() {
+    ensurePlayerName();
     var miss = profileMissing();
     if (!miss) { hideGateError(); return true; }
     if (overlayEl.style.display !== 'flex') showOverlay('lobby');
-    if (miss === 'name') {
-      showGateError('Maça başlamak için kullanıcı adı zorunlu.');
-      setMenuTab('play');
-      if (playerNameEl) playerNameEl.focus();
-    } else {
-      showGateError('Yükleme zorunlu: bir tüfek ve bir tabanca seçmelisin.');
-      setMenuTab('loadout');
-    }
+    showGateError('Yükleme zorunlu: bir tüfek ve bir tabanca seçmelisin.');
+    setMenuTab('loadout');
     playTick(300, 0.04, 0.04);
     return false;
+  }
+  function ensurePlayerName() {
+    var cur = sanitizeName(userName);
+    if (cur.length >= 2) { userName = cur; return userName; }
+    var seed = (typeof mpSelfId === 'string' && mpSelfId) || String(Date.now());
+    var h = 7;
+    for (var i = 0; i < seed.length; i++) h = (h * 131 + seed.charCodeAt(i)) % 99991;
+    userName = sanitizeName('OYUNCU' + (10 + (h % 90)));
+    syncProfileUI();
+    persistSettings();
+    return userName;
   }
   function setUserName(v, persist) {
     userName = sanitizeName(v);
@@ -5503,13 +6255,18 @@
   }
   function syncLobbyUI() {
     clampBotCounts();
+    var duelUI = !!(currentMap && currentMap.duel);
     if (botsBlueEl) {
       botsBlueEl.max = matchTeam === 'blue' ? 14 : 15;
       botsBlueEl.value = matchBots.blue;
+      botsBlueEl.disabled = duelUI;
+      botsBlueEl.title = duelUI ? 'Banana 1v1 her zaman bire bir oynanır' : '';
     }
     if (botsRedEl) {
       botsRedEl.max = matchTeam === 'red' ? 14 : 15;
       botsRedEl.value = matchBots.red;
+      botsRedEl.disabled = duelUI;
+      botsRedEl.title = duelUI ? 'Banana 1v1 her zaman bire bir oynanır' : '';
     }
     if (botsBlueValEl) botsBlueValEl.textContent = matchBots.blue;
     if (botsRedValEl) botsRedValEl.textContent = matchBots.red;
@@ -5517,7 +6274,9 @@
     var bTot = matchBots.blue + (mc.any ? mc.blue : (matchTeam === 'blue' ? 1 : 0));
     var rTot = matchBots.red + (mc.any ? mc.red : (matchTeam === 'red' ? 1 : 0));
     if (teamTotalsEl) {
-      teamTotalsEl.textContent = 'Mavi ' + bTot + '/15 · Kırmızı ' + rTot + '/15 · sen ' + (matchTeam === 'blue' ? 'mavi' : 'kırmızı');
+      teamTotalsEl.textContent = duelUI
+        ? '1v1 düello · ' + bTot + 'v' + rTot + ' · sen ' + (matchTeam === 'blue' ? 'mavi' : 'kırmızı') + ' · doğuşlar turda değişir'
+        : 'Mavi ' + bTot + '/15 · Kırmızı ' + rTot + '/15 · sen ' + (matchTeam === 'blue' ? 'mavi' : 'kırmızı');
     }
     for (var i = 0; i < teamBtns.length; i++)
       teamBtns[i].classList.toggle('sel', teamBtns[i].getAttribute('data-team') === matchTeam);
@@ -5526,13 +6285,13 @@
     var mapName = currentMap ? currentMap.name : 'Dust II Flat';
     var mapDesc = currentMap ? currentMap.desc : '';
     if (mapNoteEl) mapNoteEl.textContent = mapDesc;
-    if (mapBadgeEl) mapBadgeEl.textContent = mapRestricted() ? 'AWP + DEAGLE' : '';
-    if (playChipEl) playChipEl.textContent = mapRestricted() ? 'AWP + DEAGLE' : 'LOBİ HAZIR';
+    if (mapBadgeEl) mapBadgeEl.textContent = duelUI ? '1v1 DÜELLO' : (mapRestricted() ? 'AWP + DEAGLE' : '');
+    if (playChipEl) playChipEl.textContent = duelUI ? '1v1 DÜELLO' : (mapRestricted() ? 'AWP + DEAGLE' : 'LOBİ HAZIR');
     if (sumBlueEl) sumBlueEl.textContent = bTot;
     if (sumRedEl) sumRedEl.textContent = rTot;
     if (sumMapEl) sumMapEl.textContent = mapName;
     if (sumTeamEl) sumTeamEl.textContent = matchTeam === 'blue' ? 'Mavi Takım' : 'Kırmızı Takım';
-    if (sumBotsEl) sumBotsEl.textContent = bTot + 'v' + rTot;
+    if (sumBotsEl) sumBotsEl.textContent = duelUI ? '1v1' : (bTot + 'v' + rTot);
     if (sumDiffEl) sumDiffEl.textContent = DIFF_TR[botDifficulty] || 'Normal';
     if (sumGoalEl) sumGoalEl.textContent = killLimit > 0 ? killLimit + ' öldürme' : 'Sınırsız';
     if (sumTimeEl) sumTimeEl.textContent = timeLimit > 0 ? timeLimit + ' dakika' : 'Sınırsız';
@@ -5541,7 +6300,9 @@
     if (profileMetaEl) profileMetaEl.textContent = (matchTeam === 'blue' ? 'Mavi Takım' : 'Kırmızı Takım') + ' · rütbe 07';
     if (footHintEl) footHintEl.textContent = startedOnce && !matchEnded
       ? 'Maç devam ediyor · ' + mapName + ' · ' + matchScore.blue + ':' + matchScore.red
-      : (profileMissing() ? 'Lobi hazır · ad ve yükleme zorunlu' : 'Lobi hazır · 4 harita · yükleme tamam · LAN MP');
+      : (profileMissing() ? 'Lobi hazır · yükleme zorunlu' : (duelUI
+        ? 'Banana 1v1 · 2 oyuncu · turda doğuşlar yer değiştirir'
+        : 'Lobi hazır · 5 harita · yükleme tamam · LAN MP'));
     if (devChkEl) devChkEl.checked = devConsoleEnabled;
     if (godEl) godEl.checked = godMode;
     if (infEl) infEl.checked = infAmmo;
@@ -5805,6 +6566,11 @@
   function setBotCounts(team, n) {
     if (mpRole === 'guest') return false;
     if (team !== 'blue' && team !== 'red') return false;
+    if ((currentMap && currentMap.duel) || (MAP_DEFS[selectedMapId] && MAP_DEFS[selectedMapId].duel)) {
+      clampBotCounts();
+      syncLobbyUI();
+      return false;
+    }
     n = Math.max(0, Math.min(team === matchTeam ? 14 : 15, n | 0));
     matchBots[team] = n;
     syncLobbyUI();
@@ -5814,8 +6580,12 @@
     return true;
   }
   function setTeam(team) {
-    if (mpRole === 'guest') return;
     if (team !== 'blue' && team !== 'red') return;
+    if (mpRole === 'guest') {
+      mpGuestChooseTeam(team);
+      mpSetStatus('Takım değişikliği ana makineye gönderildi…');
+      return;
+    }
     matchTeam = team;
     player.team = team;
     clampBotCounts();
@@ -5838,11 +6608,22 @@
   function selectMap(id, restart) {
     if (mpRole === 'guest') return false;
     if (!MAP_DEFS[id]) return false;
+    var wasDuel = !!(currentMap && currentMap.duel);
+    var willDuel = !!MAP_DEFS[id].duel;
+    if (willDuel && mpRole === 'host' && Object.keys(mpGuests).length > 1) {
+      mpSetStatus('Banana 1v1 iki kişilik: önce fazla oyuncuları lobiden çıkar.', true);
+      return false;
+    }
+    if (willDuel && !wasDuel) preDuelBots = { blue: matchBots.blue, red: matchBots.red };
+    if (!willDuel && wasDuel && preDuelBots) {
+      matchBots.blue = preDuelBots.blue; matchBots.red = preDuelBots.red; preDuelBots = null;
+    }
     var changed = id !== currentMapId || !currentMap;
     selectedMapId = id;
     if (changed) loadMap(id);
     if (mpRole) { mpAvatars = {}; mpRemote = null; mpBotGhosts = {}; }
     if (currentMap.restricted) applyRestrictedLoadout();
+    clampBotCounts();
     syncLobbyUI();
     syncWeaponCards();
     if (startedOnce) {
@@ -5897,6 +6678,10 @@
     hideGateError();
     hideScoreboard();
     if (!currentMap || (mpRole && currentMapId !== selectedMapId)) loadMap(selectedMapId);
+    if (currentMap && currentMap.duel) {
+      duelSwap = 0; duelRound = 1; duelRoundOver = false; duelEndT = 0;
+      rebuildMapSpawns();
+    }
     startedOnce = true;
     matchEnded = false;
     matchScore = { blue: 0, red: 0 };
@@ -6653,6 +7438,11 @@
   var mpPingMap = {};              // konukta: cid -> ms (ana makinenin ping tablosu)
   var mpPingAcc = 1.2;             // ilk ping kısa sürede gitsin
   var mpHostLastSeen = 0;          // konukta: ana makineden son mesaj zamanı
+  var mpRoomName = '';             // ana makine: lobi adı (isteğe bağlı)
+  var mpRoomPass = '';             // ana makine: lobi şifresi (boş = şifresiz)
+  var mpJoinPassVal = '';          // konuk: bağlanırken girilen şifre
+  var mpRoomNameView = '';         // konuk: ana makineden gelen lobi adı
+  var mpRoomLockedView = false;    // konuk: lobi şifreli mi
   var MP_TIMEOUT_MS = 9000;        // bu süre sessiz kalan eş kopmuş sayılır
   var mpStatusEl = document.getElementById('mpStatus');
   var mpHostCodeEl = document.getElementById('mpHostCode');
@@ -6660,6 +7450,19 @@
   var mpJoinCodeEl = document.getElementById('mpJoinCode');
   var mpJoinAnswerEl = document.getElementById('mpJoinAnswer');
   var mpRoomCodeEl = document.getElementById('mpRoomCode');
+  var mpRoomNameEl = document.getElementById('mpAskName');
+  var mpRoomPassEl = document.getElementById('mpAskPass');
+  var mpAskEl = document.getElementById('mpAsk');
+  var mpAskEyebrowEl = document.getElementById('mpAskEyebrow');
+  var mpAskTitleEl = document.getElementById('mpAskTitle');
+  var mpAskSubEl = document.getElementById('mpAskSub');
+  var mpAskNameWrapEl = document.getElementById('mpAskNameWrap');
+  var mpAskPassWrapEl = document.getElementById('mpAskPassWrap');
+  var mpAskPassHintEl = document.getElementById('mpAskPassHint');
+  var mpAskErrEl = document.getElementById('mpAskErr');
+  var mpAskOkEl = document.getElementById('mpAskOk');
+  var mpAskCancelEl = document.getElementById('mpAskCancel');
+  var mpLobbyInfoEl = document.getElementById('mpLobbyInfo');
   var mpRosterEl = document.getElementById('mpRoster');
   var mpRosterCountEl = document.getElementById('mpRosterCount');
   var mpBalanceEl = document.getElementById('mpBalance');
@@ -6744,7 +7547,9 @@
     if (idx >= 0) targets.splice(idx, 1);
   }
   function mpClearAvatars() {
-    for (var id in mpAvatars) mpRemoveEntity(mpAvatars[id]);
+    for (var i = targets.length - 1; i >= 0; i--) {
+      if (targets[i] && targets[i].isRemote) mpRemoveEntity(targets[i]);
+    }
     mpAvatars = {};
     mpRemote = null;
   }
@@ -6807,10 +7612,28 @@
       if (p.host) {
         var tag = document.createElement('span'); tag.className = 'mptag'; tag.textContent = 'ANA MAKİNE'; row.appendChild(tag);
       }
-      var tm = document.createElement('span');
-      tm.className = 'mpteam';
-      tm.textContent = p.team ? mpTeamLabel(p.team) : 'TAKIM SEÇİYOR';
-      row.appendChild(tm);
+      var canChangeTeam = (mpRole === 'host' && !p.host) || (mpRole === 'guest' && p.id === mpSelfId);
+      if (canChangeTeam) {
+        var sw = document.createElement('span');
+        sw.className = 'mpteamsw';
+        var teams = ['blue', 'red'];
+        for (var ti = 0; ti < teams.length; ti++) {
+          var tb = document.createElement('button');
+          tb.type = 'button';
+          tb.className = 'mtsw' + (p.team === teams[ti] ? ' on' : '');
+          tb.setAttribute('data-act', 'team');
+          tb.setAttribute('data-team', teams[ti]);
+          tb.setAttribute('data-cid', p.id);
+          tb.textContent = mpTeamLabel(teams[ti]);
+          sw.appendChild(tb);
+        }
+        row.appendChild(sw);
+      } else {
+        var tm = document.createElement('span');
+        tm.className = 'mpteam';
+        tm.textContent = p.team ? mpTeamLabel(p.team) : 'TAKIM SEÇİYOR';
+        row.appendChild(tm);
+      }
       if (mpRole === 'host' && !p.host && p.id !== mpSelfId) {
         var acts = document.createElement('span');
         acts.className = 'mpact';
@@ -6827,6 +7650,7 @@
     }
     if (mpRosterCountEl) mpRosterCountEl.textContent = list.length + ' OYUNCU';
     syncLobbyStage();
+    mpSyncLobbyInfo();
   }
   function mpApplyHostCfg(m) {
     if (!m) return;
@@ -6872,7 +7696,7 @@
     var hint = document.getElementById('mpLockHint');
     if (hint) {
       hint.textContent = guest
-        ? 'Lobi ayarları ana makine tarafından yönetiliyor. Takımını kartlardan seçebilirsin.'
+        ? 'Lobi ayarları ana makine tarafından yönetiliyor. Takımını OYNA ekranından veya lobi listesindeki kendi satırından değiştirebilirsin.'
         : 'Lobi ayarlarını yalnızca odayı kuran ana makine değiştirebilir.';
       hint.style.color = guest ? '#d6b16d' : '';
     }
@@ -6906,6 +7730,7 @@
     }
   }
   function mpCleanup() {
+    if (mpAskMode === 'pass') mpAskClose();
     if (mpPeer) {
       try { if (mpPeer.destroy) mpPeer.destroy(); else mpPeer.close(); } catch (e) {}
     }
@@ -6920,6 +7745,11 @@
     mpAssignedTeam = null;
     mpHostId = null;
     mpName = null;
+    mpRoomName = '';
+    mpRoomPass = '';
+    mpJoinPassVal = '';
+    mpRoomNameView = '';
+    mpRoomLockedView = false;
     mpRole = null;
     mpStarted = false;
     mpAllowGuestStart = false;
@@ -6955,8 +7785,21 @@
   }
   function mpCreateHost() {
     if (!requireProfile()) return;
+    mpAskOpen('create', {
+      eyebrow: 'MANUEL MAÇ KUR',
+      title: 'ODA AÇ',
+      sub: 'Lobi adı ve şifre isteğe bağlı. Boş bırakıp ODA AÇ dersen oda adlandırılmadan ve şifresiz açılır.',
+      showName: true, showPass: true, ok: 'ODA AÇ', name: mpRoomName
+    }, function (vals) {
+      if (!vals) return;
+      mpCreateHostStart(vals.name, vals.pass);
+    });
+  }
+  function mpCreateHostStart(name, pass) {
     if (mpRole) mpCleanup();
     if (typeof RTCPeerConnection === 'undefined') { mpSetStatus('Tarayıcın WebRTC desteklemiyor.', true); return; }
+    mpRoomName = mpSanitizeRoomName(name);
+    mpRoomPass = mpSanitizePass(pass);
     mpRole = 'host';
     mpName = userName;
     mpSelfId = mpSelfId || mpGetClientId();
@@ -6971,7 +7814,8 @@
       done = true;
       var code = btoa(JSON.stringify({ sdp: mpPeer.localDescription }));
       if (mpHostCodeEl) mpHostCodeEl.value = code;
-      mpSetStatus('Davet kodu hazır. Kodu arkadaşına gönder; onun cevap kodunu alttaki kutuya yapıştır. Bu modda tek manuel konuk bağlanır; kalabalık lobi için tek kod modunu kullan.');
+      var lbl = mpRoomLabelText();
+      mpSetStatus('Davet kodu hazır' + (lbl ? ' · ' + lbl : '') + '. Kodu arkadaşına gönder; onun cevap kodunu alttaki kutuya yapıştır. Bu modda tek manuel konuk bağlanır; kalabalık lobi için tek kod modunu kullan.');
     };
     mpPeer.onicecandidate = function (e) { if (!e.candidate) setTimeout(finish, 400); };
     mpPeer.onicegatheringstatechange = function () { if (mpPeer.iceGatheringState === 'complete') finish(); };
@@ -6991,6 +7835,7 @@
     try { offer = JSON.parse(atob(raw)); } catch (e5) {}
     if (!offer || !offer.sdp) { mpSetStatus('Davet kodu geçersiz. Kodu eksiksiz yapıştır.', true); return; }
     if (mpRole) mpCleanup();
+    mpJoinPassVal = '';
     mpRole = 'guest';
     mpName = userName;
     mpKicked = false;
@@ -7073,6 +7918,82 @@
     var s = String(v || '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 16);
     return s || 'OYUNCU';
   }
+  function mpSanitizeRoomName(v) {
+    return String(v || '').replace(/[\u0000-\u001f\u007f]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
+  }
+  function mpSanitizePass(v) {
+    return String(v || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 16);
+  }
+  function mpRoomLabelText() {
+    if (!mpRoomName && !mpRoomPass) return '';
+    return (mpRoomName ? '"' + mpRoomName + '"' : 'Lobi') + (mpRoomPass ? ' · şifreli' : '');
+  }
+  function mpSyncLobbyInfo() {
+    if (!mpLobbyInfoEl) return;
+    var txt = '';
+    if (mpRole === 'host') {
+      txt = 'Lobi: "' + (mpRoomName || 'ADSIZ LOBİ') + '" · ' + (mpRoomPass ? 'Şifre: ' + mpRoomPass : 'ŞİFRESİZ') +
+        ' · Kod: ' + ((mpRoomCodeEl && mpRoomCodeEl.value) || '—');
+    } else if (mpRole === 'guest' && (mpRoomNameView || mpRoomLockedView)) {
+      txt = 'Lobi: "' + (mpRoomNameView || 'ADSIZ LOBİ') + '"' + (mpRoomLockedView ? ' · ŞİFRELİ' : '');
+    }
+    mpLobbyInfoEl.textContent = txt;
+    mpLobbyInfoEl.style.display = txt ? 'block' : 'none';
+  }
+  var mpAskMode = null, mpAskCb = null;
+  function mpAskOpen(mode, opts, cb) {
+    if (!mpAskEl) { if (cb) cb(null); return; }
+    mpAskMode = mode; mpAskCb = cb;
+    opts = opts || {};
+    if (mpAskEyebrowEl) mpAskEyebrowEl.textContent = opts.eyebrow || 'ÇOK OYUNCULU';
+    if (mpAskTitleEl) mpAskTitleEl.textContent = opts.title || 'LOBİ';
+    if (mpAskSubEl) mpAskSubEl.textContent = opts.sub || '';
+    if (mpAskNameWrapEl) mpAskNameWrapEl.style.display = opts.showName ? 'block' : 'none';
+    if (mpAskPassWrapEl) mpAskPassWrapEl.style.display = opts.showPass === false ? 'none' : 'block';
+    if (mpAskPassHintEl) mpAskPassHintEl.textContent = mode === 'pass' ? '' : 'isteğe bağlı · boş = şifresiz';
+    if (mpRoomNameEl) mpRoomNameEl.value = opts.name || '';
+    if (mpRoomPassEl) mpRoomPassEl.value = '';
+    if (mpAskOkEl) mpAskOkEl.textContent = opts.ok || 'TAMAM';
+    if (mpAskErrEl) mpAskErrEl.textContent = '';
+    mpAskEl.classList.add('on');
+    setTimeout(function () {
+      var el = opts.showName && mpRoomNameEl ? mpRoomNameEl : (opts.showPass === false ? mpAskOkEl : mpRoomPassEl);
+      if (el && el.focus) el.focus();
+    }, 40);
+  }
+  function mpAskClose() {
+    if (mpAskEl) mpAskEl.classList.remove('on');
+    if (mpAskErrEl) mpAskErrEl.textContent = '';
+    mpAskMode = null;
+    mpAskCb = null;
+  }
+  function mpAskCancel() {
+    var cb = mpAskCb;
+    mpAskClose();
+    if (cb) cb(null);
+  }
+  function mpAskSubmit() {
+    var mode = mpAskMode, cb = mpAskCb;
+    if (!mode) return;
+    var name = mpSanitizeRoomName(mpRoomNameEl ? mpRoomNameEl.value : '');
+    var pass = mpSanitizePass(mpRoomPassEl ? mpRoomPassEl.value : '');
+    if (mode === 'pass' && !pass) {
+      if (mpAskErrEl) mpAskErrEl.textContent = 'Bu lobi şifreli; şifre yazmadan girilemez.';
+      if (mpRoomPassEl) mpRoomPassEl.focus();
+      return;
+    }
+    mpAskClose();
+    if (cb) cb({ name: name, pass: pass });
+  }
+  if (mpAskOkEl) mpAskOkEl.addEventListener('click', function () { initAudio(); mpAskSubmit(); });
+  if (mpAskCancelEl) mpAskCancelEl.addEventListener('click', function () { playTick(260, 0.03, 0.02); mpAskCancel(); });
+  if (mpAskEl) {
+    mpAskEl.addEventListener('mousedown', function (e) { if (e.target === mpAskEl) mpAskCancel(); });
+    mpAskEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); mpAskSubmit(); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); mpAskCancel(); }
+    });
+  }
   // ---------- ANA MAKİNE: konuk bağlantıları ----------
   function mpHostAttach(conn) {
     var rec = { id: null, name: null, team: null, conn: conn, last: null, avatar: null, avatarId: '', ping: null, lastSeen: performance.now() };
@@ -7082,6 +8003,7 @@
       var m = mpParse(d);
       if (!m || mpRole !== 'host') return;
       if (m.t === 'hello') mpHostHandleHello(rec, m);
+      else if (m.t === 'probe') mpConnSend(rec.conn, { t: 'passreq', locked: !!mpRoomPass, room: mpRoomName });
       else if (rec.id) mpHostHandleMessage(rec, m);
     }, function () {
       if (closed) return;
@@ -7098,6 +8020,21 @@
       setTimeout(function () { mpConnClose(rec.conn); }, 120);
       return;
     }
+    if (mpRoomPass && mpSanitizePass(m.pass) !== mpRoomPass) {
+      mpConnSend(rec.conn, { t: 'auth', m: 'Lobi şifresi hatalı. Ana makineden doğru şifreyi al.' });
+      mpSetStatus('Şifre hatalı, katılım reddedildi: ' + mpNameSafe(m.name), true);
+      chatAddSystem('Şifre hatalı giriş denemesi: ' + mpNameSafe(m.name));
+      setTimeout(function () { mpConnClose(rec.conn); }, 140);
+      return;
+    }
+    var duelLobby = !!(MAP_DEFS[selectedMapId] && MAP_DEFS[selectedMapId].duel);
+    if (duelLobby && Object.keys(mpGuests).length >= 1 && !mpGuests[cid]) {
+      mpConnSend(rec.conn, { t: 'full', m: 'Banana 1v1 iki kişilik bir harita: başka oyuncu alınmıyor.' });
+      mpSetStatus('Lobi dolu, katılım reddedildi: ' + mpNameSafe(m.name), true);
+      chatAddSystem('Reddedildi (1v1 harita dolu): ' + mpNameSafe(m.name));
+      setTimeout(function () { mpConnClose(rec.conn); }, 140);
+      return;
+    }
     var old = mpGuests[cid];
     if (old && old !== rec) {
       delete mpGuests[cid];
@@ -7111,6 +8048,7 @@
     mpConnected = true;
     var joinedCfg = mpRulesPayload();
     mpConnSend(rec.conn, { t: 'welcome', hostId: mpSelfId, hostName: userName || 'ANA MAKİNE',
+      room: mpRoomName, locked: !!mpRoomPass,
       cfg: joinedCfg, roster: mpRosterPayload(), balance: mpBalance, started: mpStarted,
       team: null });
     mpBroadcastRoster();
@@ -7118,6 +8056,7 @@
     mpBroadcast({ t: 'sys', m: rec.name + ' oyuna katıldı' });
     mpSetStatus(rec.name + ' lobiye katıldı. Takım kartından seçim yapması bekleniyor…');
     mpApplyMpLocks();
+    mpSyncLobbyInfo();
   }
   function mpHostTeamCounts(exceptRec) {
     var c = { blue: 0, red: 0 };
@@ -7131,6 +8070,7 @@
   }
   function mpHostAssignTeam(rec, wanted) {
     wanted = wanted === 'red' ? 'red' : 'blue';
+    if (duelMap()) wanted = matchTeam === 'blue' ? 'red' : 'blue';
     var counts = mpHostTeamCounts(rec);
     var team = wanted, note = '';
     if (mpBalance) {
@@ -7149,7 +8089,8 @@
     if (mpStarted && startedOnce) {
       if (!rec.avatar) rec.avatar = mpMakePlayerAvatar(rec.id, rec.name, rec.team);
       mpSendTo(rec.id, { t: 'start', map: selectedMapId, bots: { blue: matchBots.blue, red: matchBots.red },
-        diff: botDifficulty, kill: killLimit, time: timeLimit, balance: mpBalance });
+        diff: botDifficulty, kill: killLimit, time: timeLimit, balance: mpBalance,
+        dswap: duelSwap, dround: duelRound });
       rebuildHittables();
     }
     return team;
@@ -7186,6 +8127,7 @@
   function mpHostSyncGuestHp(rec, m) {
     if (typeof m.hp !== 'number') return;
     var now = performance.now();
+    if (rec.duelGraceUntil && now < rec.duelGraceUntil) return;
     if (typeof rec.hp !== 'number') {
       rec.hp = m.hp; rec.ar = typeof m.ar === 'number' ? m.ar : 0;
       rec.dead = m.hp <= 0; rec.deadAt = rec.dead ? now : 0; rec.hpAt = now;
@@ -7202,6 +8144,7 @@
       }
     } else if (m.hp <= 0) {
       rec.hp = 0; rec.dead = true; rec.deadAt = now;
+      if (duelMap()) duelNoteDeath();
     } else if (m.hp < rec.hp) {
       rec.hp = m.hp;                                  // istemcinin kendi uyguladığı hasar
     }
@@ -7212,7 +8155,7 @@
   }
   function mpHostDamageGuest(rec, dmg, head, weaponId, killerName, killerTeam, kid, noScope, throughSmoke, blind) {
     if (!rec || !rec.team || rec.dead) return;
-    if (performance.now() - (rec.hpAt || 0) < SPAWN_PROTECT * 1000) return;
+    if (!duelMap() && performance.now() - (rec.hpAt || 0) < SPAWN_PROTECT * 1000) return;
     if (typeof rec.hp !== 'number') rec.hp = 100;
     if (typeof rec.ar !== 'number') rec.ar = 0;
     var aKey = kid === mpSelfId ? 'me' : (kid && mpGuests[kid] ? 'p:' + kid : 'b:' + (killerName || '?') + '|' + (killerTeam || '?'));
@@ -7226,6 +8169,7 @@
     if (rec.last) { rec.last.hp = rec.hp; rec.last.ar = rec.ar; }
     if (rec.hp > 0) return;
     rec.dead = true; rec.deadAt = performance.now();
+    if (duelMap()) duelNoteDeath();
     if (rec.avatar) {
       rec.avatar.hp = 0;
       if (rec.avatar.state === 'alive') { rec.avatar.state = 'falling'; rec.avatar.fallT = 0; rec.avatar.dead = true; }
@@ -7333,6 +8277,7 @@
       if (kt === victim.team) return;
       if (victim.dead) return;         // ana makine ölümü zaten işledi, çift sayma
       victim.dead = true; victim.deadAt = performance.now();
+      if (duelMap()) duelNoteDeath();
       if (typeof victim.hp !== 'number' || victim.hp > 0) victim.hp = 0;
       if (victim.last) victim.last.hp = 0;
       if (victim.avatar && victim.avatar.state === 'alive') { victim.avatar.state = 'falling'; victim.avatar.fallT = 0; victim.avatar.dead = true; }
@@ -7351,7 +8296,8 @@
       if (!rec.team) mpHostAssignTeam(rec, 'blue');
       if (!rec.avatar) rec.avatar = mpMakePlayerAvatar(rec.id, rec.name, rec.team);
       mpSendTo(rec.id, { t: 'start', map: selectedMapId, bots: { blue: matchBots.blue, red: matchBots.red },
-        diff: botDifficulty, kill: killLimit, time: timeLimit, balance: mpBalance });
+        diff: botDifficulty, kill: killLimit, time: timeLimit, balance: mpBalance,
+        dswap: duelSwap, dround: duelRound });
       mpBroadcastRoster();
       rebuildHittables();
       return;
@@ -7373,7 +8319,8 @@
     mpStarted = true;
     for (var id2 in mpGuests) {
       mpSendTo(id2, { t: 'start', map: selectedMapId, bots: { blue: matchBots.blue, red: matchBots.red },
-        diff: botDifficulty, kill: killLimit, time: timeLimit, balance: mpBalance });
+        diff: botDifficulty, kill: killLimit, time: timeLimit, balance: mpBalance,
+        dswap: duelSwap, dround: duelRound });
     }
     mpBroadcastRoster();
     rebuildHittables();
@@ -7389,6 +8336,15 @@
     mpBroadcast({ t: 'lobby' });
   }
   // ---------- KONUK ----------
+  var mpProbeTimer = 0, mpHelloSent = false;
+  function mpGuestSendHello(pass) {
+    if (mpHelloSent || mpRole !== 'guest') return;
+    mpHelloSent = true;
+    if (mpProbeTimer) { clearTimeout(mpProbeTimer); mpProbeTimer = 0; }
+    mpJoinPassVal = mpSanitizePass(pass);
+    mpSendHost({ t: 'hello', cid: mpSelfId, av: currentAvatarId(), name: ensurePlayerName(), pass: mpJoinPassVal });
+    mpSetStatus('Bağlandı. Lobi bilgisi ve takım kartları geliyor…');
+  }
   function mpGuestAttach(conn) {
     mpHostConn = conn;
     var opened = false, closed = false;
@@ -7398,8 +8354,15 @@
       mpConnected = true;
       mpKicked = false;
       mpHostLastSeen = performance.now();
-      mpSendHost({ t: 'hello', cid: mpSelfId, av: currentAvatarId(), name: userName || ('OYUNCU' + Math.floor(Math.random() * 90 + 10)) });
-      mpSetStatus('Bağlandı. Lobi bilgisi ve takım kartları geliyor…');
+      mpHelloSent = false;
+      if (mpProbeTimer) clearTimeout(mpProbeTimer);
+      // önce lobi şifreli mi diye sor; şifresizse hiç şifre istemeden gir
+      mpSendHost({ t: 'probe' });
+      mpSetStatus('Bağlandı. Lobi bilgisi alınıyor…');
+      mpProbeTimer = setTimeout(function () {
+        mpProbeTimer = 0;
+        mpGuestSendHello('');
+      }, 4000);
       mpApplyMpLocks(); mpRenderRoster();
     }, function (d) {
       mpHostLastSeen = performance.now();
@@ -7422,7 +8385,16 @@
     if (team !== 'blue' && team !== 'red') return;
     var acts = mpTeamPickEl ? mpTeamPickEl.querySelectorAll('.mtp-team') : [];
     for (var i = 0; i < acts.length; i++) acts[i].classList.toggle('sel', acts[i].getAttribute('data-team') === team);
+    for (var t = 0; t < teamBtns.length; t++) teamBtns[t].classList.toggle('sel', teamBtns[t].getAttribute('data-team') === team);
     if (mpTeamPickStatusEl) mpTeamPickStatusEl.textContent = 'Gönderildi. Ana makine onayı bekleniyor…';
+    if (mpRosterEl) {
+      var rbs = mpRosterEl.querySelectorAll('.mpteamsw button');
+      for (var j = 0; j < rbs.length; j++) {
+        if (rbs[j].getAttribute('data-cid') === mpSelfId) {
+          rbs[j].classList.toggle('on', rbs[j].getAttribute('data-team') === team);
+        }
+      }
+    }
     mpSendHost({ t: 'team', team: team });
   }
   function mpGuestHandleMessage(m) {
@@ -7440,19 +8412,50 @@
     }
     if (m.t === 'welcome') {
       mpHostId = m.hostId || null;
+      mpRoomNameView = m.room ? String(m.room).slice(0, 20) : '';
+      mpRoomLockedView = !!m.locked;
       if (m.cfg) mpApplyHostCfg(m.cfg);
       if (typeof m.balance === 'boolean') mpBalance = m.balance;
       mpRosterCache = (m.roster && m.roster.players) ? m.roster.players : [];
       mpStarted = !!m.started;
       mpAssignedTeam = m.team || null;
       mpRenderRoster(); mpApplyMpLocks();
+      var lbl = (mpRoomNameView ? '"' + mpRoomNameView + '" lobisine' : 'Lobiye') + (mpRoomLockedView ? ' (şifreli)' : '');
       if (!mpAssignedTeam) {
         mpShowTeamPick(true);
-        mpSetStatus('Lobiye bağlandın. Kartlardan takımını seç.');
+        mpSetStatus(lbl + ' bağlandın. Kartlardan takımını seç.');
       } else {
         mpShowTeamPick(false);
-        mpSetStatus('Lobiye bağlandın. Ana makine maçı başlatacak.');
+        mpSetStatus(lbl + ' bağlandın. Ana makine maçı başlatacak.');
       }
+      return;
+    }
+    if (m.t === 'auth') {
+      mpKicked = true;
+      mpCleanup();
+      mpSetStatus(m.m || 'Lobi şifresi hatalı. Ana makineden doğru şifreyi al.', true);
+      return;
+    }
+    if (m.t === 'passreq') {
+      if (mpHelloSent) return;
+      if (mpProbeTimer) { clearTimeout(mpProbeTimer); mpProbeTimer = 0; }
+      if (!m.locked) { mpGuestSendHello(''); return; }
+      var roomName = m.room ? String(m.room).slice(0, 20) : '';
+      mpAskOpen('pass', {
+        eyebrow: 'ŞİFRELİ LOBİ',
+        title: 'ŞİFRE GEREKLİ',
+        sub: (roomName ? '"' + roomName + '" ' : 'Bu ') + 'lobisi şifreli. Ana makineden aldığın şifreyi yaz; şifreyi bilmeden giriş yapılamaz.',
+        showName: false, showPass: true, ok: 'BAĞLAN'
+      }, function (vals) {
+        if (mpRole !== 'guest') { mpSetStatus('Bağlantı kesildi; tekrar KODLA BAĞLAN dene.', true); return; }
+        if (!vals) {
+          mpKicked = true;
+          mpCleanup();
+          mpSetStatus('Giriş iptal edildi. Şifreli lobiye şifre olmadan girilmez.', true);
+          return;
+        }
+        mpGuestSendHello(vals.pass);
+      });
       return;
     }
     if (m.t === 'assigned') {
@@ -7493,7 +8496,34 @@
         setTimeout(function () {
           if (mpRole === 'guest' && mpStarted && !startedOnce) mpSendHost({ t: 'play' });
         }, 1200);
+      } else if (currentMap && currentMap.duel) {
+        duelSwap = m.dswap ? 1 : 0;
+        duelRound = m.dround || 1;
+        duelRoundOver = false; duelEndT = 0;
+        rebuildMapSpawns();
+        respawn();
       }
+      return;
+    }
+    if (m.t === 'duel') {
+      duelSwap = m.swap ? 1 : 0;
+      duelRound = m.round || (duelRound + 1);
+      duelRoundOver = false; duelEndT = 0;
+      rebuildMapSpawns();
+      for (var duId in mpAvatars) {
+        var duAv = mpAvatars[duId];
+        var duSp = teamSpawnDef(duAv.team);
+        duAv.nx = duSp.x; duAv.nz = duSp.z; duAv.nyaw = duSp.yaw || 0;
+        duAv.group.position.set(duSp.x, 0, duSp.z);
+        duAv.group.rotation.set(0, duSp.yaw || 0, 0);
+        duAv.state = 'alive'; duAv.dead = false; duAv.fallT = 0;
+        duAv.group.visible = true;
+        duAv.hp = 100; duAv.armor = 100;
+        if (duAv.gunG) duAv.gunG.visible = true;
+        drawBotBar(duAv);
+      }
+      respawn();
+      chatAddSystem('Tur ' + duelRound + ' · doğuşlar yer değiştirdi');
       return;
     }
     if (m.t === 'wd') { mpWorldUpdate(m); return; }
@@ -7533,6 +8563,13 @@
       else { playDink(m.head); showHitmarker(m.head, false); }
       return;
     }
+    if (m.t === 'full') {
+      mpKicked = true;
+      mpCleanup();
+      mpShowTeamPick(false);
+      mpSetStatus('Lobi dolu: ' + (m.m || 'Bu harita 1v1, başka oyuncu alınmıyor.'), true);
+      return;
+    }
     if (m.t === 'kick' || m.t === 'ban') {
       mpKicked = true;
       var wasPlaying = startedOnce && overlayMode === 'playing';
@@ -7560,7 +8597,20 @@
   }
   function mpOpenRoom() {
     if (!requireProfile()) return;
+    mpAskOpen('create', {
+      eyebrow: 'ODA KUR',
+      title: 'ODA AÇ',
+      sub: 'Lobi adı ve şifre isteğe bağlı. Boş bırakıp ODA AÇ dersen oda adlandırılmadan ve şifresiz açılır; şifre yazarsan yalnızca şifreyi bilenler girebilir.',
+      showName: true, showPass: true, ok: 'ODA AÇ', name: mpRoomName
+    }, function (vals) {
+      if (!vals) return;
+      mpOpenRoomStart(vals.name, vals.pass);
+    });
+  }
+  function mpOpenRoomStart(name, pass) {
     if (mpRole) mpCleanup();
+    mpRoomName = mpSanitizeRoomName(name);
+    mpRoomPass = mpSanitizePass(pass);
     var code = mpGenCode();
     if (mpRoomCodeEl) mpRoomCodeEl.value = code;
     loadPeerJS(function (err) {
@@ -7573,7 +8623,8 @@
       catch (e3) { mpSetStatus('Oda açılamadı: ' + e3.message, true); mpRole = null; return; }
       mpPeer.on('open', function () {
         mpConnected = false;
-        mpSetStatus('Oda açık: ' + code + '. Aynı kodu birden fazla arkadaşın kullanabilir; her biri takım kartından seçim yapar. Hazır olunca MAÇI BAŞLAT.');
+        var lbl = mpRoomLabelText();
+        mpSetStatus('Oda açık: ' + code + (lbl ? ' · ' + lbl : ' (şifresiz)') + '. ' + (mpRoomPass ? 'Şifreyi yalnızca girmesini istediklerine ver. ' : '') + 'Aynı kodu birden fazla arkadaşın kullanabilir; her biri takım kartından seçim yapar. Hazır olunca MAÇI BAŞLAT.');
         mpRenderRoster(); mpApplyMpLocks();
       });
       mpPeer.on('connection', function (conn) { mpHostAttach(conn); });
@@ -7594,6 +8645,7 @@
     var raw = (mpRoomCodeEl ? mpRoomCodeEl.value : '').trim().toUpperCase().replace(/\s+/g, '');
     if (!raw) { mpSetStatus('Önce oda kodunu yaz (örn. ABC123).', true); return; }
     if (mpRole) mpCleanup();
+    mpJoinPassVal = '';
     loadPeerJS(function (err) {
       if (err) { mpSetStatus('Buluşma sunucusuna ulaşılamadı. İnternet yoksa aşağıdaki "Manuel kod değişimi"ni kullan.', true); return; }
       mpRole = 'guest';
@@ -7638,7 +8690,7 @@
     av.nx = ax; av.nz = az; av.nyaw = sp.yaw || 0;
     av.netCrouch = 0; av.netPitch = 0;
     av.hp = 100; av.armor = 100; av.kills = 0; av.deaths = 0; av.assists = 0;
-    av.protectUntil = performance.now() / 1000 + SPAWN_PROTECT;
+    av.protectUntil = duelMap() ? 0 : performance.now() / 1000 + SPAWN_PROTECT;
     drawBotBar(av);
     mpAvatars[id] = av;
     if (!mpRemote) mpRemote = av;
@@ -7655,7 +8707,7 @@
   }
   function mpRefreshAvatars() {
     if (mpRole !== 'host') return;
-    mpAvatars = {}; mpRemote = null;
+    mpClearAvatars();
     mpSpawnGuestAvatars();
     rebuildHittables();
   }
@@ -7914,12 +8966,23 @@
     if (ob) ob.addEventListener('click', mpOpenRoom);
     if (rb) rb.addEventListener('click', mpJoinRoom);
     if (mpRosterEl) mpRosterEl.addEventListener('click', function (e) {
-      if (mpRole !== 'host') return;
       var el = e.target;
       while (el && el !== mpRosterEl && !(el.getAttribute && el.getAttribute('data-act'))) el = el.parentNode;
       if (!el || el === mpRosterEl) return;
       var act = el.getAttribute('data-act');
       var cid = el.getAttribute('data-cid');
+      if (act === 'team') {
+        var team = el.getAttribute('data-team') === 'red' ? 'red' : 'blue';
+        if (mpRole === 'host') {
+          var rec = mpGuests[cid];
+          if (rec) mpHostAssignTeam(rec, team);
+        } else if (mpRole === 'guest' && cid === mpSelfId) {
+          mpGuestChooseTeam(team);
+          mpSetStatus('Takım değişikliği ana makineye gönderildi…');
+        }
+        return;
+      }
+      if (mpRole !== 'host') return;
       if (act && cid) mpHostKick(cid, act === 'ban');
     });
     if (mpBalanceEl) mpBalanceEl.addEventListener('change', function () {
@@ -8194,13 +9257,20 @@
     }
     if (deathT > 0) {
       if (!paused) deathT -= dt;
-      if (deathT <= 0) {
+      if (duelMap()) {
+        if (deathT <= 0) deathT = 0;
+        if (deathCountEl) deathCountEl.textContent = duelCountdownText();
+      } else if (deathT <= 0) {
         respawn();
         if (deathEl) deathEl.style.display = 'none';
         updateHudHealth();
       } else if (deathCountEl) {
         deathCountEl.textContent = 'Yeniden doğuş: ' + Math.ceil(deathT) + ' sn · ' + teamSpawnDef(player.team).name;
       }
+    }
+    if (duelMap() && startedOnce && !matchEnded && duelRoundOver && !paused && mpRole !== 'guest') {
+      duelEndT -= dt;
+      if (duelEndT <= 0) duelRestartRound();
     }
     if (protectEl) {
       var protLeft = player.protectUntil - performance.now() / 1000;
@@ -8285,8 +9355,36 @@
       return { role: mpRole, connected: mpConnected, name: mpName, selfId: mpSelfId,
         hostId: mpHostId, started: mpStarted, balance: mpBalance, assignedTeam: mpAssignedTeam,
         banned: Object.keys(mpBanned), guests: guests, roster: mpRosterCache,
+        room: { name: mpRoomName, locked: !!mpRoomPass, viewName: mpRoomNameView, viewLocked: mpRoomLockedView },
         avatars: Object.keys(mpAvatars), ghosts: Object.keys(mpBotGhosts).length, remote: remoteInfo };
     },
+    mpLobby: function (o) {
+      if (o) {
+        if (typeof o.name === 'string') mpRoomName = mpSanitizeRoomName(o.name);
+        if (typeof o.pass === 'string') mpRoomPass = mpSanitizePass(o.pass);
+        if (typeof o.joinPass === 'string') mpJoinPassVal = mpSanitizePass(o.joinPass);
+        mpSyncLobbyInfo();
+      }
+      return { name: mpRoomName, pass: mpRoomPass, joinPass: mpJoinPassVal,
+        viewName: mpRoomNameView, viewLocked: mpRoomLockedView,
+        info: mpLobbyInfoEl ? mpLobbyInfoEl.textContent : null };
+    },
+    mpHandleHello: mpHostHandleHello,
+    mpGuestHandle: mpGuestHandleMessage,
+    mpAsk: mpAskOpen,
+    mpAskDo: mpAskSubmit,
+    mpAskAbort: mpAskCancel,
+    mpAskState: function () {
+      return { on: !!(mpAskEl && mpAskEl.classList.contains('on')),
+        mode: mpAskMode,
+        title: mpAskTitleEl ? mpAskTitleEl.textContent : '',
+        sub: mpAskSubEl ? mpAskSubEl.textContent : '',
+        nameShown: !!(mpAskNameWrapEl && mpAskNameWrapEl.style.display !== 'none'),
+        passShown: !!(mpAskPassWrapEl && mpAskPassWrapEl.style.display !== 'none'),
+        okLabel: mpAskOkEl ? mpAskOkEl.textContent : '',
+        err: mpAskErrEl ? mpAskErrEl.textContent : '' };
+    },
+    ensureName: ensurePlayerName,
     mpHostAttach: mpHostAttach, mpHostDropGuest: mpHostDropGuest, mpHostKick: mpHostKick, mpHostStartAll: mpHostStartAll,
     mpAuthority: function () { return { guests: mpGuests, damageGuest: mpHostDamageGuest, syncGuestHp: mpHostSyncGuestHp }; },
     mpSend: mpSend, mpCreateHost: mpCreateHost, mpJoinFromCode: mpJoinFromCode, mpAcceptAnswer: mpAcceptAnswer, mpLeave: mpLeave,
@@ -8314,6 +9412,26 @@
     flashState: function () { return { blind: +flashBlind.toFixed(3), t: +flashBlindT.toFixed(3) }; },
     bloodCount: function () { var n = 0; for (var bi2 = 0; bi2 < BLOOD_N; bi2++) if (bloodLife[bi2] > 0) n++; return n; },
     drawMinimap: drawMinimap,
+    previewShot: function (o) {
+      o = o || {};
+      var px = typeof o.px === 'number' ? o.px : 0, py = typeof o.py === 'number' ? o.py : 30, pz = typeof o.pz === 'number' ? o.pz : 40;
+      var tx = typeof o.tx === 'number' ? o.tx : 0, ty = typeof o.ty === 'number' ? o.ty : 0, tz = typeof o.tz === 'number' ? o.tz : 0;
+      var fov = typeof o.fov === 'number' ? o.fov : 46;
+      var w = o.w || 1600, h = o.h || 900;
+      var wv = {}, wi;
+      for (wi in weaponGroups) { wv[wi] = weaponGroups[wi].visible; weaponGroups[wi].visible = false; }
+      var oldW = renderer.domElement.width, oldH = renderer.domElement.height, oldDpr = renderer.getPixelRatio(), oldFov = camera.fov;
+      renderer.setPixelRatio(1); renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.fov = fov; camera.updateProjectionMatrix();
+      camera.position.set(px, py, pz); camera.lookAt(tx, ty, tz);
+      renderer.render(scene, camera);
+      var url = renderer.domElement.toDataURL('image/jpeg', 0.92);
+      renderer.setPixelRatio(oldDpr); renderer.setSize(oldW, oldH, false);
+      camera.fov = oldFov; camera.aspect = oldW / oldH; camera.updateProjectionMatrix();
+      camera.position.set(player.x, player.y + EYE, player.z);
+      for (wi in weaponGroups) weaponGroups[wi].visible = wv[wi];
+      return url;
+    },
     chat: function () { return { open: chatOpen, mode: chatMode, lines: chatLogEl ? chatLogEl.children.length : 0 }; },
     chatOpen: openChat, chatClose: closeChat, chatSend: function (mode, text) { return chatSend(text, mode); },
     chatSystem: chatAddSystem,
@@ -8331,7 +9449,11 @@
     },
     tick: function (dt) {
       tickMatchClock(dt);
-      if (deathT > 0) { deathT -= dt; if (deathT <= 0) { respawn(); if (deathEl) deathEl.style.display = 'none'; updateHudHealth(); } }
+      if (deathT > 0) { deathT -= dt; if (!duelMap() && deathT <= 0) { respawn(); if (deathEl) deathEl.style.display = 'none'; updateHudHealth(); } }
+      if (duelMap() && startedOnce && !matchEnded && duelRoundOver && mpRole !== 'guest') {
+        duelEndT -= dt;
+        if (duelEndT <= 0) duelRestartRound();
+      }
       updateWeapon(dt); updateTargets(dt); mpNetTick(dt);
       updatePuffs(dt); updateBlood(dt); updateTracers(dt); updateFlash(dt); updateSmokes(dt);
       updateTeamScoreHud();

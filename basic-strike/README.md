@@ -21,13 +21,17 @@ olabilir (ana makine + birden fazla katılımcı).
 
 Açılışta maç otomatik başlamaz; önce lobi gelir:
 
-- **Harita seç:** Dust II Flat, Aim Redline (depo), AWP Lego 2, Meydan Köy.
+- **Harita seç:** Dust II Flat, Aim Redline (depo), AWP Lego 2, Meydan Köy,
+  Banana 1v1 (2 kişilik turlu düello).
 - **Takım seç:** Mavi Takım (güney) veya Kırmızı Takım (kuzey).
 - **Bot sayısı:** 0–15 arası. Toplam takım mevcudu 15'i geçemez; kendi
   takımında en fazla 14 bot olabilir (15. kişi sensin), karşı takımda 15 bot
   olabilir.
-- **Kullanıcı adı (zorunlu):** Maça başlamadan önce 2–16 karakterlik bir ad gir.
+- **Kullanıcı adı (isteğe bağlı):** 2–16 karakterlik bir ad girebilirsin.
   Ad; üst profil, skorbord, öldürme akışı ve çok oyunculu eşleşmede görünür.
+  Boş bırakıp maçı başlatırsan otomatik olarak `OYUNCU##` biçiminde bir ad
+  atanır (ör. `OYUNCU27`); oyuncuya özel bu ad kaydedilir ve tüm ekranlarda
+  kullanılır.
 - **Silah yüklemesi (zorunlu):** Tüm tüfeklerden **bir adet** (AK-47, AWP,
   M4A4) ve tüm tabancalardan **bir adet** (USP, Deagle) seçmeden maç başlamaz.
   Seçimler değiştirene kadar geçerlidir; maç içinde yalnızca bu iki ateşli
@@ -197,22 +201,37 @@ arasıdır**: hareket, atış ve skor verileri sunucudan geçmez, doğrudan akar
 ### Tek kodla bağlan (önerilen)
 
 - **Ana makine:** OYNA sekmesinde kuralları seç, MP sekmesinde **ODA AÇ**'a
-  bas — 6 haneli bir oda kodu üretilir. Aynı kodu birden fazla arkadaşın
+  bas — açılan pencerede **lobi adı** ve **lobi şifresi** sorulur. İkisini boş
+  bırakıp **ODA AÇ**'a basarsan oda adlandırılmadan ve şifresiz açılır. Onaydan
+  sonra 6 haneli bir oda kodu üretilir. Aynı kodu birden fazla arkadaşın
   kullanabilir.
-- **Katılımcı:** kodu yazıp **KODLA BAĞLAN**'a bas. Bağlanınca **iki takım
-  kartı** açılır; mavi veya kırmızıyı seçersin. Seçim ana makineye iletilir.
+- **Lobi adı ve şifresi (isteğe bağlı):** Lobi adı yazarsan katılımcılar
+  bağlanınca lobinin adını görür. Lobi şifresi yazarsan yalnızca şifreyi
+  bilenler girebilir: katılımcı **KODLA BAĞLAN**'a bastıktan sonra oda
+  şifreliyse ekrana şifre penceresi gelir ve şifre yazılmadan giriş yapılamaz;
+  yanlış veya boş şifreyle bağlanan ana makine tarafından reddedilir ve
+  bağlantısı kapatılır. Oda şifresizse şifre hiç sorulmaz, doğrudan lobiye
+  girilir. Şifre yalnızca bağlantı sırasında doğrulanır; kaydedilmez.
+- **Katılımcı:** kodu yazıp **KODLA BAĞLAN**'a bas; şifreliyse açılan
+  pencerede şifreyi yaz. Bağlanınca **iki takım kartı** açılır; mavi veya
+  kırmızıyı seçersin. Seçim ana makineye iletilir.
 - **Takım dengeleme (isteğe bağlı):** ana makine bu ayarı açarsa yeni katılan,
   insan sayısı az olan takıma yerleştirilir ve kart seçimine göre gerekirse
   dengelenir. Kapalıyken herkes seçtiği takıma girer.
 - **Lobi listesi:** ana makine tüm oyuncuları görür; yanlarındaki **KICK** ve
   **BAN** düğmeleriyle lobiden atabilir. **Banlanan aynı odaya geri giremez**;
   **atılan (kick) yeniden bağlanabilir**.
+- **Takım değiştirme:** lobi listesinde her katılımcının satırında **MAVİ** ve
+  **KIRMIZI** düğmeleri vardır. Ana makine buradan istediği katılımcının
+  takımını atar; katılımcı da kendi satırındaki düğmelerle **veya OYNA
+  sekmesindeki takım kartlarından** takım değişikliği isteyebilir. Seçili takım
+  vurgulu görünür; dengeleme açıksa atama sayılara göre düzeltilir.
 - **Yetkiler:** harita, bot sayıları, zorluk, öldürme hedefi, süre ve takım
   dengeleme ayarlarını **yalnızca ana makine** değiştirebilir. Katılımcılarda bu
   alanlar kilitlidir; maçı da ana makine başlatır.
 - Kod internet üzerinden de çalışır: PeerJS buluşma sunucusu tarafları
   eşleştirir, veri yine doğrudan şifreli eşler arası akar. Kodu bilen odaya
-  girebilir.
+  girebilir; ana makine şifre koyduysa şifreyi de bilmesi gerekir.
 - **Sohbet:** `U` takım, `Y` herkes. Mesajlar ana makine üzerinden dağıtılır;
   takım mesajını yalnızca aynı takım görür, herkes mesajını tüm oyuncular görür.
   Yazarken oyun durmaz, hareket/ateş kilitlenir; mesajlar 6,5 saniye sonra
@@ -224,7 +243,9 @@ arasıdır**: hareket, atış ve skor verileri sunucudan geçmez, doğrudan akar
 İnternet yoksa aynı yerel ağdaki makineler davet/cevap koduyla bağlanır.
 Bu mod tamamen sunucusuzdur; buz sunucuları dahil hiçbir sunucu kullanılmaz
 (taraflar aynı LAN'da olmalıdır). Her davet/cevap kod çifti **tek bir konuk**
-bağlar; kalabalık lobi için tek kod modunu kullan.
+bağlar; kalabalık lobi için tek kod modunu kullan. Manuel modda da ana makine
+davet kodunu üretmeden önce lobi adı/şifresi penceresi açılır; konuk lobiye
+bağlanınca oda şifreliyse şifre ayrıca sorulur.
 
 **Maç kurmak (Ana Makine):**
 
@@ -267,9 +288,22 @@ Kurallar:
 | **Aim Redline** | Depo salonu: beyaz tuğla duvarlar, yüksek pencereler, çelik makaslı tavan ve asma lambalar; kasa/konteyner siperleri, zeminde silah siluetleri ve sarı-siyah yükleme şeridi. |
 | **AWP Lego 2** | Lego kalesi arenası: altın üs, iki yönlü rampa, güvertede yürünebilir platform, tam ortada deliğin üzerinde dört kapılı kule, kemerli doğu-batı tüneli, delikten güverteye çıkan ve dış cephelerdeki tırmanılabilir kırmızı merdivenler, mavi/kırmızı/yeşil baseplate doğuş alanları; **yalnızca AWP + Deagle** (bıçak ve bombalar dahil). |
 | **Meydan Köy** | Özel tasarım köy meydanı: çeşme, pazar tezgâhları, ağaçlar ve iki savunulabilir avlu. |
+| **Banana 1v1** | 2 kişilik muz sokağı düellosu: mavi doğuş sağ üstte, kırmızı doğuş sol altta; taş duvarlı dar sokak, paletler, kasalar ve variller. Çevrimdışı 1v1 bot, çok oyunculuda 1'e 1. Doğuş koruması yoktur; taraflardan biri ölünce tur yeniden başlar ve turlar ilerledikçe doğuş noktaları yer değiştirir. |
 
 Her harita kendi temasını, dokularını, doğuş noktalarını, bot rotalarını ve mini
 haritasını getirir. Oyuncu ve bot doğuşları takıma göre ayrıdır.
+
+### Banana 1v1 tur kuralları
+
+- Harita yalnızca **1'e 1** oynanır: çevrimdışı rakip bot sayısı 1'dir (dost bot
+  yoktur), çok oyunculuda lobiye ikinci oyuncudan fazlası alınmaz ("Lobi dolu").
+- Doğuşlar sabittir: **mavi sağ üst**, **kırmızı sol alt**. Doğuş koruması
+  uygulanmaz.
+- İki taraftan biri öldüğü anda tur biter; 2,6 saniye sonra yeni tur başlar,
+  ölen/ölenler kendi doğuşlarına döner.
+- Her turda doğuşlar **yer değiştirir**: mavi takım bir sonraki turu kırmızı
+  doğuşta, kırmızı takım mavi doğuşta başlatır.
+- Öldürme hedefi/süre kuralları diğer haritalardaki gibi geçerlidir.
 
 ## Geliştirici konsolu
 
