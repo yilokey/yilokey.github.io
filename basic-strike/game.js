@@ -4779,7 +4779,13 @@
               var stepN = Math.min(dd, Math.max(dd * 0.4, 5 * dt));
               t.group.position.x += (ddx / dd) * stepN;
               t.group.position.z += (ddz / dd) * stepN;
-              if (dd > 0.15) moving = true;
+              // ağ paketleri 50 ms'de bir geldiği için dd çoğu karede eşiğin altında kalıyor;
+              // yürüme animasyonu kısa bir süre "hareket ediyor" sayılsın ki bacaklar donsun diye beklemesin
+              t.netMoveT = 0.24;
+            }
+            if (t.netMoveT > 0) {
+              t.netMoveT -= dt;
+              if (t.netMoveT > 0) moving = true;
             }
             var dyy = t.nyaw - t.group.rotation.y;
             while (dyy > Math.PI) dyy -= Math.PI * 2;
@@ -8800,12 +8806,18 @@
     if (!startedOnce) return;
     var mz = new THREE.Vector3(m.x, m.y, m.z);
     var d2 = new THREE.Vector3(m.dx, m.dy, m.dz);
+    // efekt, göz hizasındaki birinci şahıs noktasından değil, görünen modelin namlu ucundan çıksın
+    if (avatar && avatar.gunG && avatar.gunG.visible && avatar.state === 'alive') {
+      avatar.group.updateMatrixWorld(true);
+      mz.set(0, 0.015, -0.695);
+      avatar.gunG.localToWorld(mz);
+    }
     spawnTracer(mz, mz.clone().addScaledVector(d2, 60));
     var pd2 = Math.sqrt(Math.pow(m.x - player.x, 2) + Math.pow(m.y - (player.y + 1.5), 2) + Math.pow(m.z - player.z, 2));
     playShot(m.w || 'rifle', Math.max(0.05, Math.min(1, 1 - pd2 / 55)));
     if (avatar) {
       avatar.recoil = 1; avatar.flashT = 0.06;
-      if (avatar.flash) { avatar.flash.position.set(m.x, m.y, m.z); avatar.flash.visible = true; }
+      if (avatar.flash) { avatar.flash.position.copy(mz); avatar.flash.visible = true; }
     }
   }
   function mpApplyGrenade(m) {
