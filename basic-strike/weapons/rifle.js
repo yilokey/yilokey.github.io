@@ -35,12 +35,17 @@
     wp(g, 0.024, 0.010, 0.110, 0, -0.062, 0.005, mMat);      // korkuluk
     wp(g, 0.012, 0.030, 0.012, 0, -0.045, -0.005, bMat);     // tetik
     wp(g, 0.012, 0.032, 0.050, 0.052, 0.020, 0.030, mMat);   // emniyet kolu
-    // kavisli şarjör
-    var mag = new THREE.Group(); mag.position.set(0, -0.10, -0.135); g.add(mag);
-    wpr(mag, 0.052, 0.095, 0.105, 0, -0.030, 0, -0.10, 0, 0, kMat);
-    wpr(mag, 0.052, 0.095, 0.105, 0, -0.105, -0.012, -0.26, 0, 0, kMat);
-    wpr(mag, 0.052, 0.085, 0.100, 0, -0.173, -0.036, -0.44, 0, 0, kMat);
-    mag.userData.baseY = -0.10;
+    // kavisli şarjör — bitişik segmentler
+    var mag = new THREE.Group(); mag.position.set(0, -0.058, -0.135); g.add(mag);
+    var magStep = 0.056, magA = 0.05, magY = 0, magZ = 0, dStepY = 0, dStepZ = 0;
+    for (var mi = 0; mi < 5; mi++) {
+      dStepY = -Math.cos(magA); dStepZ = -Math.sin(magA);
+      wpr(mag, 0.052, magStep + 0.010, 0.105, 0, magY + dStepY * magStep * 0.5, magZ + dStepZ * magStep * 0.5, magA, 0, 0, kMat);
+      magY += dStepY * magStep; magZ += dStepZ * magStep;
+      magA += 0.09;
+    }
+    wpr(mag, 0.056, 0.016, 0.112, 0, magY + dStepY * 0.007, magZ + dStepZ * 0.007, magA, 0, 0, kMat);
+    mag.userData.baseY = -0.058;
     g.userData.mag = mag;
     // sürgü kolu (reload animasyonu)
     var charge = wp(g, 0.024, 0.024, 0.055, 0.058, 0.030, 0.06, mMat);

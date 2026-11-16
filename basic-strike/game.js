@@ -1448,6 +1448,7 @@
       if (o === wallMesh || o === floor || o === sky) return;
       if (o.userData.noHit) return;
       if (o.userData.part === 'nohit') return;
+      for (var hp = o; hp; hp = hp.parent) if (hp === camera) return;   // birinci şahıs viewmodel hiçbir ışına takılmasın
       hittables.push(o);
     });
   }
@@ -2006,11 +2007,11 @@
   var viewSleeveMat = new THREE.MeshLambertMaterial({ color: 0x26292e });
   var viewSleeveDark = new THREE.MeshLambertMaterial({ color: 0x1f2226 });
 
-  function addGlove(g, x, y, z, scale, flip, rotX, rotY) {
+  function addGlove(g, x, y, z, scale, flip, rotX, rotY, rotZ) {
     var hand = new THREE.Group();
     hand.position.set(x, y, z);
     hand.scale.setScalar(scale || 1);
-    hand.rotation.set(rotX || 0, rotY || 0, 0);
+    hand.rotation.set(rotX || 0, rotY || 0, rotZ || 0);
     hand.userData.noHit = true;
     g.add(hand);
     var palm = new THREE.Mesh(new THREE.BoxGeometry(0.100, 0.076, 0.132), gloveMat);
@@ -2053,15 +2054,21 @@
     g.add(j);
     return j;
   }
-  function addArmChain(g, hand, side, elbow) {
+  function addArmChain(g, hand, side, elbow, wristPos) {
     var sgn = side > 0 ? 1 : -1;
     // sadece ön kol görünür: dirsek ekranın altında, üst kol hiç çizilmez
     var el = elbow || [hand[0] + sgn * 0.26, hand[1] - 0.42, hand[2] + 0.12];
-    var wrist = [hand[0], hand[1] + 0.004, hand[2] + 0.078];
+    var wrist = wristPos || [hand[0], hand[1] + 0.004, hand[2] + 0.078];
     addSleeve(g, el, wrist, 0.048, viewSleeveDark, 0.036);
     addJoint(g, el, 0.046, viewSleeveMat);
   }
   function addViewArms(g, kind) {
+    var ap = g.userData.armPose;               // model kendi el pozunu tanımlıyorsa (kabza kavraması)
+    if (ap) {
+      addArmChain(g, ap.hand, 1, ap.elbow, ap.wrist);
+      addGlove(g, ap.hand[0], ap.hand[1], ap.hand[2], 1, false, ap.rot[0], ap.rot[1], ap.rot[2]);
+      return;
+    }
     var cfg = {
       rifle: { rh: [0.012, -0.125, 0.035], re: [0.22, -0.50, 0.32], lh: [0.0, 0.045, -0.26], le: [0.02, -0.50, 0.26] },
       pistol: { rh: [0.0, -0.09, 0.04], re: [0.20, -0.48, 0.30], lh: [-0.025, -0.075, -0.035], le: [-0.02, -0.46, 0.26] },
@@ -4694,7 +4701,9 @@
       if (!scoped) {
         var wPush = viewWallPush();
         if (wPush > 0) {
-          var wp2 = Math.max(0, Math.min(0.62, wPush - 0.28));
+          // geri çekme sınırlı: silah asla kameranın gerisine/arkasına geçmesin
+          var maxBack = Math.max(0.10, -0.16 - base.z);
+          var wp2 = Math.max(0, Math.min(maxBack, wPush - 0.28));
           gw.position.z += wp2;
           gw.position.y += wp2 * 0.16;
           gw.rotation.x -= wp2 * 0.55;
@@ -5062,11 +5071,11 @@
     pistol2: [88, 38, 60, 30]
   };
   var WEAPON_IMAGES = {
-    rifle: 'previews/weapons/ak47.png',
-    sniper: 'previews/weapons/awp.png',
-    rifle2: 'previews/weapons/m4a4.png',
-    pistol: 'previews/weapons/usp.png',
-    pistol2: 'previews/weapons/deagle.png'
+    rifle: 'previews/weapons/ak47.png?v=20261116ab',
+    sniper: 'previews/weapons/awp.png?v=20261116ab',
+    rifle2: 'previews/weapons/m4a4.png?v=20261116ab',
+    pistol: 'previews/weapons/usp.png?v=20261116ab',
+    pistol2: 'previews/weapons/deagle.png?v=20261116ab'
   };
   function updateLoadoutDetail() {
     var w = WEAPONS[menuWeapon];
@@ -8493,6 +8502,48 @@
   showOverlay('lobby');
   animate();
 
+  /* silah kartı görseli: modeli yandan (namlu sağa) kareye sığdırıp PNG üretir */
+  function renderWeaponImage(id, w, h) {
+    var reg = (window.BS_WEAPONS || {})[id];
+    if (!reg || !reg.build) return null;
+    var iw = w || 1792, ih = h || 1024;
+    var g = reg.build(WEAPON_KIT);
+    var box = new THREE.Box3().setFromObject(g);
+    var size = box.getSize(new THREE.Vector3());
+    var center = box.getCenter(new THREE.Vector3());
+    g.position.sub(center);
+
+    var k = Math.min(iw * 0.94 / Math.max(size.z, 0.001), ih * 0.86 / Math.max(size.y, 0.001));
+    var vw = iw / k, vh = ih / k;
+    var cam = new THREE.OrthographicCamera(-vw / 2, vw / 2, vh / 2, -vh / 2, 0.01, 20);
+    cam.position.set(8, 0, 0);
+    cam.lookAt(0, 0, 0);
+
+    var tmp = new THREE.Scene();
+    tmp.add(new THREE.AmbientLight(0xffffff, 0.26));
+    var key = new THREE.DirectionalLight(0xfff1dd, 0.72);
+    key.position.set(4, 7, 3); tmp.add(key);
+    var fill = new THREE.DirectionalLight(0xcfe0f0, 0.20);
+    fill.position.set(5, -4, -5); tmp.add(fill);
+    var rim = new THREE.DirectionalLight(0xffffff, 0.16);
+    rim.position.set(-6, 3, -2); tmp.add(rim);
+    tmp.add(g);
+
+    var oldW = renderer.domElement.width, oldH = renderer.domElement.height, oldDpr = renderer.getPixelRatio();
+    var oldClear = renderer.getClearColor(new THREE.Color()).getHex(), oldAlpha = renderer.getClearAlpha();
+    renderer.setPixelRatio(1); renderer.setSize(iw, ih, false);
+    renderer.setClearColor(0x000000, 1);
+    renderer.render(tmp, cam);
+    var url = renderer.domElement.toDataURL('image/png');
+    renderer.setClearColor(oldClear, oldAlpha);
+    renderer.setPixelRatio(oldDpr); renderer.setSize(oldW, oldH, false);
+    camera.aspect = oldW / oldH; camera.updateProjectionMatrix();
+    g.traverse(function (o) {
+      if (o.geometry) o.geometry.dispose();
+    });
+    return url;
+  }
+
   /* geliştirici kancası — konsoldan test/inceleme için */
   window.__dust2 = {
     player: player, keys: keys, updatePlayer: updatePlayer, respawn: respawn,
@@ -8504,6 +8555,7 @@
     switchWeapon: switchWeapon, setScoped: setScoped, cycleScope: cycleScope, reload: startReload,
     weaponGroups: weaponGroups, currentWeapon: currentWeapon,
     fire: function () { fireShot(); },
+    updateWeapon: updateWeapon,
     fireHeavy: function () { fireShot(true); },
     throwSmoke: throwSmoke, throwFlash: throwFlash, throwHE: throwHE, hurt: hurtPlayer, smokes: smokes,
     grenades: grenades, nades: nades, damageTarget: damageTarget,
@@ -8578,6 +8630,7 @@
     flashState: function () { return { blind: +flashBlind.toFixed(3), t: +flashBlindT.toFixed(3) }; },
     bloodCount: function () { var n = 0; for (var bi2 = 0; bi2 < BLOOD_N; bi2++) if (bloodLife[bi2] > 0) n++; return n; },
     drawMinimap: drawMinimap,
+    renderWeaponImage: renderWeaponImage,
     previewShot: function (o) {
       o = o || {};
       var px = typeof o.px === 'number' ? o.px : 0, py = typeof o.py === 'number' ? o.py : 30, pz = typeof o.pz === 'number' ? o.pz : 40;
@@ -8596,6 +8649,25 @@
       camera.fov = oldFov; camera.aspect = oldW / oldH; camera.updateProjectionMatrix();
       camera.position.set(player.x, player.y + EYE, player.z);
       for (wi in weaponGroups) weaponGroups[wi].visible = wv[wi];
+      return url;
+    },
+    fpsShot: function (o) {
+      o = o || {};
+      var w = o.w || 1280, h = o.h || 720, steps = typeof o.steps === 'number' ? o.steps : 80, dt = o.dt || 1 / 60;
+      var si;
+      camera.rotation.set(player.pitch, player.yaw, 0);
+      camera.position.set(player.x, player.y + EYE, player.z);
+      camera.updateMatrixWorld(true);
+      for (si = 0; si < steps; si++) updateWeapon(dt);
+      camera.updateMatrixWorld(true);
+      var oldW = renderer.domElement.width, oldH = renderer.domElement.height, oldDpr = renderer.getPixelRatio(), oldFov = camera.fov, oldAspect = camera.aspect;
+      var fv = typeof o.fov === 'number' ? o.fov : camera.fov;
+      renderer.setPixelRatio(1); renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.fov = fv; camera.updateProjectionMatrix();
+      renderer.render(scene, camera);
+      var url = renderer.domElement.toDataURL('image/jpeg', 0.92);
+      renderer.setPixelRatio(oldDpr); renderer.setSize(oldW, oldH, false);
+      camera.fov = oldFov; camera.aspect = oldAspect; camera.updateProjectionMatrix();
       return url;
     },
     chat: function () { return { open: chatOpen, mode: chatMode, lines: chatLogEl ? chatLogEl.children.length : 0 }; },
