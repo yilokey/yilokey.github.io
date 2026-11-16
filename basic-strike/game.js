@@ -18,7 +18,7 @@
   function tex(canvas, rx, ry) {
     var t = new THREE.CanvasTexture(canvas);
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    t.anisotropy = 4;
+    t.anisotropy = 16;
     t.encoding = THREE.sRGBEncoding;
     if (rx) t.repeat.set(rx, ry || rx);
     return t;
@@ -213,8 +213,36 @@
     }
     return tex(o.c);
   }
-  function asphaltTexture() {
-    var o = canvas2d(512, 512), g = o.g, i, x, y;
+  // temiz dökme beton: yatay kalıp izleri + bağlantı noktaları (KALDRIX)
+  function concreteCleanTexture() {
+    var o = canvas2d(512, 512), g = o.g, i, x, y, r, grd;
+    g.fillStyle = '#b9bab7'; g.fillRect(0, 0, 512, 512);
+    for (i = 0; i < 24; i++) {
+      g.fillStyle = 'rgba(' + (150 + Math.random() * 40 | 0) + ',' + (152 + Math.random() * 40 | 0) + ',' + (150 + Math.random() * 40 | 0) + ',' + (0.05 + Math.random() * 0.06).toFixed(3) + ')';
+      g.fillRect(0, Math.random() * 512, 512, 8 + Math.random() * 40);
+    }
+    g.strokeStyle = 'rgba(112,114,112,0.32)'; g.lineWidth = 2;
+    for (i = 0; i <= 4; i++) { g.beginPath(); g.moveTo(0, i * 128); g.lineTo(512, i * 128); g.stroke(); }
+    g.strokeStyle = 'rgba(112,114,112,0.16)';
+    for (i = 0; i <= 4; i++) { g.beginPath(); g.moveTo(i * 128, 0); g.lineTo(i * 128, 512); g.stroke(); }
+    g.fillStyle = 'rgba(96,98,96,0.5)';
+    for (x = 0; x < 4; x++) for (y = 0; y < 4; y++) {
+      g.beginPath(); g.arc(x * 128 + 20, y * 128 + 20, 3.4, 0, 6.283); g.fill();
+      g.beginPath(); g.arc(x * 128 + 108, y * 128 + 20, 3.4, 0, 6.283); g.fill();
+    }
+    for (i = 0; i < 7000; i++) {
+      g.fillStyle = Math.random() < 0.5 ? 'rgba(90,92,90,0.06)' : 'rgba(226,228,226,0.07)';
+      g.fillRect(Math.random() * 512, Math.random() * 512, 1.5, 1.5);
+    }
+    for (i = 0; i < 16; i++) {
+      x = Math.random() * 512; y = Math.random() * 512; r = 24 + Math.random() * 60;
+      grd = g.createRadialGradient(x, y, 2, x, y, r);
+      grd.addColorStop(0, 'rgba(84,86,84,0.10)'); grd.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = grd; g.beginPath(); g.arc(x, y, r, 0, 6.283); g.fill();
+    }
+    return tex(o.c);
+  }
+  function asphaltTexture() {    var o = canvas2d(512, 512), g = o.g, i, x, y;
     g.fillStyle = '#414449'; g.fillRect(0, 0, 512, 512);
     for (i = 0; i < 15000; i++) {
       g.fillStyle = Math.random() < 0.5 ? 'rgba(20,22,24,0.18)' : 'rgba(190,194,198,0.09)';
@@ -501,6 +529,58 @@
     }
     return tex(o.c);
   }
+  function brickRedTexture() {
+    var o = canvas2d(512, 512), g = o.g, i, row, col, x, y, bw = 128, bh = 64;
+    g.fillStyle = '#b8b1a4'; g.fillRect(0, 0, 512, 512);
+    for (row = 0; row < 8; row++) {
+      var off = (row % 2) * (bw / 2);
+      for (col = -1; col < 5; col++) {
+        x = col * bw + off; y = row * bh;
+        var sh = 0.86 + Math.random() * 0.26;
+        var rr = Math.round(150 * sh), gg = Math.round(66 * sh), bb = Math.round(50 * sh);
+        if (Math.random() < 0.18) { rr = Math.round(120 * sh); gg = Math.round(58 * sh); bb = Math.round(46 * sh); }
+        g.fillStyle = 'rgb(' + rr + ',' + gg + ',' + bb + ')';
+        g.fillRect(x + 3, y + 3, bw - 6, bh - 6);
+        g.fillStyle = 'rgba(255,220,200,0.16)'; g.fillRect(x + 3, y + 3, bw - 6, 3);
+        g.fillStyle = 'rgba(60,26,18,0.28)'; g.fillRect(x + 3, y + bh - 7, bw - 6, 4);
+        if (Math.random() < 0.25) {
+          g.fillStyle = 'rgba(70,34,24,0.16)';
+          g.beginPath(); g.arc(x + 14 + Math.random() * (bw - 28), y + 10 + Math.random() * (bh - 20), 3 + Math.random() * 6, 0, 6.283); g.fill();
+        }
+      }
+    }
+    for (i = 0; i < 7000; i++) {
+      g.fillStyle = Math.random() < 0.5 ? 'rgba(60,30,22,0.06)' : 'rgba(255,235,220,0.05)';
+      g.fillRect(Math.random() * 512, Math.random() * 512, 1.6, 1.6);
+    }
+    return tex(o.c);
+  }
+  function tileFloorTexture() {
+    var o = canvas2d(512, 512), g = o.g, i, row, col, x, y, cs = 64;
+    g.fillStyle = '#7c7d79'; g.fillRect(0, 0, 512, 512);
+    for (row = 0; row < 8; row++) {
+      for (col = 0; col < 8; col++) {
+        x = col * cs; y = row * cs;
+        var sh = 0.94 + Math.random() * 0.08;
+        g.fillStyle = 'rgb(' + Math.round(168 * sh) + ',' + Math.round(169 * sh) + ',' + Math.round(165 * sh) + ')';
+        g.fillRect(x + 2, y + 2, cs - 4, cs - 4);
+        g.fillStyle = 'rgba(255,255,255,0.10)'; g.fillRect(x + 2, y + 2, cs - 4, 2);
+        g.fillStyle = 'rgba(52,54,52,0.18)'; g.fillRect(x + 2, y + cs - 4, cs - 4, 2);
+      }
+    }
+    for (i = 0; i < 22; i++) {
+      var rx = Math.random() * 512, ry = Math.random() * 512, rr = 26 + Math.random() * 80;
+      var grd = g.createRadialGradient(rx, ry, 2, rx, ry, rr);
+      grd.addColorStop(0, Math.random() < 0.55 ? 'rgba(120,122,118,0.14)' : 'rgba(220,220,214,0.15)');
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = grd; g.beginPath(); g.arc(rx, ry, rr, 0, 6.283); g.fill();
+    }
+    for (i = 0; i < 9000; i++) {
+      g.fillStyle = Math.random() < 0.55 ? 'rgba(80,82,78,0.07)' : 'rgba(240,240,234,0.07)';
+      g.fillRect(Math.random() * 512, Math.random() * 512, 1.6, 1.6);
+    }
+    return tex(o.c);
+  }
   function metalCrateTexture() {
     var o = canvas2d(256, 256), g = o.g, i, y, x, yy, rr, grd;
     g.fillStyle = '#6f7a72'; g.fillRect(0, 0, 256, 256);
@@ -691,6 +771,8 @@
 
   var texWall = wallTexture(), texFloor = floorTexture(), texCrate = crateTexture(), texBarrel = barrelTexture();
   var texConcrete = concreteTexture(), texAsphalt = asphaltTexture();
+  var texConcreteClean = concreteCleanTexture();
+  var texBrickRed = brickRedTexture(), texTileFloor = tileFloorTexture();
   var texBrickWhite = brickWhiteTexture(), texWarehouseFloor = warehouseFloorTexture();
   var texMetalCrate = metalCrateTexture(), texHazard = hazardTexture(), texWeaponDecal = weaponDecalTexture();
   var texLegoWall = legoWallTexture(), texLegoFloor = legoFloorTexture(), texLegoCrate = legoCrateTexture();
@@ -743,9 +825,10 @@
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
   var sc = sun.shadow.camera;
-  sc.left = -85; sc.right = 85; sc.top = 85; sc.bottom = -85; sc.near = 20; sc.far = 340;
+  sc.left = -110; sc.right = 110; sc.top = 110; sc.bottom = -110; sc.near = 20; sc.far = 380;
   sc.updateProjectionMatrix();
   sun.shadow.bias = -0.0006;
+  sun.shadow.normalBias = 0.03;
   scene.add(sun);
   scene.add(sun.target);
 
@@ -842,6 +925,40 @@
     return out;
   }
 
+  /* ---------- statik sahne birleştirme (draw call azaltma) ---------- */
+  var batchGroups = null, batchMatCache = {};
+  function batchAdd(key, mat, geo, noShadow) {
+    if (!batchGroups) batchGroups = {};
+    var b = batchGroups[key];
+    if (!b) b = batchGroups[key] = { mat: mat, geos: [], cast: !(noShadow && noShadow.cast === false), recv: !(noShadow && noShadow.recv === false) };
+    b.geos.push(geo);
+  }
+  function batchMat(color) {
+    var k = 'c' + color;
+    var m = batchMatCache[k];
+    if (!m) m = batchMatCache[k] = new THREE.MeshLambertMaterial({ color: color });
+    return m;
+  }
+  function flushBatches() {
+    if (!batchGroups) return;
+    for (var k in batchGroups) {
+      var b = batchGroups[k];
+      var m = new THREE.Mesh(mergeGeos(b.geos), b.mat);
+      m.castShadow = b.cast; m.receiveShadow = b.recv;
+      worldRoot.add(m);
+    }
+    batchGroups = null;
+  }
+  var bmWood = new THREE.MeshLambertMaterial({ map: texDoorWood });
+  var bmAshlar = new THREE.MeshLambertMaterial({ map: texAshlar });
+  var bmAshlarTint = new THREE.MeshLambertMaterial({ map: texAshlar, color: 0x8d8878 });
+  var bmIron = new THREE.MeshLambertMaterial({ color: 0x2c3032 });
+  var bmLampGlow = new THREE.MeshBasicMaterial({ color: 0xffd58a });
+  var bmTrunk = new THREE.MeshLambertMaterial({ color: 0x6b4a2a });
+  var bmLeaf = new THREE.MeshLambertMaterial({ color: 0x4d7a35 });
+  var bmSoil = new THREE.MeshLambertMaterial({ color: 0x54402a });
+  var bmCrop = new THREE.MeshLambertMaterial({ color: 0x3f6b2b });
+
   // malzemeler yeni harita için üretilir
   function makeWorldMaterials(theme) {
     if (theme === 'concrete') return {
@@ -894,6 +1011,14 @@
       door: new THREE.MeshLambertMaterial({ color: 0x3d4442 }),
       frame: new THREE.MeshLambertMaterial({ color: 0x2c3033 })
     };
+    if (theme === 'kaldrix') return {
+      wall: new THREE.MeshLambertMaterial({ map: texBrickRed }),
+      floor: new THREE.MeshLambertMaterial({ map: texTileFloor, color: 0xb0b3b4 }), floorMap: texTileFloor,
+      crate: new THREE.MeshLambertMaterial({ map: texCrate, color: 0xc2a184 }),
+      barrel: new THREE.MeshLambertMaterial({ map: texBarrel }),
+      door: new THREE.MeshLambertMaterial({ color: 0x8f2f28 }),
+      frame: new THREE.MeshLambertMaterial({ color: 0xb9b7b0 })
+    };
     return {
       wall: new THREE.MeshLambertMaterial({ map: texWall }),
       floor: new THREE.MeshLambertMaterial({ map: texFloor }), floorMap: texFloor,
@@ -922,7 +1047,10 @@
       miniBg: '#1f261f', miniFloor: '#9a9a7e', miniProp: '#4c5a3c' },
     warehouse: { skyTop: 0x6f7c88, skyMid: 0xaeb8c0, skyBot: 0xd6d2c6, fog: 0xc4c6c4, fogNear: 34, fogFar: 170,
       sunColor: 0xfff4e2, sunInt: 0.55, hemiSky: 0xdfe6ea, hemiGround: 0x8d8778, hemiInt: 1.0, dust: 0xe8e4da,
-      miniBg: '#1a1d20', miniFloor: '#8f9498', miniProp: '#464c53' }
+      miniBg: '#1a1d20', miniFloor: '#8f9498', miniProp: '#464c53' },
+    kaldrix: { skyTop: 0x93a3b0, skyMid: 0xdfe4e7, skyBot: 0xf7f7f3, fog: 0xe8e9e7, fogNear: 140, fogFar: 520,
+      sunColor: 0xffffff, sunInt: 1.15, hemiSky: 0xe4ecf2, hemiGround: 0x9a9a94, hemiInt: 0.9, dust: 0xeceae4,
+      miniBg: '#1b1e22', miniFloor: '#8a9094', miniProp: '#5c6165' }
   };
 
   function applyTheme(name) {
@@ -971,19 +1099,17 @@
     y0 = y0 || 0;
     var g = boxGeo(w, h, d, 0.7);
     g.translate(x + w / 2, y0 + h / 2, z + d / 2);
-    var m = new THREE.Mesh(g, mat || worldMats.crate);
-    m.castShadow = true; m.receiveShadow = true;
-    worldRoot.add(m);
+    var m = mat || worldMats.crate;
+    batchAdd('crate_' + m.uuid, m, g);
     props.push({ x0: x, x1: x + w, z0: z, z1: z + d, y0: y0, y1: y0 + h });
   }
   function addMetalCrate(x, z, w, d, h, y0) {
     addCrate(x, z, w, d, h, y0, worldMats.crateMetal || worldMats.crate);
   }
   function addBarrel(x, z) {
-    var m = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.95, 14), worldMats.barrel);
-    m.position.set(x, 0.475, z);
-    m.castShadow = true; m.receiveShadow = true;
-    worldRoot.add(m);
+    var g = new THREE.CylinderGeometry(0.5, 0.5, 0.95, 14);
+    g.translate(x, 0.475, z);
+    batchAdd('barrel_' + worldMats.barrel.uuid, worldMats.barrel, g);
     props.push({ x0: x - 0.5, x1: x + 0.5, z0: z - 0.5, z1: z + 0.5, y0: 0, y1: 0.95 });
   }
   function addStuds(x, z, w, d, y, color) {
@@ -1028,10 +1154,11 @@
   }
   function groundTint(w, d, x, z, color, opacity) {
     var m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshBasicMaterial({
-      color: color, transparent: true, opacity: opacity, depthWrite: false
+      color: color, transparent: true, opacity: opacity, depthWrite: false,
+      polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -8
     }));
     m.rotation.x = -Math.PI / 2;
-    m.position.set(x, 0.014, z);
+    m.position.set(x, 0.05, z);
     m.userData.noHit = true;
     worldRoot.add(m);
   }
@@ -1108,389 +1235,38 @@
     worldRoot.add(mMain); worldRoot.add(mThin); worldRoot.add(mShade); worldRoot.add(mBulb);
   }
 
-  function house(x, z, w, d, h, wallColor, roofColor) {
-    var body = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshLambertMaterial({ color: wallColor }));
-    body.position.set(x, h / 2, z); body.castShadow = true; body.receiveShadow = true; worldRoot.add(body);
-    var roofH = Math.max(1.3, h * 0.42);
-    var roof = new THREE.Mesh(new THREE.ConeGeometry(Math.sqrt(w * w + d * d) / 2 * 1.1, roofH, 4),
-      new THREE.MeshLambertMaterial({ color: roofColor }));
-    roof.position.set(x, h + roofH / 2, z);
-    roof.rotation.y = Math.PI / 4;
-    roof.castShadow = true; worldRoot.add(roof);
-    var detMat = new THREE.MeshLambertMaterial({ color: 0x4a3524 });
-    var winW = Math.min(1.0, w * 0.18), winH = Math.min(1.2, h * 0.28);
-    for (var sx = -1; sx <= 1; sx += 2) for (var sz = -1; sz <= 1; sz += 2) {
-      var win = new THREE.Mesh(new THREE.BoxGeometry(winW, winH, 0.12), detMat);
-      win.position.set(x + sx * w * 0.25, h * 0.58, z + sz * (d / 2 + 0.02));
-      worldRoot.add(win);
-    }
-    var dw = Math.min(1.9, h * 0.42);
-    var door = new THREE.Mesh(new THREE.BoxGeometry(0.9, dw, 0.14), detMat);
-    door.position.set(x, dw / 2, z + d / 2 + 0.02);
-    worldRoot.add(door);
+  /* ================= HARİTA KİTİ ================= */
+  // maps/*.js dosyaları bu nesne üzerinden oyunun çizim yardımcılarına erişir.
+  var MAP_KIT = {
+    MAPS: window.BS_MAPS || {},
+    addRoom: addRoom, addCrate: addCrate, addMetalCrate: addMetalCrate, addBarrel: addBarrel,
+    addBlock: addBlock, part: part, groundDecal: groundDecal, groundTint: groundTint,
+    hazardStrip: hazardStrip, warehouseCeiling: warehouseCeiling, boxGeo: boxGeo,
+    mergeGeos: mergeGeos, batchAdd: batchAdd, batchMat: batchMat,
+    findClearSpot: findClearSpot, walkable: walkable, makeSpawnList: makeSpawnList,
+    labelTexture: labelTexture, letterTexture: letterTexture,
+    texAshlar: texAshlar, texPlaster: texPlaster, texPlasterGrey: texPlasterGrey,
+    texConcrete: texConcrete, texBrickRed: texBrickRed, texTileFloor: texTileFloor, texConcreteClean: texConcreteClean,
+    texPlasterOchre: texPlasterOchre, texPlasterRust: texPlasterRust, texPlasterYellow: texPlasterYellow,
+    texRoofTile: texRoofTile, texDoorWood: texDoorWood, texLegoPlate: texLegoPlate,
+    texWeaponDecal: texWeaponDecal, texGrate: texGrate, texSandbag: texSandbag, texWoodBarrel: texWoodBarrel,
+    bmWood: bmWood, bmAshlarTint: bmAshlarTint, bmIron: bmIron, bmLampGlow: bmLampGlow,
+    bmTrunk: bmTrunk, bmLeaf: bmLeaf, bmSoil: bmSoil, bmCrop: bmCrop,
+    props: props, climbZones: climbZones, ramps: ramps, ledgeRamps: ledgeRamps, ROOMS: ROOMS,
+    worldRoot: worldRoot, worldMats: null, floor: null,
+    WALL_H: 0, WALL_T: WALL_T, PH: 0, STEP: STEP, GX: 0, GZ: 0, GW: 0, GD: 0,
+    bloom: 0, pi: 0
+  };
+  // harita yüklenirken değişen durumları kite taşı
+  function syncMapKit() {
+    MAP_KIT.worldMats = worldMats;
+    MAP_KIT.worldRoot = worldRoot;
+    MAP_KIT.floor = floor;
+    MAP_KIT.WALL_H = WALL_H; MAP_KIT.WALL_T = WALL_T;
+    MAP_KIT.PH = PH; MAP_KIT.STEP = STEP;
+    MAP_KIT.GX = GX; MAP_KIT.GZ = GZ; MAP_KIT.GW = GW; MAP_KIT.GD = GD;
   }
-  function tree(x, z, s) {
-    s = s || 1;
-    var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.17 * s, 0.28 * s, 2.3 * s, 8),
-      new THREE.MeshLambertMaterial({ color: 0x6b4a2a }));
-    trunk.position.set(x, 1.15 * s, z); trunk.castShadow = true; worldRoot.add(trunk);
-    var leafMat = new THREE.MeshLambertMaterial({ color: 0x4d7a35 });
-    var fol = [[0, 2.7, 0, 1.25], [0.7, 2.2, 0.35, 0.85], [-0.6, 2.3, -0.3, 0.9], [0.1, 3.3, 0.15, 0.75]];
-    for (var i = 0; i < fol.length; i++) {
-      var f = fol[i];
-      var leaf = new THREE.Mesh(new THREE.SphereGeometry(f[3] * s, 10, 8), leafMat);
-      leaf.position.set(x + f[0] * s, f[1] * s, z + f[2] * s);
-      leaf.castShadow = true; worldRoot.add(leaf);
-    }
-    props.push({ x0: x - 0.32 * s, x1: x + 0.32 * s, z0: z - 0.32 * s, z1: z + 0.32 * s, y0: 0, y1: 2.3 * s });
-  }
-  function stall(x, z, rot, color) {
-    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rot || 0;
-    var wood = new THREE.MeshLambertMaterial({ color: 0x7a5a34 });
-    var postGeo = new THREE.BoxGeometry(0.14, 2.1, 0.14);
-    var pts = [[-1.25, -0.85], [1.25, -0.85], [-1.25, 0.85], [1.25, 0.85]];
-    for (var i = 0; i < pts.length; i++) {
-      var post = new THREE.Mesh(postGeo, wood);
-      post.position.set(pts[i][0], 1.05, pts[i][1]); post.castShadow = true; g.add(post);
-    }
-    var canopy = new THREE.Mesh(new THREE.BoxGeometry(3.05, 0.09, 2.25), new THREE.MeshLambertMaterial({ color: color }));
-    canopy.position.set(0, 2.12, 0); canopy.rotation.z = 0.07; canopy.castShadow = true; g.add(canopy);
-    var table = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.7, 1.05), wood);
-    table.position.set(0, 0.35, 0.12); table.castShadow = true; g.add(table);
-    var fruit = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.34, 0.52),
-      new THREE.MeshLambertMaterial({ color: 0xcf9f3a }));
-    fruit.position.set(-0.55, 0.87, 0.12); g.add(fruit);
-    worldRoot.add(g);
-    props.push({ x0: x - 1.2, x1: x + 1.2, z0: z - 0.55, z1: z + 0.65, y0: 0, y1: 0.7 });
-  }
-  function fountain(x, z) {
-    var stone = new THREE.MeshLambertMaterial({ color: 0x9a9484 });
-    var base = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.5, 0.75, 22), stone);
-    base.position.set(x, 0.375, z); base.castShadow = true; base.receiveShadow = true; worldRoot.add(base);
-    var water = new THREE.Mesh(new THREE.CircleGeometry(2.04, 22),
-      new THREE.MeshLambertMaterial({ color: 0x3c7d9a, transparent: true, opacity: 0.85 }));
-    water.rotation.x = -Math.PI / 2; water.position.set(x, 0.78, z); worldRoot.add(water);
-    var col = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.32, 2.0, 10), stone);
-    col.position.set(x, 1.75, z); col.castShadow = true; worldRoot.add(col);
-    var bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.68, 0.22, 14), stone);
-    bowl.position.set(x, 2.55, z); bowl.castShadow = true; worldRoot.add(bowl);
-    props.push({ x0: x - 2.3, x1: x + 2.3, z0: z - 2.3, z1: z + 2.3, y0: 0, y1: 0.75 });
-  }
-
-  /* ---------------- HARİTA 1: DUST II FLAT (radar düzeni) ---------------- */
-  function buildDust2Flat() {
-    // güney: T tarafı
-    addRoom(-22, 39, 21, 10, 'T Spawn');
-    addRoom(-37, 27, 15, 22, 'T Plat');
-    addRoom(-47, 19, 11, 22, 'T Ramp');
-    addRoom(-44, 9, 20, 16, 'Outside Tunnels');
-    addRoom(-39, 0, 8, 10, 'Tunnel Stairs');
-    addRoom(-46, -9, 27, 10, 'Upper Tunnels');
-    addRoom(-37, -14, 4, 7, 'B Tunnel Stairs');
-    addRoom(-24, -11, 18, 4, 'Lower Tunnels');
-
-    // orta hat
-    addRoom(-10, 11, 5, 28, 'Suicide');
-    addRoom(-8, 11, 18, 14, 'Top Mid');
-    addRoom(-6, -15, 9, 28, 'Mid');
-    addRoom(-8, -18, 11, 5, 'Mid Doors');
-    addRoom(4, -15, 3, 28, 'Catwalk');
-    addRoom(2, -15, 16, 8, 'A Short Lower');
-
-    // CT tarafı
-    addRoom(-23, -38, 17, 21, 'CT Mid');
-    addRoom(-9, -38, 21, 14, 'CT Spawn');
-    addRoom(-9, -24, 20, 9, 'CT Mid East');
-    addRoom(11, -38, 7, 25, 'A Short');
-
-    // A bölgesi
-    addRoom(12, -41, 24, 10, 'A Plat');
-    addRoom(29, -49, 15, 8, 'Goose');
-    addRoom(36, -41, 8, 8, 'A Ramp');
-    addRoom(29, -33, 15, 7, 'A Cross');
-    addRoom(35, -26, 12, 29, 'Long A');
-    addRoom(25, 0, 21, 8, 'Long Corner');
-    addRoom(17, 6, 10, 12, 'Long Doors');
-    addRoom(17, 18, 9, 16, 'Outside Long');
-    addRoom(8, 17, 11, 8, 'Top Mid Link');
-    addRoom(27, 6, 8, 16, 'Side Pit');
-    addRoom(36, 6, 8, 16, 'Pit');
-    addRoom(44, 7, 4, 15, 'Pit Plat');
-
-    // B bölgesi
-    addRoom(-46, -51, 11, 18, 'B Plat');
-    addRoom(-35, -43, 9, 10, 'B Site');
-    addRoom(-26, -41, 3, 4, 'Window');
-    addRoom(-28, -34, 7, 9, 'B Doors');
-    addRoom(-46, -33, 20, 19, 'B Lower');
-
-    // T tarafı eşyaları
-    addCrate(-21, 45.5, 1.6, 1.6, 0.9);
-    addBarrel(-21, 40.5);
-    addCrate(-35, 46, 2, 2, 1.7);
-    addCrate(-33.4, 46.2, 1.2, 1.2, 0.85, 1.7);
-    addBarrel(-24, 45);
-    addBarrel(-46, 26);
-    addCrate(-38, 36, 1.4, 1.4, 0.85);
-    addCrate(-41, 12, 1.8, 1.8, 0.85);
-    addBarrel(-27, 20);
-    addCrate(-30, 22, 1.4, 1.4, 0.85);
-    addCrate(-44, -6, 2, 2, 1.4);
-    addBarrel(-30, -3);
-    addCrate(-15, -10, 2, 2, 0.85);
-
-    // orta hat eşyaları
-    addCrate(-5, -10, 2, 2, 1.4);          // XBOX
-    addBarrel(1.5, 2);
-    addBarrel(7.5, 21); addBarrel(8.9, 21.4);
-    addCrate(-7, 23, 1.4, 1.4, 0.85);
-    addCrate(16, 23, 1.4, 1.4, 0.85);
-    addCrate(16, -9, 1.2, 1.2, 0.85);
-    addCrate(16, -30, 1.4, 1.4, 0.85);
-    addBarrel(13, -22);
-
-    // CT tarafı eşyaları
-    addCrate(-2, -36, 1.6, 1.6, 0.85);
-    addBarrel(-4, -28);
-    addCrate(-21, -35, 2, 2, 1.7);
-    addCrate(-12, -20, 1.6, 1.6, 0.85);
-    addBarrel(-20, -24);
-
-    // A bölgesi eşyaları
-    addCrate(29, -35, 1.6, 1.6, 1.5);      // default
-    addCrate(16, -40, 1.4, 1.4, 0.85);     // ninja
-    addCrate(26, -32, 1.4, 1.4, 0.85);
-    addCrate(41, -39.5, 1.4, 1.4, 0.85);
-    addBarrel(36, -46); addBarrel(37.4, -46.2);
-    addCrate(40, -47, 1.6, 1.6, 0.85);
-    addCrate(40, -30, 1.6, 1.6, 0.85);
-    addBlock(41, -23, 4, 1.8, 1.0, 0x8a5a2b);   // A Car
-    addCrate(37, -8, 1.6, 1.6, 0.85);
-    addCrate(27, 2, 1.6, 1.6, 0.9);             // blue crate
-    addCrate(18, 7, 1.2, 1.2, 0.85);
-    addCrate(25.5, 16, 1.2, 1.2, 0.85);
-    addCrate(19, 30, 1.8, 1.8, 0.9);
-    addBarrel(25, 32);
-    addCrate(28.5, 20, 1.4, 1.4, 0.85);
-    addBarrel(38, 12);
-    addCrate(42, 19, 1.4, 1.4, 0.85);
-    addBlock(44, 8, 0.4, 10, 2.2, 0x8f8a7a);    // Pit / Pit Plat ayrımı
-
-    // B bölgesi eşyaları
-    addCrate(-29.5, -40.5, 1.6, 1.6, 1.5);      // default
-    addCrate(-34, -42.6, 1.2, 1.2, 0.85);
-    addCrate(-44, -48, 2, 2, 1.7);
-    addBarrel(-37, -46);
-    addBlock(-30, -22, 3.4, 1.8, 1.1, 0x8a5a2b); // B Car
-    addCrate(-43.5, -16, 2, 2, 0.9);
-    addCrate(-38, -16.5, 1.6, 1.6, 0.85);
-    addCrate(-38, -33, 2.2, 2.2, 1.7);          // Big Box
-
-    // kapı çerçeveleri
-    var fm = worldMats.frame;
-    part(11, 0.35, 0.4, -3, 2.92, -18, fm);     // Mid Doors
-    part(10, 0.35, 0.4, 22, 2.92, 17.6, fm);    // Long Doors
-    part(0.4, 0.35, 9, -25, 2.92, -29.5, fm);   // B Doors
-
-    // zemin işaretleri
-    groundDecal(letterTexture('A'), 5, 31.5, -34.5, 0, true);
-    groundDecal(letterTexture('B'), 5, -31, -38.5, 0, true);
-    groundDecal(labelTexture('T SPAWN'), 9, -12, 44.5, 0, true);
-    groundDecal(labelTexture('CT SPAWN'), 9, 8.5, -30, 0, true);
-    groundTint(17, 8, -12, 44, 0x3fbf5f, 0.16);
-    groundTint(7, 12, 8.5, -30, 0x3fbf5f, 0.18);
-    groundTint(7, 6, 31.5, -34.2, 0xe0641a, 0.34);
-    groundTint(7, 7, -31, -38.3, 0xe0641a, 0.34);
-  }
-
-  // T/CT doğuş ızgaraları: 3 sütun x 5 sıra, radar işaretli yeşil alanların içinde
-  function dust2FlatSpawnList() {
-    var bx = [-17, -11, -5], bz = [40, 42, 44, 46, 48];
-    var rx = [7, 9, 11], rz = [-35.5, -33, -30.5, -28, -25.5];
-    var blue = [], red = [], i, j;
-    for (i = 0; i < bz.length; i++)
-      for (j = 0; j < bx.length; j++) blue.push({ x: bx[j], z: bz[i], yaw: 0 });
-    for (i = 0; i < rz.length; i++)
-      for (j = 0; j < rx.length; j++) red.push({ x: rx[j], z: rz[i], yaw: Math.PI });
-    return { blue: blue, red: red };
-  }
-
-  /* ---------------- HARİTA 2: AIM REDLINE (depo salonu) ---------------- */
-  function buildRedline() {
-    addRoom(-12, -17, 24, 34, 'Depo Salonu');
-
-    // zemin: takım alanları, silah siluetleri, tehlike şeridi
-    groundTint(6.5, 20, -9.0, 0, 0x3d7fd4, 0.12);
-    groundTint(6.5, 20, 9.0, 0, 0xa33b30, 0.12);
-    groundDecal(texWeaponDecal, 4.0, -5.1, 0, 0.25, true);
-    groundDecal(texWeaponDecal, 4.0, 5.1, 0, 0.25 + Math.PI, true);
-    groundDecal(texWeaponDecal, 3.6, 0, 5.0, 0.15, true);
-    groundDecal(texWeaponDecal, 3.6, 0, -5.0, 0.15 + Math.PI, true);
-    groundDecal(texWeaponDecal, 3.2, 4.2, 12.6, -0.5, true);
-    groundDecal(texWeaponDecal, 3.2, -4.2, -12.6, -0.5 + Math.PI, true);
-    hazardStrip(-11.45, -16, 3.2, 9.5);
-
-    // merkez çelik konteyner
-    addMetalCrate(-1.5, -1.2, 3.0, 2.4, 2.3);
-
-    // 180° dönel simetrik siper yerleşimi (her parça eşiyle aynı)
-    addCrate(3.8, 8.0, 2.0, 2.0, 1.7);
-    addCrate(-5.8, -10.0, 2.0, 2.0, 1.7);
-    addCrate(3.6, 5.2, 1.4, 1.4, 0.85);
-    addCrate(-5.0, -6.6, 1.4, 1.4, 0.85);
-    addMetalCrate(-8.2, 8.4, 2.6, 2.6, 2.3);
-    addMetalCrate(5.6, -11.0, 2.6, 2.6, 2.3);
-    addCrate(7.2, 9.0, 1.7, 1.7, 0.9);
-    addCrate(-8.9, -10.7, 1.7, 1.7, 0.9);
-    addCrate(-4.8, 7.0, 1.7, 1.7, 0.9);
-    addCrate(3.1, -8.7, 1.7, 1.7, 0.9);
-    // istiflenmiş ahşap kasalar
-    addCrate(-9.2, 6.0, 2.2, 2.2, 0.9);
-    addCrate(-9.0, 6.2, 1.6, 1.6, 0.85, 0.9);
-    addCrate(7.0, -8.2, 2.2, 2.2, 0.9);
-    addCrate(7.4, -7.8, 1.6, 1.6, 0.85, 0.9);
-    // konteyner üstü kasalar
-    addCrate(-7.9, 8.7, 1.3, 1.3, 0.7, 2.3);
-    addCrate(6.6, -10.0, 1.3, 1.3, 0.7, 2.3);
-    // varil çiftleri
-    addBarrel(-3.4, 2.6); addBarrel(3.4, -2.6);
-    addBarrel(6.0, 6.6); addBarrel(-6.0, -6.6);
-    // doğuş önü siper kasaları: mavi sağdan sola, kırmızı soldan sağa
-    addCrate(-7.6, 2.6, 1.5, 1.5, 1.8);
-    addCrate(-7.6, -2.2, 1.5, 1.5, 1.8);
-    addCrate(-7.6, -7.0, 1.5, 1.5, 1.8);
-    addCrate(6.1, -2.6, 1.5, 1.5, 1.8);
-    addCrate(6.1, 2.2, 1.5, 1.5, 1.8);
-    addCrate(6.1, 7.0, 1.5, 1.5, 1.8);
-
-    // tavan + aydınlatma
-    warehouseCeiling(-12, -17, 24, 34, 7.5);
-
-    // yüksek pencereler (dekor)
-    var glass = new THREE.MeshBasicMaterial({ color: 0xd9e6ea });
-    var wframe = new THREE.MeshLambertMaterial({ color: 0x3a3d3e });
-    var wz, sx, fx, fr, gl, wx, sz, fz, fr2, gl2;
-    for (wz = -12.5; wz <= 12.5; wz += 5) {
-      for (sx = -1; sx <= 1; sx += 2) {
-        fx = sx * 11.72;
-        fr = new THREE.Mesh(new THREE.BoxGeometry(0.14, 1.8, 3.4), wframe);
-        fr.position.set(fx, 5.15, wz);
-        fr.userData.noHit = true; worldRoot.add(fr);
-        gl = new THREE.Mesh(new THREE.PlaneGeometry(3.1, 1.5), glass);
-        gl.position.set(fx - sx * 0.09, 5.15, wz);
-        gl.rotation.y = -sx * Math.PI / 2;
-        gl.userData.noHit = true; worldRoot.add(gl);
-      }
-    }
-    for (wx = -6; wx <= 6; wx += 6) {
-      for (sz = -1; sz <= 1; sz += 2) {
-        fz = sz * 16.72;
-        fr2 = new THREE.Mesh(new THREE.BoxGeometry(3.4, 1.8, 0.14), wframe);
-        fr2.position.set(wx, 5.15, fz);
-        fr2.userData.noHit = true; worldRoot.add(fr2);
-        gl2 = new THREE.Mesh(new THREE.PlaneGeometry(3.1, 1.5), glass);
-        gl2.position.set(wx, 5.15, fz - sz * 0.09);
-        if (sz > 0) gl2.rotation.y = Math.PI;
-        gl2.userData.noHit = true; worldRoot.add(gl2);
-      }
-    }
-  }
-
-  // doğu/batı duvarlarına yakın, ortaya hizalı tek sıra doğuş (sağdan sola)
-  function redlineSpawnList() {
-    var n = 15, step = 2.2, blue = [], red = [];
-    for (var i = 0; i < n; i++) {
-      var z = 15.4 - i * step;
-      blue.push({ x: -10.4, z: z, yaw: -Math.PI / 2 });
-      red.push({ x: 10.4, z: -z, yaw: Math.PI / 2 });
-    }
-    return { blue: blue, red: red };
-  }
-
-  /* ---------------- HARİTA 3: AWP_LEGO_2 ---------------- */
-  var LEGO_GOLD_COL = 0xd9a72a;
-  // altın lego kütlesi: yanlar tuğla, üst yüz stud kaplama
-  function goldBox(x, z, w, d, y0, h) {
-    var g = boxGeo(w, h, d, 0.5);
-    g.translate(x + w / 2, y0 + h / 2, z + d / 2);
-    var m = new THREE.Mesh(g, [worldMats.goldSide, worldMats.goldSide, worldMats.goldTop,
-      worldMats.goldSide, worldMats.goldSide, worldMats.goldSide]);
-    m.castShadow = true; m.receiveShadow = true;
-    worldRoot.add(m);
-    props.push({ x0: x, x1: x + w, z0: z, z1: z + d, y0: y0, y1: y0 + h });
-  }
-  // renkli baseplate alanı (zemin studları)
-  function plateZone(x, z, w, d, color) {
-    var t = texLegoPlate.clone();
-    t.needsUpdate = true;
-    t.repeat.set(w / 2, d / 2);
-    var mat = new THREE.MeshLambertMaterial({ map: t, color: color });
-    mat.userData.ownMap = true;
-    var m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), mat);
-    m.rotation.x = -Math.PI / 2;
-    m.position.set(x + w / 2, 0.012, z + d / 2);
-    m.receiveShadow = true; m.userData.noHit = true;
-    worldRoot.add(m);
-  }
-  // x yüzeyine monte merdiven (basamaklar z boyunca)
-  function ladderX(x, zc, y0, y1) {
-    var mat = worldMats.ladder, i, m, y;
-    for (i = -1; i <= 1; i += 2) {
-      m = part(0.07, y1 - y0, 0.07, x, (y0 + y1) / 2, zc + i * 0.45, mat);
-      m.userData.noHit = true; m.castShadow = false;
-    }
-    for (y = y0 + 0.2; y < y1 - 0.06; y += 0.3) {
-      m = part(0.06, 0.06, 0.96, x, y, zc, mat);
-      m.userData.noHit = true; m.castShadow = false;
-    }
-  }
-  // z yüzeyine monte merdiven (basamaklar x boyunca)
-  function ladderZ(z, xc, y0, y1) {
-    var mat = worldMats.ladder, i, m, y;
-    for (i = -1; i <= 1; i += 2) {
-      m = part(0.07, y1 - y0, 0.07, xc + i * 0.45, (y0 + y1) / 2, z, mat);
-      m.userData.noHit = true; m.castShadow = false;
-    }
-    for (y = y0 + 0.2; y < y1 - 0.06; y += 0.3) {
-      m = part(0.96, 0.06, 0.06, xc, y, z, mat);
-      m.userData.noHit = true; m.castShadow = false;
-    }
-  }
-  // tırmanılabilir merdiven bölgesi (x,z merkez; hx/hz yatay tolerans)
-  function addClimb(x, z, y0, y1, hx, hz) {
-    climbZones.push({ x: x, z: z, y0: y0, y1: y1, hx: hx, hz: hz });
-  }
-  // tünel ağzı söve + kemer çıtası
-  function archTrimX(xf) {
-    var mat = worldMats.trim, s, i, b, t, z, y, dz, dy, len, N = 20, dt = Math.PI / N;
-    for (s = -1; s <= 1; s += 2) {
-      b = part(0.13, 2.34, 0.22, xf, 1.17, s * 3.06, mat);
-      b.userData.noHit = true;
-    }
-    for (i = 0; i <= N; i++) {
-      t = i * dt;
-      z = 3.0 * Math.cos(t);
-      y = 2.3 + 0.55 * Math.sin(t);
-      dz = -3.0 * Math.sin(t) * dt;
-      dy = 0.55 * Math.cos(t) * dt;
-      len = Math.sqrt(dz * dz + dy * dy) * 1.45 + 0.05;
-      b = part(0.13, 0.18, len, xf, y, z, mat);
-      b.rotation.x = Math.atan2(-dy, dz);
-      b.userData.noHit = true;
-    }
-  }
-  // tünel tavanı koyu astar (delikten yeşil zemin görünsün diye parçalı)
-  function darkCeil(x, z, w, d) {
-    var m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshBasicMaterial({ color: 0x3a2f1d }));
-    m.rotation.x = Math.PI / 2;
-    m.position.set(x + w / 2, 2.585, z + d / 2);
-    m.userData.noHit = true;
-    worldRoot.add(m);
-  }
-  // rampa: görünür eğim + pürüzsüz eğimli çarpışma yüzeyi (basamaksız)
-  function addRamp(x0, x1, zA, zB, yA, yB) {
-    ramps.push({ x0: x0, x1: x1, zA: zA, zB: zB, yA: yA, yB: yB });
-  }
+  // motorun her haritada kullandığı rampa sorguları
   function rampYAt(r, z) {
     var span = r.zB - r.zA;
     if (Math.abs(span) < 1e-6) return Math.max(r.yA, r.yB);
@@ -1504,776 +1280,25 @@
       if (x <= r.x0 || x >= r.x1) continue;
       if (z <= Math.min(r.zA, r.zB) || z >= Math.max(r.zA, r.zB)) continue;
       var ry = rampYAt(r, z);
-      if (ry > y + STEP + 0.01 && ry - 0.32 < y + PH) return true;   // gövdeler, alt boşluk açık kalır
+      if (ry > y + STEP + 0.01 && ry - 0.32 < y + PH) return true;
     }
     return false;
   }
-  function buildLegoRamp(dir) {
-    var s, L = Math.sqrt(12 * 12 + 3.2 * 3.2);
-    var th = dir * Math.atan2(3.2, 12);
-    var midZ = dir * 16;
-    var rg = boxGeo(7, 0.3, L, 0.5);
-    var rm = new THREE.Mesh(rg, worldMats.goldTop);
-    rm.position.set(0, 1.6 - 0.15 * Math.cos(th), midZ - 0.15 * Math.sin(th));
-    rm.rotation.x = th;
-    rm.castShadow = true; rm.receiveShadow = true;
-    worldRoot.add(rm);
-    for (s = -1; s <= 1; s += 2) {
-      var cg = boxGeo(0.26, 0.5, L, 0.5);
-      var cm = new THREE.Mesh(cg, worldMats.gold);
-      cm.position.set(s * 3.73, 1.6 + 0.25 * Math.cos(th), midZ + 0.25 * Math.sin(th));
-      cm.rotation.x = th;
-      cm.castShadow = true; cm.receiveShadow = true;
-      worldRoot.add(cm);
+  // harita tanımları maps/ klasöründeki dosyalardan gelir (index.html'de game.js'ten önce yüklenir)
+  var MAP_DEFS = {};
+  (function () {
+    var src = window.BS_MAPS || {};
+    for (var id in src) {
+      var m = src[id];
+      MAP_DEFS[id] = {
+        name: m.name, desc: m.desc, theme: m.theme, wallH: m.wallH,
+        restricted: !!m.restricted, duel: !!m.duel, street: !!m.street,
+        spawns: m.spawns, miniLabels: m.miniLabels, routes: m.routes,
+        build: m.build, spawnsFn: m.spawnsFn, postBuild: m.postBuild, helpers: m.helpers
+      };
     }
-    // tek eğimli yüzey: basamak sarsıntısı yok, rampa altından yürünebilir
-    addRamp(-3.5, 3.5, dir * 22, dir * 10, 0, 3.2);
-    // korkuluk üst yüzeyleri: üzerinde yürünebilir, ama alt geçişi kapatmaz
-    ledgeRamps.push({ x0: -3.95, x1: -3.52, zA: dir * 22, zB: dir * 10, yA: 0.5, yB: 3.7 });
-    ledgeRamps.push({ x0: 3.52, x1: 3.95, zA: dir * 22, zB: dir * 10, yA: 0.5, yB: 3.7 });
-  }
-  function buildAwpLego2() {
-    addRoom(-30, -26, 60, 52, 'Lego Arena');
+  })();
 
-    // zemin baseplate bölgeleri
-    plateZone(-30, 12, 60, 14, 0x355fc4);
-    plateZone(-30, -26, 60, 14, 0xc2352f);
-    plateZone(-30, -12, 60, 24, 0x3f9a3a);
-
-    // altın üs: kuzey/güney kütleler + tünel üstü güverte (orta delikli)
-    goldBox(-15, -10, 30, 7, 0, 3.2);
-    goldBox(-15, 3, 30, 7, 0, 3.2);
-    goldBox(-15, -3, 13.4, 6, 2.6, 0.6);
-    goldBox(1.6, -3, 13.4, 6, 2.6, 0.6);
-    goldBox(-1.6, -3, 3.2, 1.4, 2.6, 0.6);
-    goldBox(-1.6, 1.6, 3.2, 1.4, 2.6, 0.6);
-    darkCeil(-14.6, -2.85, 13.0, 5.7);
-    darkCeil(1.6, -2.85, 13.0, 5.7);
-    darkCeil(-1.6, -2.85, 3.2, 1.25);
-    darkCeil(-1.6, 1.6, 3.2, 1.25);
-    // tünel ağızlarındaki üst kiriş
-    goldBox(14.2, -3, 0.8, 6, 2.3, 0.9);
-    goldBox(-15, -3, 0.8, 6, 2.3, 0.9);
-    archTrimX(15.06);
-    archTrimX(-15.06);
-
-    // güverte parapetleri (rampa ve tünel boşlukları açık)
-    goldBox(-15, 9.6, 11, 0.4, 3.2, 1.0);
-    goldBox(4, 9.6, 11, 0.4, 3.2, 1.0);
-    goldBox(-15, -10, 11, 0.4, 3.2, 1.0);
-    goldBox(4, -10, 11, 0.4, 3.2, 1.0);
-    goldBox(14.6, -10, 0.4, 8.5, 3.2, 1.0);
-    goldBox(14.6, 1.5, 0.4, 8.5, 3.2, 1.0);
-    goldBox(-15, -10, 0.4, 8.5, 3.2, 1.0);
-    goldBox(-15, 1.5, 0.4, 8.5, 3.2, 1.0);
-    // tünel üstü boşluklarda alçak eşik
-    goldBox(14.6, -1.5, 0.4, 3, 3.2, 0.35);
-    goldBox(-15, -1.5, 0.4, 3, 3.2, 0.35);
-
-    // kule: güvertedeki deliğin tam üzerinde, dört kapılı oyuk tuğla gövde + belfry
-    goldBox(-4, -4, 2.9, 0.5, 3.2, 3.0);
-    goldBox(1.1, -4, 2.9, 0.5, 3.2, 3.0);
-    goldBox(-1.1, -4, 2.2, 0.5, 5.4, 0.8);
-    goldBox(-4, 3.5, 2.9, 0.5, 3.2, 3.0);
-    goldBox(1.1, 3.5, 2.9, 0.5, 3.2, 3.0);
-    goldBox(-1.1, 3.5, 2.2, 0.5, 5.4, 0.8);
-    goldBox(-4, -3.5, 0.5, 2.4, 3.2, 3.0);
-    goldBox(-4, 1.1, 0.5, 2.4, 3.2, 3.0);
-    goldBox(-4, -1.1, 0.5, 2.2, 5.4, 0.8);
-    goldBox(3.5, -3.5, 0.5, 2.4, 3.2, 3.0);
-    goldBox(3.5, 1.1, 0.5, 2.4, 3.2, 3.0);
-    goldBox(3.5, -1.1, 0.5, 2.2, 5.4, 0.8);
-    var tx2, tz2, tp;
-    for (tx2 = -1; tx2 <= 1; tx2 += 2) for (tz2 = -1; tz2 <= 1; tz2 += 2) {
-      tp = part(0.55, 2.6, 0.55, tx2 * 3.75, 7.5, tz2 * 3.75, worldMats.gold);
-      tp.userData.noHit = true;
-    }
-    tp = part(7.5, 0.35, 0.7, 0, 8.65, -3.75, worldMats.gold); tp.userData.noHit = true;
-    tp = part(7.5, 0.35, 0.7, 0, 8.65, 3.75, worldMats.gold); tp.userData.noHit = true;
-    tp = part(0.7, 0.35, 7.5, 3.75, 8.65, 0, worldMats.gold); tp.userData.noHit = true;
-    tp = part(0.7, 0.35, 7.5, -3.75, 8.65, 0, worldMats.gold); tp.userData.noHit = true;
-
-    // güvertedeki delik çerçevesi
-    addBlock(-1.6, -1.82, 3.2, 0.22, 0.2, LEGO_GOLD_COL, 3.2);
-    addBlock(-1.6, 1.6, 3.2, 0.22, 0.2, LEGO_GOLD_COL, 3.2);
-    addBlock(-1.82, -1.6, 0.22, 3.2, 0.2, LEGO_GOLD_COL, 3.2);
-    addBlock(1.6, -1.6, 0.22, 3.2, 0.2, LEGO_GOLD_COL, 3.2);
-
-    // kırmızı merdivenler: dış cepheler, tünel içi ve güverte deliği
-    ladderX(15.08, 4.55, 0.15, 4.35);
-    ladderX(-15.08, -4.55, 0.15, 4.35);
-    addClimb(15.08, 4.55, 0.15, 4.25, 0.55, 0.9);
-    addClimb(-15.08, -4.55, 0.15, 4.25, 0.55, 0.9);
-    ladderZ(2.94, -11, 0.15, 2.5);
-    ladderZ(-2.94, 11, 0.15, 2.5);
-    ladderX(-1.44, 0, 0.15, 3.15);
-    addClimb(-1.44, 0, 0.15, 3.2, 0.5, 0.9);
-
-    // iki rampa (güney / kuzey)
-    buildLegoRamp(1);
-    buildLegoRamp(-1);
-  }
-
-  // takım duvarlarına yakın, ortaya hizalı tek sıra doğuş (sağdan sola)
-  function legoSpawnList() {
-    var n = 15, step = 2.5, blue = [], red = [];
-    for (var i = 0; i < n; i++) {
-      var x = 17.5 - i * step;
-      blue.push({ x: x, z: 23.4, yaw: 0 });
-      red.push({ x: -x, z: -23.4, yaw: Math.PI });
-    }
-    return { blue: blue, red: red };
-  }
-
-  function legoRoutes() {
-    var blue = [
-      [[16, 16], [18, 9], [18, 2], [16, 0], [8, 0], [-8, 0], [-16, 0], [-18, -3], [-18, -10], [-14, -16], [-6, -20]],
-      [[14, 18], [18, 12], [18, 4], [18, -4], [16, -12], [10, -16], [6, -20]],
-      [[10, 20], [6, 24], [-4, 24], [-14, 20], [-18, 12], [-18, 4], [-18, -4], [-18, -12], [-14, -16], [-6, -20]],
-      [[12, 16], [16, 10], [18, 3], [16, 0], [10, 0], [0, 0], [-10, 0], [-16, 0], [-18, -4], [-18, -12], [-12, -16], [-6, -20]],
-      [[10, 22], [2, 24], [-10, 22], [-16, 16], [-18, 8], [-18, -2], [-16, -10], [-10, -14], [-6, -17], [-6, -21]]
-    ];
-    var red = [], i, j, r;
-    for (i = 0; i < blue.length; i++) {
-      r = [];
-      for (j = 0; j < blue[i].length; j++) r.push([-blue[i][j][0], -blue[i][j][1]]);
-      red.push(r);
-    }
-    return { blue: blue, red: red };
-  }
-
-  /* ---------------- HARİTA 4: MEYDAN KÖY ---------------- */
-  function buildVillage() {
-    addRoom(-16, -16, 32, 32, 'Meydan');
-    addRoom(-31, -4, 15, 8, 'Batı Çarşı');
-    addRoom(16, -4, 15, 8, 'Doğu Çarşı');
-    addRoom(-27, 8, 11, 16, 'Batı Avlu');
-    addRoom(16, 8, 11, 16, 'Doğu Avlu');
-    addRoom(-27, -24, 11, 16, 'Batı Kışla');
-    addRoom(16, -24, 11, 16, 'Doğu Kışla');
-    addRoom(-7, 16, 14, 18, 'Mavi Yol');
-    addRoom(-7, -34, 14, 18, 'Kırmızı Yol');
-    fountain(0, 0);
-    stall(-11, 6, 0.2, 0xd0a03a);
-    stall(11, -6, Math.PI + 0.2, 0x3d7fd4);
-    stall(-11, -6, -0.25, 0xa33b30);
-    stall(11, 6, Math.PI - 0.25, 0x4f7a3a);
-    addCrate(-13, -11, 2, 2, 0.9);
-    addCrate(11, 11, 2, 2, 1.2);
-    addCrate(-4, 11, 3, 0.8, 0.9);
-    addCrate(1, -11, 3, 0.8, 0.9);
-    addBarrel(-14, 1); addBarrel(14, -1); addBarrel(-14, -1.5);
-    addBlock(6, -13, 2.5, 1, 1.0, 0xa89f88);
-    addBlock(-8, 13, 2.5, 1, 1.0, 0xa89f88);
-    tree(-14, 14, 1.05);
-    tree(14, -14, 1.1);
-    tree(-14, -14, 0.95);
-    tree(14, 14, 1.0);
-    // dekoratif evler (yürünebilir alan dışında)
-    house(-24, 6, 8, 3.2, 4.2, '#d8cbb0', '#8a4b32');
-    house(24, -6, 8, 3.2, 4.2, '#d8cbb0', '#8a4b32');
-    house(-40, 16, 9, 8, 5.2, '#cfc0a2', '#7c3f2a');
-    house(40, -16, 9, 8, 5.2, '#cfc0a2', '#7c3f2a');
-    house(0, 42, 12, 8, 5.0, '#d8cbb0', '#8a4b32');
-    house(0, -42, 12, 8, 5.0, '#cfc0a2', '#7c3f2a');
-    house(-40, -20, 8, 9, 4.6, '#d8cbb0', '#7c3f2a');
-    house(40, 20, 8, 9, 4.6, '#d8cbb0', '#7c3f2a');
-    groundTint(13, 10, 0, 27, 0x3d7fd4, 0.14);
-    groundTint(13, 10, 0, -27, 0xa33b30, 0.14);
-    groundDecal(labelTexture('MEYDAN'), 12, 0, 6, 0, true);
-  }
-
-  /* ---------------- HARİTA 5: BANANA 1V1 ---------------- */
-  // radar düzeni: sağ üstte mavi doğuş, sol altta kırmızı doğuş, arada muz kavisli sokak
-  function bananaPallet(x, z, rot) {
-    var wood = new THREE.MeshLambertMaterial({ map: texDoorWood });
-    var bag = new THREE.MeshLambertMaterial({ map: texSandbag });
-    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rot || 0;
-    var i, j, b;
-    for (i = 0; i < 4; i++) {
-      b = new THREE.Mesh(new THREE.BoxGeometry(1.84, 0.06, 0.22), wood);
-      b.position.set(0, 0.05, -0.54 + i * 0.36);
-      b.receiveShadow = true; g.add(b);
-    }
-    for (i = -1; i <= 1; i += 2) {
-      b = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.1, 1.26), wood);
-      b.position.set(i * 0.78, 0.03, 0); g.add(b);
-    }
-    var sackGeo = new THREE.SphereGeometry(0.5, 8, 6);
-    for (j = 0; j < 4; j++) for (i = 0; i < 2; i++) {
-      b = new THREE.Mesh(sackGeo, bag);
-      b.scale.set(0.92, 0.26, 0.58);
-      b.position.set((i - 0.5) * 0.88 + (j % 2 ? 0.05 : -0.04), 0.16 + j * 0.17, (j % 2 ? 0.03 : -0.02));
-      b.rotation.y = (j % 2 ? 0.06 : -0.05);
-      b.castShadow = true; b.receiveShadow = true; g.add(b);
-    }
-    b = new THREE.Mesh(sackGeo, bag);
-    b.scale.set(0.86, 0.26, 0.54);
-    b.position.set(0.04, 0.88, 0.01);
-    b.rotation.y = 0.12;
-    b.castShadow = true; g.add(b);
-    worldRoot.add(g);
-    var turned = rot && Math.abs(Math.sin(rot)) > 0.5;
-    var hx = turned ? 0.66 : 0.94, hz = turned ? 0.94 : 0.66;
-    props.push({ x0: x - hx, x1: x + hx, z0: z - hz, z1: z + hz, y0: 0, y1: 1.03 });
-  }
-  function bananaHash(a, b, c) {
-    var h = (Math.imul(a | 0, 374761393) + Math.imul(b | 0, 668265263) + Math.imul(c | 0, 2246822519)) | 0;
-    h = Math.imul(h ^ (h >>> 13), 1274126177);
-    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-  }
-  function bananaLowWall(x, z, len, alongX, h) {
-    h = h || 1.0;
-    var w = alongX ? len : 0.5, d = alongX ? 0.5 : len;
-    var body = new THREE.Mesh(boxGeo(w, h, d, 0.55), new THREE.MeshLambertMaterial({ map: texAshlar }));
-    body.position.set(x + w / 2, h / 2, z + d / 2);
-    body.castShadow = true; body.receiveShadow = true;
-    worldRoot.add(body);
-    var cap = new THREE.Mesh(boxGeo(w + 0.16, 0.12, d + 0.16, 1.6), new THREE.MeshLambertMaterial({ map: texAshlar, color: 0x8f8a7c }));
-    cap.position.set(x + w / 2, h + 0.06, z + d / 2);
-    cap.castShadow = true; cap.userData.noHit = true;
-    worldRoot.add(cap);
-    props.push({ x0: x, x1: x + w, z0: z, z1: z + d, y0: 0, y1: h + 0.12 });
-  }
-  function bananaPillar(x, z, h) {
-    h = h || 2.4;
-    var stone = new THREE.MeshLambertMaterial({ map: texAshlar });
-    var body = new THREE.Mesh(boxGeo(0.68, h, 0.68, 0.6), stone);
-    body.position.set(x, h / 2, z);
-    body.castShadow = true; body.receiveShadow = true;
-    worldRoot.add(body);
-    var cap = new THREE.Mesh(boxGeo(0.9, 0.14, 0.9, 1.6), new THREE.MeshLambertMaterial({ map: texAshlar, color: 0x8f8a7c }));
-    cap.position.set(x, h + 0.07, z);
-    cap.castShadow = true; cap.userData.noHit = true;
-    worldRoot.add(cap);
-    props.push({ x0: x - 0.34, x1: x + 0.34, z0: z - 0.34, z1: z + 0.34, y0: 0, y1: h + 0.14 });
-  }
-  function bananaLeanPallet(x, z, rotY) {
-    var wood = new THREE.MeshLambertMaterial({ map: texDoorWood });
-    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rotY || 0;
-    var lean = 0.2, i;
-    for (i = 0; i < 5; i++) {
-      var p = new THREE.Mesh(new THREE.BoxGeometry(0.26, 1.3, 0.06), wood);
-      p.position.set(-0.56 + i * 0.28, 0.63, 0.1);
-      p.rotation.x = lean;
-      p.castShadow = true; g.add(p);
-    }
-    for (i = 0; i < 3; i++) {
-      var bat = new THREE.Mesh(new THREE.BoxGeometry(1.38, 0.1, 0.05), wood);
-      bat.position.set(0, 0.33 + i * 0.4, -0.02);
-      bat.rotation.x = lean;
-      g.add(bat);
-    }
-    g.traverse(function (o) { if (o.isMesh) o.userData.noHit = true; });
-    worldRoot.add(g);
-  }
-  function bananaLaundry(x1, z1, x2, z2, y) {
-    var dx = x2 - x1, dz = z2 - z1;
-    var len = Math.sqrt(dx * dx + dz * dz);
-    var dir = new THREE.Vector3(dx, 0, dz).normalize();
-    var line = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, len - 0.2, 4),
-      new THREE.MeshLambertMaterial({ color: 0x3a3936 }));
-    line.position.set((x1 + x2) / 2, y, (z1 + z2) / 2);
-    line.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-    line.userData.noHit = true;
-    worldRoot.add(line);
-    var cols = [0xdfe3e6, 0x7b95a8, 0xc9b981];
-    for (var i = 0; i < 3; i++) {
-      var t = 0.28 + i * 0.22;
-      var cx = x1 + dx * t, cz = z1 + dz * t;
-      var cloth = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.56, 0.03),
-        new THREE.MeshLambertMaterial({ color: cols[i] }));
-      cloth.position.set(cx, y - 0.32, cz);
-      cloth.rotation.y = Math.atan2(-dir.z, dir.x);
-      cloth.rotation.z = (i - 1) * 0.05;
-      cloth.userData.noHit = true;
-      worldRoot.add(cloth);
-    }
-  }
-  function bananaBigDoor(x, z, rotY, double, arched) {
-    var stone = new THREE.MeshLambertMaterial({ map: texAshlar });
-    var wood = new THREE.MeshLambertMaterial({ map: texDoorWood });
-    var iron = new THREE.MeshLambertMaterial({ color: 0x2c3032 });
-    var glow = new THREE.MeshBasicMaterial({ color: 0xffd58a });
-    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rotY || 0;
-    var dw = double ? 1.78 : 1.06, dh = double ? 2.5 : 2.24;
-    var i;
-    var step = new THREE.Mesh(boxGeo(dw + 0.5, 0.12, 0.42, 1), stone);
-    step.position.set(0, 0.06, 0.16); step.receiveShadow = true; g.add(step);
-    var leaf = new THREE.Mesh(new THREE.BoxGeometry(dw, dh, 0.09), wood);
-    leaf.position.set(0, dh / 2 + 0.06, 0.03); g.add(leaf);
-    for (i = 1; i < (double ? 6 : 4); i++) {
-      var pl = new THREE.Mesh(new THREE.BoxGeometry(0.035, dh - 0.12, 0.02), new THREE.MeshLambertMaterial({ color: 0x3e2814 }));
-      pl.position.set(-dw / 2 + dw * i / (double ? 6 : 4), dh / 2 + 0.06, 0.085); g.add(pl);
-    }
-    if (double) {
-      var seam = new THREE.Mesh(new THREE.BoxGeometry(0.05, dh, 0.03), iron);
-      seam.position.set(0, dh / 2 + 0.06, 0.09); g.add(seam);
-    }
-    for (i = -1; i <= 1; i += 2) {
-      var jamb = new THREE.Mesh(boxGeo(0.2, dh + 0.2, 0.14, 0.8), stone);
-      jamb.position.set(i * (dw / 2 + 0.12), (dh + 0.2) / 2, 0.05); g.add(jamb);
-    }
-    var lintel = new THREE.Mesh(boxGeo(dw + 0.55, 0.2, 0.18, 0.8), stone);
-    lintel.position.set(0, dh + 0.16, 0.05); g.add(lintel);
-    if (arched) {
-      var arch = new THREE.Mesh(new THREE.TorusGeometry(dw / 2 + 0.1, 0.11, 6, 16, Math.PI), stone);
-      arch.position.set(0, dh + 0.26, 0.05); g.add(arch);
-      var key = new THREE.Mesh(boxGeo(0.26, 0.3, 0.16, 1), stone);
-      key.position.set(0, dh + 0.42, 0.06); g.add(key);
-    }
-    var bracket = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.1, 0.3), iron);
-    bracket.position.set(dw / 2 + 0.5, 2.95, 0.12); g.add(bracket);
-    var lamp = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.24, 0.18), glow);
-    lamp.position.set(dw / 2 + 0.5, 2.78, 0.2); g.add(lamp);
-    var hood = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.06, 0.24), iron);
-    hood.position.set(dw / 2 + 0.5, 2.92, 0.2); g.add(hood);
-    g.traverse(function (o) { if (o.isMesh) { o.userData.noHit = true; o.castShadow = true; } });
-    worldRoot.add(g);
-  }
-  /* Sokağa bakan duvar yüzeylerine İtalyan köy cephesi giydirir:
-     taş taban, boyalı sıva, kepenkli pencereler, saksılar, kapılar,
-     balkonlar, saçaklar ve çatılar tek geçişte toplanıp birleştirilir. */
-  function bananaStreetScene() {
-    var mats = {
-      stone: new THREE.MeshLambertMaterial({ map: texAshlar }),
-      quoin: new THREE.MeshLambertMaterial({ map: texAshlar, color: 0xb4ae9f }),
-      trim: new THREE.MeshLambertMaterial({ map: texAshlar, color: 0xd8d2c3 }),
-      yellow: new THREE.MeshLambertMaterial({ map: texPlasterYellow }),
-      ochre: new THREE.MeshLambertMaterial({ map: texPlasterOchre }),
-      rust: new THREE.MeshLambertMaterial({ map: texPlasterRust }),
-      grey: new THREE.MeshLambertMaterial({ map: texPlasterGrey }),
-      cream: new THREE.MeshLambertMaterial({ map: texPlaster }),
-      roof: new THREE.MeshLambertMaterial({ map: texRoofTile }),
-      wood: new THREE.MeshLambertMaterial({ map: texDoorWood }),
-      woodDark: new THREE.MeshLambertMaterial({ color: 0x150c04 }),
-      iron: new THREE.MeshLambertMaterial({ color: 0x2b2f30 }),
-      glass: new THREE.MeshBasicMaterial({ color: 0x04080b }),
-      shutterG: new THREE.MeshLambertMaterial({ color: 0x2b4232 }),
-      shutterB: new THREE.MeshLambertMaterial({ color: 0x452c17 }),
-      leaf: new THREE.MeshLambertMaterial({ color: 0x1b3a12 }),
-      bloom: new THREE.MeshLambertMaterial({ color: 0x4d100a }),
-      glow: new THREE.MeshBasicMaterial({ color: 0xffd58a }),
-      zinc: new THREE.MeshLambertMaterial({ color: 0x6d7274 })
-    };
-    var FB = {}, up = new THREE.Vector3(0, 1, 0), tmpG;
-    function fb(key, w, h, d, lx, ly, lz, uv, rx, F) {
-      tmpG = boxGeo(w, h, d, uv || 0.3);
-      if (rx) tmpG.rotateX(rx);
-      tmpG.translate(lx, ly, lz);
-      tmpG.applyMatrix4(F);
-      (FB[key] || (FB[key] = [])).push(tmpG);
-    }
-    function fcyl(key, r, h, lx, ly, lz, F) {
-      tmpG = new THREE.CylinderGeometry(r, r, h, 7);
-      tmpG.translate(lx, ly, lz);
-      tmpG.applyMatrix4(F);
-      (FB[key] || (FB[key] = [])).push(tmpG);
-    }
-    function ftorus(key, rad, tube, lx, ly, lz, F) {
-      tmpG = new THREE.TorusGeometry(rad, tube, 6, 14, Math.PI);
-      tmpG.translate(lx, ly, lz);
-      tmpG.applyMatrix4(F);
-      (FB[key] || (FB[key] = [])).push(tmpG);
-    }
-    var manualDoors = [[-7.0, 21.5], [7.0, -21.5], [-19.7, 11.6]];
-    function nearManualDoor(wx, wz) {
-      for (var mi = 0; mi < manualDoors.length; mi++) {
-        var ddx = wx - manualDoors[mi][0], ddz = wz - manualDoors[mi][1];
-        if (ddx * ddx + ddz * ddz < 5.5) return true;
-      }
-      return false;
-    }
-    var segs = [], i2, j2, j0, i0, len, wl, wr, wn, ws;
-    for (i2 = GX; i2 <= GX + GW; i2++) {
-      j2 = GZ;
-      while (j2 < GZ + GD) {
-        wl = walkable(i2 - 1, j2); wr = walkable(i2, j2);
-        if (wl !== wr) {
-          j0 = j2;
-          while (j2 < GZ + GD && (walkable(i2 - 1, j2) !== walkable(i2, j2))) j2++;
-          len = j2 - j0;
-          if (wl) segs.push({ ox: i2 - WALL_T / 2, oz: j0, dx: 0, dz: 1, nx: -1, nz: 0, len: len });
-          else segs.push({ ox: i2 + WALL_T / 2, oz: j2, dx: 0, dz: -1, nx: 1, nz: 0, len: len });
-        } else j2++;
-      }
-    }
-    for (j2 = GZ; j2 <= GZ + GD; j2++) {
-      i2 = GX;
-      while (i2 < GX + GW) {
-        wn = walkable(i2, j2 - 1); ws = walkable(i2, j2);
-        if (wn !== ws) {
-          i0 = i2;
-          while (i2 < GX + GW && (walkable(i2, j2 - 1) !== walkable(i2, j2))) i2++;
-          len = i2 - i0;
-          if (wn) segs.push({ ox: i2, oz: j2 - WALL_T / 2, dx: -1, dz: 0, nx: 0, nz: -1, len: len });
-          else segs.push({ ox: i0, oz: j2 + WALL_T / 2, dx: 1, dz: 0, nx: 0, nz: 1, len: len });
-        } else i2++;
-      }
-    }
-    var si, ci, t, chW, seg, F, lC, rA, rB, rC, pk, stoneBuild;
-    var plasterKeys = ['yellow', 'ochre', 'cream', 'grey', 'rust'];
-    for (si = 0; si < segs.length; si++) {
-      seg = segs[si];
-      F = new THREE.Matrix4();
-      F.makeBasis(new THREE.Vector3(seg.dx, 0, seg.dz), up, new THREE.Vector3(seg.nx, 0, seg.nz));
-      F.setPosition(seg.ox, 0, seg.oz);
-      t = 0; ci = 0;
-      while (t < seg.len - 0.05) {
-        chW = 3.6 + bananaHash(si * 17 + seg.ox, seg.oz * 3 + ci, 7) * 3.2;
-        if (chW > seg.len - t) chW = seg.len - t;
-        if (seg.len - t - chW < 2.0) chW = seg.len - t;
-        rA = bananaHash(si * 13 + ci * 7, ci, si);
-        rB = bananaHash(ci * 31 + 5, si * 17, 3);
-        rC = bananaHash(si + 101, ci + 7, 11);
-        lC = t + chW / 2;
-        stoneBuild = rA > 0.8;
-        pk = stoneBuild ? 'stone' : plasterKeys[Math.floor(rB * plasterKeys.length)];
-        var wx0 = seg.ox + seg.dx * lC, wz0 = seg.oz + seg.dz * lC;
-        var shutKey = rC < 0.55 ? 'shutterG' : 'shutterB';
-        var winY = 4.85;
-        // taş taban + sıva gövde
-        fb('stone', chW - 0.03, 1.05, 0.1, lC, 0.525, 0.05, 0.3, 0, F);
-        if (stoneBuild) fb('stone', chW - 0.03, WALL_H - 1.02, 0.075, lC, 1.02 + (WALL_H - 1.02) / 2, 0.038, 0.2, 0, F);
-        else {
-          fb(pk, chW - 0.08, WALL_H - 1.37, 0.06, lC, 1.02 + (WALL_H - 1.37) / 2, 0.03, 0.42, 0, F);
-          fb('trim', chW - 0.06, 0.12, 0.1, lC, 3.62, 0.05, 0.5, 0, F);
-        }
-        // köşe taşları (yalnızca parsel uçlarında)
-        var segEnd = t + chW >= seg.len - 0.08;
-        if (stoneBuild) {
-          var endsX = [];
-          if (ci === 0) endsX.push(t + 0.3);
-          if (segEnd) endsX.push(t + chW - 0.3);
-          for (var ei = 0; ei < endsX.length; ei++) {
-            for (var qy = 0.36; qy < WALL_H - 0.55; qy += 0.62) {
-              var qw = (Math.round(qy / 0.62) % 2) ? 0.56 : 0.38;
-              fb('quoin', qw, 0.28, 0.07, endsX[ei], qy, 0.055, 0.9, 0, F);
-            }
-          }
-        }
-        // pencere
-        var winAt = function (wxw, wyw, wide) {
-          var ww = wide ? 1.02 : 0.86, wh = wide ? 1.32 : 1.14;
-          fb('trim', 0.14, wh + 0.26, 0.1, wxw - ww / 2 - 0.07, wyw, 0.05, 1, 0, F);
-          fb('trim', 0.14, wh + 0.26, 0.1, wxw + ww / 2 + 0.07, wyw, 0.05, 1, 0, F);
-          fb('trim', ww + 0.28, 0.14, 0.1, wxw, wyw + wh / 2 + 0.07, 0.05, 1, 0, F);
-          fb('trim', ww + 0.28, 0.14, 0.1, wxw, wyw - wh / 2 - 0.07, 0.05, 1, 0, F);
-          fb('glass', ww, wh, 0.03, wxw, wyw, 0.075, 1, 0, F);
-          fb('woodDark', 0.045, wh, 0.02, wxw, wyw, 0.085, 1, 0, F);
-          fb('woodDark', ww, 0.045, 0.02, wxw, wyw, 0.085, 1, 0, F);
-          fb(shutKey, 0.4, wh + 0.08, 0.05, wxw - ww / 2 - 0.28, wyw, 0.09, 1, 0, F);
-          fb(shutKey, 0.4, wh + 0.08, 0.05, wxw + ww / 2 + 0.28, wyw, 0.09, 1, 0, F);
-          fb('trim', ww + 0.42, 0.1, 0.24, wxw, wyw - wh / 2 - 0.2, 0.1, 1, 0, F);
-          if (bananaHash(si, ci, Math.round(wxw * 7)) < 0.68) {
-            fb('woodDark', ww + 0.2, 0.22, 0.24, wxw, wyw - wh / 2 - 0.36, 0.16, 1, 0, F);
-            for (var fi = -1; fi <= 1; fi++) {
-              fb('leaf', 0.16, 0.16, 0.16, wxw + fi * 0.24, wyw - wh / 2 - 0.22, 0.24, 1, 0, F);
-              if (fi === 0) fb('bloom', 0.13, 0.13, 0.13, wxw, wyw - wh / 2 - 0.14, 0.26, 1, 0, F);
-            }
-          }
-        };
-        // kapı (bazı parsellerde)
-        if (rA < 0.24 && chW >= 3.2 && !nearManualDoor(wx0, wz0)) {
-          var dwx = lC + (rC - 0.5) * Math.max(0, chW - 3.0) * 0.3;
-          var dbl = rC > 0.62, darc = rC > 0.84;
-          var dw2 = dbl ? 1.72 : 1.06, dh2 = dbl ? 2.45 : 2.24, pi;
-          fb('wood', dw2, dh2, 0.08, dwx, dh2 / 2, 0.1, 0.6, 0, F);
-          for (pi = 1; pi < (dbl ? 6 : 4); pi++)
-            fb('woodDark', 0.035, dh2 - 0.1, 0.02, dwx - dw2 / 2 + dw2 * pi / (dbl ? 6 : 4), dh2 / 2, 0.15, 1, 0, F);
-          fb('trim', 0.16, dh2 + 0.16, 0.12, dwx - dw2 / 2 - 0.09, dh2 / 2, 0.12, 1, 0, F);
-          fb('trim', 0.16, dh2 + 0.16, 0.12, dwx + dw2 / 2 + 0.09, dh2 / 2, 0.12, 1, 0, F);
-          fb('trim', dw2 + 0.42, 0.18, 0.16, dwx, dh2 + 0.08, 0.12, 1, 0, F);
-          fb('trim', dw2 + 0.5, 0.09, 0.4, dwx, 0.045, 0.2, 0.8, 0, F);
-          if (darc) ftorus('trim', dw2 / 2 + 0.08, 0.1, dwx, dh2 + 0.18, 0.11, F);
-          fb('iron', 0.07, 0.1, 0.26, dwx + dw2 / 2 + 0.45, 2.86, 0.1, 1, 0, F);
-          fb('glow', 0.16, 0.22, 0.16, dwx + dw2 / 2 + 0.45, 2.72, 0.2, 1, 0, F);
-        } else if (rB > 0.42 && chW >= 3.4) {
-          winAt(lC, 2.35, false);
-          if (chW >= 5.4) winAt(lC + chW * 0.26, 2.35, false);
-        }
-        // üst kat pencereleri
-        if (chW >= 5.4) {
-          winAt(lC - chW * 0.23, winY, true);
-          winAt(lC + chW * 0.23, winY, true);
-        } else if (chW >= 3.2) winAt(lC, winY, false);
-        // balkon
-        if (rC > 0.78 && chW >= 4.4) {
-          var balX = chW >= 5.4 ? lC - chW * 0.23 : lC;
-          fb('trim', 2.0, 0.13, 0.85, balX, winY - 0.8, 0.4, 1, 0, F);
-          fb('trim', 2.0, 0.1, 0.1, balX, winY - 0.82, 0.78, 1, 0, F);
-          for (var bi = 0; bi < 7; bi++)
-            fb('iron', 0.045, 1.0, 0.045, balX - 0.88 + bi * 0.293, winY - 0.24, 0.74, 1, 0, F);
-          fb('iron', 1.9, 0.06, 0.06, balX, winY + 0.26, 0.74, 1, 0, F);
-          fb('iron', 1.9, 0.05, 0.05, balX, winY + 0.02, 0.74, 1, 0, F);
-          fb('leaf', 0.42, 0.2, 0.2, balX - 0.55, winY - 0.68, 0.8, 1, 0, F);
-          fb('bloom', 0.16, 0.14, 0.16, balX + 0.5, winY - 0.64, 0.8, 1, 0, F);
-        }
-        // saçak + kiremit çatı
-        fb('trim', chW, 0.24, 0.18, lC, WALL_H - 0.31, 0.07, 0.7, 0, F);
-        fb('roof', chW + 0.1, 0.12, 2.6, lC, WALL_H + 0.2, -0.55, 0.55, 0.3, F);
-        // çatı katı + anten
-        if (rB > 0.55) {
-          var ah = 0.9 + rC * 1.5;
-          fb(pk, chW - 0.3, ah, 2.3, lC, WALL_H + ah / 2, -1.28, 0.4, 0, F);
-          fb('roof', chW - 0.1, 0.12, 2.6, lC, WALL_H + ah + 0.14, -1.35, 0.55, 0.28, F);
-          if (rA > 0.5) {
-            fcyl('zinc', 0.035, 2.0, lC + chW * 0.18, WALL_H + ah + 1.05, -1.3, F);
-            for (var ai = 0; ai < 4; ai++)
-              fb('zinc', 0.9 - ai * 0.12, 0.03, 0.03, lC + chW * 0.18, WALL_H + ah + 1.5 + ai * 0.22, -1.3, 1, 0, F);
-          }
-        }
-        // yağmur borusu
-        if (rC < 0.35) fcyl('zinc', 0.055, WALL_H - 0.5, t + 0.24, (WALL_H - 0.5) / 2, 0.1, F);
-        // duvar feneri
-        if (rA > 0.86) {
-          fb('iron', 0.07, 0.08, 0.24, lC, 3.9, 0.1, 1, 0, F);
-          fb('glow', 0.15, 0.2, 0.15, lC, 3.76, 0.2, 1, 0, F);
-          fb('iron', 0.2, 0.05, 0.2, lC, 3.88, 0.2, 1, 0, F);
-        }
-        t += chW; ci++;
-      }
-    }
-    for (var mk in FB) {
-      if (!FB[mk].length) continue;
-      var mesh = new THREE.Mesh(mergeGeos(FB[mk]), mats[mk]);
-      mesh.userData.noHit = true;
-      mesh.receiveShadow = true;
-      worldRoot.add(mesh);
-    }
-  }
-  function bananaPlanter(x, z, rotY) {
-    var wood = new THREE.MeshLambertMaterial({ color: 0x6f4a2c });
-    var leaf = new THREE.MeshLambertMaterial({ color: 0x1b3a12 });
-    var bloom = new THREE.MeshLambertMaterial({ color: 0x4d100a });
-    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rotY || 0;
-    var box = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.42, 0.46), wood);
-    box.position.set(0, 0.21, 0); box.castShadow = true; box.receiveShadow = true; g.add(box);
-    for (var i = 0; i < 5; i++) {
-      var s = new THREE.Mesh(new THREE.SphereGeometry(0.17, 8, 6), (i % 3 === 0 ? bloom : leaf));
-      s.position.set(-0.42 + i * 0.21, 0.5 + (i % 2) * 0.05, (i % 2 ? 0.1 : -0.09));
-      s.castShadow = true; g.add(s);
-    }
-    g.traverse(function (o) { if (o.isMesh) o.userData.noHit = true; });
-    worldRoot.add(g);
-  }
-  function bananaGate(x, z, rotY) {
-    var iron = new THREE.MeshLambertMaterial({ color: 0x2c3032 });
-    var red = new THREE.MeshLambertMaterial({ color: 0x87281f });
-    var white = new THREE.MeshLambertMaterial({ color: 0xe8e2d2 });
-    var stone = new THREE.MeshLambertMaterial({ map: texAshlar });
-    var g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rotY || 0;
-    var i;
-    for (i = -1; i <= 1; i += 2) {
-      var post = new THREE.Mesh(boxGeo(0.4, 2.9, 0.4, 0.6), stone);
-      post.position.set(i * 1.6, 1.45, 0);
-      post.castShadow = true; post.receiveShadow = true; g.add(post);
-      var cap = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.12, 0.52), stone);
-      cap.position.set(i * 1.6, 2.96, 0); g.add(cap);
-    }
-    var rail = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.09, 0.1), iron);
-    rail.position.set(0, 2.78, 0); g.add(rail);
-    rail = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.09, 0.1), iron);
-    rail.position.set(0, 0.14, 0); g.add(rail);
-    for (i = -3; i <= 3; i++) {
-      var bar = new THREE.Mesh(new THREE.BoxGeometry(0.055, 2.6, 0.09), iron);
-      bar.position.set(i * 0.36, 1.46, 0.01); g.add(bar);
-      var tip = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.17, 5), iron);
-      tip.position.set(i * 0.36, 2.88, 0.01); g.add(tip);
-    }
-    for (i = -1; i <= 1; i += 2) {
-      var scroll = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.032, 5, 10, Math.PI), iron);
-      scroll.position.set(i * 0.98, 1.92, 0.03); g.add(scroll);
-    }
-    var ring = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.085, 8, 20), red);
-    ring.position.set(0.85, 1.5, 0.1); g.add(ring);
-    for (i = 0; i < 4; i++) {
-      var stripe = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.2, 0.1), white);
-      stripe.position.set(0.85 + Math.cos(i * Math.PI / 2) * 0.35, 1.5 + Math.sin(i * Math.PI / 2) * 0.35, 0.11);
-      stripe.rotation.z = i * Math.PI / 2;
-      g.add(stripe);
-    }
-    g.traverse(function (o) { if (o.isMesh) { o.userData.noHit = true; o.castShadow = false; } });
-    worldRoot.add(g);
-  }
-  function buildBanana1v1() {
-    worldMats.barrel = new THREE.MeshLambertMaterial({ map: texWoodBarrel });
-    // dış hat: mavi geçit (kuzey-doğu), üst avlu, kavisli muz yolu, alt kavşak, kırmızı geçit (güney-batı)
-    addRoom(7, -25, 8, 8, 'Mavi Geçit');
-    addRoom(-4, -17, 21, 12, 'Üst Avlu');
-    addRoom(17, -12, 3, 7, 'Doğu Niş');
-    addRoom(-4, -5, 8, 4, 'Muz Yolu 1');
-    addRoom(-6, -1, 8, 4, 'Muz Yolu 2');
-    addRoom(-8, 3, 8, 4, 'Muz Yolu 3');
-    addRoom(-13, 7, 7, 2, 'Muz Yolu 4');
-    addRoom(-14, 9, 9, 5, 'Alt Kavşak');
-    addRoom(-20, 10, 6, 4, 'Sol Çıkmaz');
-    addRoom(-15, 14, 8, 10, 'Kırmızı Geçit');
-
-    // zemin: takım alanları ve doğuş yazıları
-    groundTint(6.4, 6.4, 10, -22, 0x3d7fd4, 0.2);
-    groundTint(6.4, 6.4, -11, 20, 0xa33b30, 0.2);
-    groundDecal(labelTexture('MAVİ'), 3.4, 10, -22, 0, true);
-    groundDecal(labelTexture('KIRMIZI'), 3.8, -11, 20, 0, true);
-
-    // ana siperler
-    addCrate(5.0, -9.5, 2.2, 2.2, 1.6);
-    addCrate(-7.2, 9.4, 1.6, 1.6, 1.1);
-    bananaPallet(-3.0, -16.2);
-    bananaPallet(-3.0, -3.5);
-    bananaPallet(-12.0, 7.6);
-    bananaPallet(-17.4, 10.75);
-    bananaPallet(-13.6, 16.3);
-    addBarrel(14.0, -18.1);
-    addBarrel(18.6, -7.0);
-    addBarrel(-16.4, 12.8);
-    addBarrel(-8.2, 18.4);
-    addBarrel(13.8, -11.8);
-    addBarrel(-14.2, 15.1);
-    addBarrel(-8.1, 22.5);
-
-    // taş sütun ve alçak duvarlar (radardaki çıkıntılar)
-    bananaPillar(1.2, -10.6, 2.5);
-    bananaPillar(-3.6, 4.6, 2.4);
-    bananaLowWall(-13.7, 9.4, 3.0, true, 0.95);
-    bananaLowWall(16.1, -16.6, 2.6, false, 0.95);
-    bananaLowWall(-13.7, 22.8, 4.6, true, 0.9);
-
-    // cephe detayları: saksı, demir kapı, kemerli çift kapılar, yaslanmış paletler
-    bananaPlanter(3.0, -16.4, 0);
-    bananaPlanter(11.4, -16.4, 0);
-    bananaPlanter(-3.55, -1.6, Math.PI / 2);
-    bananaPlanter(-13.55, 13.2, -Math.PI / 2);
-    bananaGate(-19.6, 11.6, Math.PI / 2);
-    bananaBigDoor(-7.34, 21.6, -Math.PI / 2, true, true);
-    bananaBigDoor(7.34, -21.6, Math.PI / 2, true, true);
-    bananaLeanPallet(-3.62, -13.4, -Math.PI / 2);
-    bananaLeanPallet(12.9, -16.45, Math.PI);
-    bananaLeanPallet(-14.45, 17.3, -Math.PI / 2);
-    bananaLeanPallet(-19.45, 13.3, -Math.PI / 2);
-
-    // sokak detayları: çamaşır ipleri ve mazgallar
-    bananaLaundry(-3.7, -3.2, 3.7, -3.2, 4.55);
-    bananaLaundry(-5.7, 1.1, 1.7, 1.1, 4.4);
-    groundDecal(texGrate, 0.95, 2.6, -6.4, 0.2, true);
-    groundDecal(texGrate, 0.95, -8.4, 10.4, 0, true);
-    groundDecal(texGrate, 1.15, 9.6, -19.8, 0, true);
-    groundDecal(texGrate, 0.9, -11.8, 18.2, 0, true);
-    groundDecal(texGrate, 2.0, -10.8, 12.6, 0.15, true);
-
-    // çevredeki köy evleri ve ağaçlar (yürünebilir alanın dışında)
-    house(10, -33, 12, 9, 7.6, '#d9ccb2', '#8a4b32');
-    house(-12, -25, 9, 8, 7.4, '#d6c6a8', '#7c3f2a');
-    house(27, -12, 10, 10, 7.2, '#cfc0a2', '#8a4b32');
-    house(25, 3, 8, 9, 7.0, '#d9ccb2', '#7c3f2a');
-    house(-27, -2, 8, 10, 7.4, '#c9b795', '#8a4b32');
-    house(23, 24, 10, 9, 7.2, '#d6c6a8', '#7c3f2a');
-    house(-29, 21, 9, 10, 7.4, '#d9ccb2', '#8a4b32');
-    house(1, -42, 14, 9, 8.0, '#cfc0a2', '#8a4b32');
-    tree(20.5, -1.5, 1.1);
-    tree(-24, 17, 1.0);
-    tree(6.5, -30.5, 1.05);
-    tree(-25, 6, 0.95);
-  }
-  function bananaRoutes() {
-    var blue = [
-      [[10, -22], [10, -18], [6, -14], [1, -9], [-1, -3], [-4, 1], [-7, 5], [-9.5, 8], [-10, 11], [-11, 17], [-11, 20]],
-      [[10, -22], [13, -19], [8, -13], [3, -7], [-2, -2], [-6, 2], [-9, 6], [-12, 8], [-12, 12], [-11, 18], [-11, 20]],
-      [[10, -22], [8, -20], [5, -15], [0, -8], [-3, -2], [-5, 1], [-8, 4], [-12, 7], [-17, 11], [-14, 13], [-11, 19]]
-    ];
-    var red = [], i, j, r;
-    for (i = 0; i < blue.length; i++) {
-      r = [];
-      for (j = blue[i].length - 1; j >= 0; j--) r.push(blue[i][j]);
-      red.push(r);
-    }
-    return { blue: blue, red: red };
-  }
-
-  var MAP_DEFS = {
-    dust2_flat: {
-      name: 'Dust II Flat', desc: 'Radar düzeni · düz zemin · A/B, Long, Mid, Tünel hatları', theme: 'sand',
-      restricted: false, build: buildDust2Flat, spawnsFn: dust2FlatSpawnList,
-      spawns: { blue: { x: -11, z: 44, yaw: 0, name: 'T Spawn' }, red: { x: 8.5, z: -30, yaw: Math.PI, name: 'CT Spawn' } },
-      miniLabels: [{ t: 'A', x: 31.5, z: -34.5 }, { t: 'B', x: -31, z: -38.5 }],
-      routes: {
-        blue: [
-          [[-12, 44], [-6, 30], [-6, 20], [-2, 20], [12, 20], [21, 26], [21, 14], [30, 2], [40, -12], [36, -28], [32, -34]],
-          [[-12, 44], [-6, 30], [-6, 20], [-2, 12], [0, 0], [0, -12], [0, -17], [-6, -20], [5, -18], [8, -12], [14, -20], [14, -32], [24, -34], [32, -34]],
-          [[-12, 44], [-20, 42], [-30, 40], [-40, 30], [-40, 22], [-36, 14], [-36, 4], [-36, -5], [-35, -11], [-35, -20], [-31, -30], [-31, -38], [-31, -42]],
-          [[-12, 44], [-6, 30], [-6, 20], [-2, 12], [0, 0], [0, -12], [-8, -9], [-16, -9], [-22, -9], [-25, -6], [-35, -5], [-35, -11], [-35, -20], [-40, -30], [-31, -38]],
-          [[-12, 44], [-6, 30], [-6, 20], [-2, 12], [0, 4], [0, -12], [-6, -20], [5, -18], [8, -12], [14, -20], [14, -32], [8, -34]]
-        ],
-        red: [
-          [[8, -30], [14, -30], [15, -24], [22, -34], [32, -34]],
-          [[8, -30], [0, -30], [0, -22], [0, -17], [0, 0], [2, 14], [-6, 30], [-12, 44]],
-          [[8, -30], [0, -30], [-10, -30], [-20, -30], [-24, -30], [-30, -38], [-31, -41]],
-          [[8, -30], [0, -32], [-10, -36], [-20, -36], [-25, -39], [-30, -40], [-40, -45]],
-          [[8, -30], [14, -30], [22, -34], [30, -30], [38, -20], [40, -5], [32, 4], [21, 10], [21, 24], [12, 20], [2, 16]]
-        ]
-      }
-    },
-    redline: {
-      name: 'Aim Redline', desc: 'Depo salonu · kasa düelloları · hızlı tempo', theme: 'warehouse',
-      wallH: 7.5, restricted: false, build: buildRedline, spawnsFn: redlineSpawnList,
-      spawns: { blue: { x: -10.4, z: 0, yaw: -Math.PI / 2, name: 'Mavi Spawn' }, red: { x: 10.4, z: 0, yaw: Math.PI / 2, name: 'Kırmızı Spawn' } },
-      miniLabels: [{ t: 'MAVİ', x: -4.2, z: 9.5 }, { t: 'KIRMIZI', x: 3.2, z: -9.5 }],
-      routes: {
-        blue: [
-          [[-10, -1.5], [-7, -2.0], [-4.6, -2.6], [-1.8, -3.4], [1.5, -4.2], [4.6, -4.4], [7.5, -4.2], [10, -3.0]],
-          [[-10, 1.8], [-7.2, 2.8], [-4.6, 3.9], [-1.2, 4.3], [1.8, 4.4], [4.4, 4.0], [7.4, 3.2], [10, 1.8]],
-          [[-10.4, -3.5], [-9.2, -6.2], [-7.4, -7.8], [-4.2, -7.4], [-2.4, -6.2], [-1.6, -4.6], [0.4, -4.3], [3.0, -5.4], [5.4, -6.2], [8.6, -5.2], [10.2, -4.6]],
-          [[-10.4, 3.5], [-10.6, 7.0], [-9.4, 10.8], [-6.0, 13.4], [-2.0, 13.6], [2.0, 13.4], [6.0, 12.8], [8.8, 11.6], [10.4, 9.0], [10.6, 5.0], [10.2, 2.0]],
-          [[-9.6, 0], [-7.0, 0.2], [-4.5, 0.6], [-2.4, 2.2], [0, 2.3], [2.4, 1.8], [4.8, 1.2], [7.2, 1.0], [9.6, 0.2]]
-        ],
-        red: [
-          [[10, 1.5], [7, 2.0], [4.6, 2.6], [1.8, 3.4], [-1.5, 4.2], [-4.6, 4.4], [-7.5, 4.2], [-10, 3.0]],
-          [[10, -1.8], [7.2, -2.8], [4.6, -3.9], [1.2, -4.3], [-1.8, -4.4], [-4.4, -4.0], [-7.4, -3.2], [-10, -1.8]],
-          [[10.4, 3.5], [9.2, 6.2], [7.4, 7.8], [4.2, 7.4], [2.4, 6.2], [1.6, 4.6], [-0.4, 4.3], [-3.0, 5.4], [-5.4, 6.2], [-8.6, 5.2], [-10.2, 4.6]],
-          [[10.4, -3.5], [10.6, -7.0], [9.4, -10.8], [6.0, -13.4], [2.0, -13.6], [-2.0, -13.4], [-6.0, -12.8], [-8.8, -11.6], [-10.4, -9.0], [-10.6, -5.0], [-10.2, -2.0]],
-          [[9.6, 0], [7.0, -0.2], [4.5, -0.6], [2.4, -2.2], [0, -2.3], [-2.4, -1.8], [-4.8, -1.2], [-7.2, -1.0], [-9.6, -0.2]]
-        ]
-      }
-    },
-    awp_lego_2: {
-      name: 'AWP Lego 2', desc: 'Lego kalesi · rampa, kule, tünel · AWP + Deagle', theme: 'legofield',
-      wallH: 12, restricted: true, build: buildAwpLego2, spawnsFn: legoSpawnList,
-      spawns: { blue: { x: 0, z: 23.4, yaw: 0, name: 'Mavi Spawn' },
-        red: { x: 0, z: -23.4, yaw: Math.PI, name: 'Kırmızı Spawn' } },
-      miniLabels: [{ t: 'MAVİ', x: 21, z: 19 }, { t: 'KIRMIZI', x: -21, z: -19 }],
-      routes: legoRoutes()
-    },
-    village: {
-      name: 'Meydan Köy', desc: 'Kendi tasarımım · çeşmeli köy meydanı, pazar tezgahları, iki avlu', theme: 'village',
-      restricted: false, build: buildVillage,
-      spawns: { blue: { x: 0, z: 27, yaw: 0, name: 'Mavi Yol' }, red: { x: 0, z: -27, yaw: Math.PI, name: 'Kırmızı Yol' } },
-      miniLabels: [{ t: 'MEYDAN', x: 0, z: 6 }, { t: 'MAVİ', x: 0, z: 27 }, { t: 'KIRMIZI', x: 0, z: -27 }],
-      routes: {
-        blue: [
-          [[-4, 16], [-7, 8], [-9, 0], [-6, -8], [-2, -12]],
-          [[4, 16], [8, 8], [9, 0], [6, -8], [2, -12]],
-          [[0, 18], [0, 12], [-11, 10], [-13, 4], [-12, -4]],
-          [[0, 18], [0, 12], [11, 10], [13, 4], [12, -4]]
-        ],
-        red: [
-          [[4, -16], [7, -8], [9, 0], [6, 8], [2, 12]],
-          [[-4, -16], [-8, -8], [-9, 0], [-6, 8], [-2, 12]],
-          [[0, -18], [0, -12], [11, -10], [13, -4], [12, 4]],
-          [[0, -18], [0, -12], [-11, -10], [-13, -4], [-12, 4]]
-        ]
-      }
-    },
-    banana_1v1: {
-      name: 'Banana 1v1', desc: '2 kişilik muz sokak düellosu · turlu · her turda doğuşlar yer değiştirir', theme: 'village',
-      wallH: 6.8, restricted: false, build: buildBanana1v1, duel: true, street: true, postBuild: bananaStreetScene,
-      spawns: {
-        blue: { x: 10, z: -22, yaw: Math.PI, name: 'Mavi Doğuş' },
-        red: { x: -11, z: 20, yaw: 0, name: 'Kırmızı Doğuş' }
-      },
-      miniLabels: [{ t: 'MAVİ', x: 10, z: -23.4 }, { t: 'KIRMIZI', x: -11, z: 21.4 }, { t: 'ORTA', x: -7, z: 6 }],
-      routes: bananaRoutes()
-    }
-  };
 
   function buildWallsAndFloor() {
     var wallGeos = [], i2, j2, j0, i0, len, gg;
@@ -2316,23 +1341,32 @@
       floor.position.set(GX + GW / 2, 0, GZ + GD / 2);
       floor.receiveShadow = true;
       worldRoot.add(floor);
+      var padMat = new THREE.MeshLambertMaterial({ map: padTex });
+      padMat.polygonOffset = true;
+      padMat.polygonOffsetFactor = -1;
+      padMat.polygonOffsetUnits = -4;
+      // odalar birbirinin üstüne bindiği için derinlik yazımı kapalı; aksi halde
+      // eş düzlemli döşeme kopyaları z-fighting ile titrer
+      padMat.depthWrite = false;
+      var padGeos = [];
       for (var r = 0; r < ROOMS.length; r++) {
         var room = ROOMS[r];
-        var ct = padTex.clone();
-        ct.needsUpdate = true;
-        ct.wrapS = ct.wrapT = THREE.RepeatWrapping;
-        ct.repeat.set(room.w / 2.4, room.d / 2.4);
-        var padMat = new THREE.MeshLambertMaterial({ map: ct });
-        padMat.userData.ownMap = true;
-        var pad = new THREE.Mesh(new THREE.PlaneGeometry(room.w, room.d), padMat);
-        pad.rotation.x = -Math.PI / 2;
-        pad.position.set(room.x + room.w / 2, 0.012, room.z + room.d / 2);
-        pad.receiveShadow = true; pad.userData.noHit = true;
-        worldRoot.add(pad);
+        var pg = new THREE.PlaneGeometry(room.w, room.d);
+        var puv = pg.attributes.uv;
+        for (var pu = 0; pu < puv.count; pu++)
+          puv.setXY(pu, puv.getX(pu) * room.w / 2.4, puv.getY(pu) * room.d / 2.4);
+        pg.rotateX(-Math.PI / 2);
+        pg.translate(room.x + room.w / 2, 0.06, room.z + room.d / 2);
+        padGeos.push(pg);
       }
+      var pad = new THREE.Mesh(mergeGeos(padGeos), padMat);
+      pad.renderOrder = 1;
+      pad.receiveShadow = true; pad.userData.noHit = true;
+      worldRoot.add(pad);
     } else {
       var fw2 = GW + 50, fd2 = GD + 50;
       if (currentMap.theme === 'legofield') worldMats.floorMap.repeat.set(fw2 / 2, fd2 / 2);
+      else if (currentMap.theme === 'kaldrix') worldMats.floorMap.repeat.set(fw2 / 16, fd2 / 16);
       else worldMats.floorMap.repeat.set(fw2 / 6, fd2 / 6);
       floor = new THREE.Mesh(new THREE.PlaneGeometry(fw2, fd2), worldMats.floor);
       floor.rotation.x = -Math.PI / 2;
@@ -2340,7 +1374,8 @@
       floor.receiveShadow = true;
       worldRoot.add(floor);
     }
-    if (currentMap.postBuild) currentMap.postBuild();
+    if (currentMap.postBuild) currentMap.postBuild(MAP_KIT);
+    flushBatches();
   }
 
   function buildMinimap() {
@@ -2416,6 +1451,15 @@
       hittables.push(o);
     });
   }
+  // ölü gövdeler mermiyi durdurmaz, tepki vermez: ilk "sağlam" (duvar/zemin/canlı) isabeti bul
+  function firstSolidHit(hits) {
+    for (var i = 0; i < hits.length; i++) {
+      var o = hits[i].object;
+      if (o && o.__tgt && o.__tgt.state !== 'alive') continue;
+      return hits[i];
+    }
+    return null;
+  }
 
   function loadMap(id) {
     var def = MAP_DEFS[id] || MAP_DEFS.dust2_flat;
@@ -2428,8 +1472,10 @@
     worldMats = makeWorldMaterials(def.theme);
     buildTheme = def.theme;
     applyTheme(def.theme);
-    def.build();
+    syncMapKit();
+    def.build(MAP_KIT);
     buildGrid();
+    syncMapKit();
     buildWallsAndFloor();
     buildMinimap();
     rebuildMapSpawns();
@@ -2462,7 +1508,7 @@
       return;
     }
     if (currentMap.spawnsFn) {
-      var cs = currentMap.spawnsFn();
+      var cs = currentMap.spawnsFn(MAP_KIT);
       mapSpawns.blue = cs.blue;
       mapSpawns.red = cs.red;
     } else {
@@ -2566,8 +1612,17 @@
     if (currentMap && currentMap.spawns.blue) return currentMap.spawns.blue;
     return { x: 0, z: 0, yaw: 0, name: 'Spawn' };
   }
+  // takımın bölge ızgarasından sıralı doğuş noktası (0 = ilk sıra başı)
+  function teamSpawnSpot(team, idx) {
+    var spots = mapSpawns[team];
+    if (spots && spots.length) {
+      var k = Math.abs(idx || 0) % spots.length;
+      return spots[k];
+    }
+    return teamSpawnDef(team);
+  }
   function respawn() {
-    var sp = teamSpawnDef(player.team);
+    var sp = teamSpawnSpot(player.team, 0);
     player.x = sp.x; player.y = 0; player.z = sp.z;
     player.vx = player.vy = player.vz = 0;
     player.yaw = sp.yaw || 0; player.pitch = 0;
@@ -2663,6 +1718,46 @@
     var g = env(t0, gain, 0.001, dur);
     o.connect(g); g.connect(masterGain); o.start(t0); o.stop(t0 + dur + 0.05);
   }
+  // --- şarjör / sürgü sesleri (prosedürel) ---
+  function playNoiseSweep(f0, f1, dur, peak, q, delay) {
+    if (!actx) return;
+    var t0 = actx.currentTime + (delay || 0);
+    var src = actx.createBufferSource(); src.buffer = noiseBuffer(dur + 0.06);
+    var bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = q || 2;
+    bp.frequency.setValueAtTime(f0, t0);
+    bp.frequency.exponentialRampToValueAtTime(Math.max(80, f1), t0 + dur);
+    var g = env(t0, peak, 0.003, dur);
+    src.connect(bp); bp.connect(g); g.connect(masterGain);
+    src.start(t0); src.stop(t0 + dur + 0.07);
+  }
+  function playClack(freq, peak, dur, delay) {
+    if (!actx) return;
+    var t0 = actx.currentTime + (delay || 0);
+    var o = actx.createOscillator(); o.type = 'triangle';
+    o.frequency.setValueAtTime(freq, t0);
+    o.frequency.exponentialRampToValueAtTime(Math.max(40, freq * 0.35), t0 + dur);
+    var g = env(t0, peak, 0.0015, dur);
+    o.connect(g); g.connect(masterGain); o.start(t0); o.stop(t0 + dur + 0.05);
+    var src = actx.createBufferSource(); src.buffer = noiseBuffer(dur * 0.8 + 0.02);
+    var bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.6;
+    bp.frequency.setValueAtTime(freq * 3.2, t0);
+    bp.frequency.exponentialRampToValueAtTime(Math.max(120, freq * 0.8), t0 + dur * 0.7);
+    var g2 = env(t0, peak * 0.55, 0.001, dur * 0.7);
+    src.connect(bp); bp.connect(g2); g2.connect(masterGain);
+    src.start(t0); src.stop(t0 + dur * 0.8 + 0.03);
+  }
+  function playMagRelease() { playClack(1700, 0.045, 0.028); }
+  function playMagOut() {
+    playNoiseSweep(2100, 520, 0.16, 0.05, 1.3);
+    playClack(260, 0.028, 0.045);
+  }
+  function playMagSeat(heavy) {
+    playClack(heavy ? 170 : 230, heavy ? 0.13 : 0.095, heavy ? 0.075 : 0.06);
+    playNoiseSweep(900, 260, 0.05, 0.028, 2);
+  }
+  function playBoltPull() { playNoiseSweep(1200, 2700, 0.075, 0.05, 2.8); }
+  function playBoltSlam(heavy) { playClack(heavy ? 380 : 470, heavy ? 0.14 : 0.12, 0.07); }
+  function playSlideRelease(heavy) { playClack(heavy ? 520 : 640, heavy ? 0.11 : 0.09, 0.05); }
   function playStep(low, quiet) {
     if (!actx) return;
     var t0 = actx.currentTime;
@@ -2672,25 +1767,56 @@
     src.connect(lp); lp.connect(g); g.connect(masterGain);
     src.start(t0); src.stop(t0 + 0.12);
   }
+  // mermi isabeti: et/ten sesi (gövde tok darbe, kafa ek çatlama) - ton yok
   function playDink(head, vol) {
     if (!actx) return;
     vol = vol === undefined ? 1 : Math.max(0, Math.min(1, vol));
     if (vol <= 0.02) return;
     var t0 = actx.currentTime;
     var o = actx.createOscillator(); o.type = 'sine';
-    o.frequency.value = head ? 1750 : 1100;
-    var g = env(t0, 0.22 * vol, 0.001, head ? 0.1 : 0.05);
+    o.frequency.setValueAtTime(head ? 165 : 120, t0);
+    o.frequency.exponentialRampToValueAtTime(head ? 62 : 46, t0 + 0.13);
+    var g = env(t0, (head ? 0.2 : 0.16) * vol, 0.002, head ? 0.14 : 0.11);
     o.connect(g); g.connect(masterGain);
-    o.start(t0); o.stop(t0 + (head ? 0.18 : 0.09));
+    o.start(t0); o.stop(t0 + 0.17);
+    playNoiseSweep(head ? 1100 : 620, head ? 240 : 150, head ? 0.1 : 0.12, 0.055 * vol, 0.9);
+    if (head) playClack(300, 0.1 * vol, 0.05);
   }
+  // öldürme teyidi: ton yerine kısa tok darbe
   function playKill() {
     if (!actx) return;
     var t0 = actx.currentTime;
     var o = actx.createOscillator(); o.type = 'sine';
-    o.frequency.setValueAtTime(900, t0);
-    o.frequency.setValueAtTime(1350, t0 + 0.08);
-    var g = env(t0, 0.2, 0.002, 0.16);
-    o.connect(g); g.connect(masterGain); o.start(t0); o.stop(t0 + 0.25);
+    o.frequency.setValueAtTime(100, t0);
+    o.frequency.exponentialRampToValueAtTime(42, t0 + 0.2);
+    var g = env(t0, 0.16, 0.003, 0.2);
+    o.connect(g); g.connect(masterGain); o.start(t0); o.stop(t0 + 0.24);
+    playNoiseSweep(520, 180, 0.18, 0.04, 0.8);
+  }
+  // silahı çekme/kurma: her silahın kendine özgü mekanik sesi
+  function playEquip(id) {
+    if (!actx) return;
+    if (id === 'sniper') {
+      playNoiseSweep(1300, 2500, 0.07, 0.045, 2.6);
+      playClack(360, 0.11, 0.07, 0.13);
+      playNoiseSweep(900, 480, 0.06, 0.03, 1.5, 0.19);
+    } else if (id === 'rifle') {
+      playNoiseSweep(1500, 2800, 0.055, 0.035, 2.4);
+      playClack(440, 0.095, 0.06, 0.11);
+    } else if (id === 'rifle2') {
+      playClack(520, 0.08, 0.045, 0.01);
+      playNoiseSweep(1700, 3200, 0.045, 0.028, 2.2, 0.02);
+    } else if (id === 'pistol') {
+      playNoiseSweep(1900, 1000, 0.06, 0.028, 2.4);
+      playClack(700, 0.06, 0.04, 0.05);
+    } else if (id === 'pistol2') {
+      playClack(480, 0.1, 0.055, 0.0);
+      playNoiseSweep(1500, 820, 0.06, 0.032, 2.2, 0.06);
+    } else if (id === 'knife') {
+      playNoiseSweep(2200, 900, 0.13, 0.035, 1.8);
+    } else {
+      playClack(600, 0.05, 0.035, 0.0);
+    }
   }
   function playHurt() {
     if (!actx) return;
@@ -2764,28 +1890,25 @@
 
   /* ================= SİLAHLAR ================= */
   var DEG = Math.PI / 180;
-  var WEAPONS = [
-    { id: 'rifle', name: 'AK-47', cls: 'rifle', speedMul: 1, auto: true, dmg: 36, headMul: 4, rpm: 600, magSize: 30, reserveMax: 90,
-      spread: 0.010, bloom: 0.006, bloomMax: 0.05, kickUp: 0.75, kickSide: 0.3, reloadTime: 2.4, moveSpread: 0.032,
-      pos: { x: 0.33, y: -0.24, z: -0.62 }, muzzle: { x: 0.24, y: -0.17, z: -0.86 } },
-    { id: 'pistol', name: 'USP', cls: 'pistol', speedMul: 1.1, auto: false, dmg: 25, headMul: 4, rpm: 380, magSize: 12, reserveMax: 60,
-      spread: 0.009, bloom: 0.011, bloomMax: 0.055, kickUp: 0.8, kickSide: 0.35, reloadTime: 2.1, moveSpread: 0.026,
-      pos: { x: 0.30, y: -0.23, z: -0.52 }, muzzle: { x: 0.16, y: -0.17, z: -0.62 } },
-    { id: 'sniper', name: 'AWP', cls: 'rifle', speedMul: 1, auto: false, dmg: 115, headMul: 4, legDmg: 85, rpm: 41, magSize: 10, reserveMax: 30,
-      spread: 0.002, bloom: 0.03, bloomMax: 0.09, kickUp: 2.6, kickSide: 0.5, reloadTime: 3.0, zoom: true, moveSpread: 0.09,
-      pos: { x: 0.34, y: -0.25, z: -0.66 }, muzzle: { x: 0.2, y: -0.16, z: -1.0 } },
-    { id: 'rifle2', name: 'M4A4', cls: 'rifle', speedMul: 1, auto: true, dmg: 33, headMul: 4, rpm: 666, magSize: 30, reserveMax: 90,
-      spread: 0.009, bloom: 0.0055, bloomMax: 0.047, kickUp: 0.7, kickSide: 0.28, reloadTime: 2.6, moveSpread: 0.03,
-      pos: { x: 0.33, y: -0.24, z: -0.6 }, muzzle: { x: 0.24, y: -0.16, z: -0.88 } },
-    { id: 'pistol2', name: 'Deagle', cls: 'pistol', speedMul: 1.1, auto: false, dmg: 53, headMul: 4, rpm: 267, magSize: 7, reserveMax: 35,
-      spread: 0.011, bloom: 0.021, bloomMax: 0.1, kickUp: 1.7, kickSide: 0.55, reloadTime: 2.3, moveSpread: 0.033,
-      pos: { x: 0.3, y: -0.23, z: -0.54 }, muzzle: { x: 0.16, y: -0.16, z: -0.68 } },
-    { id: 'knife', name: 'BIÇAK', cls: 'knife', speedMul: 1.2, melee: true, auto: false, dmg: 35, headMul: 1, rpm: 130,
-      heavyDmg: 75, heavyRpm: 65, backstabDmg: 50, heavyBackstab: 9999,
-      magSize: 0, reserveMax: 0, spread: 0.02, bloom: 0, bloomMax: 0, kickUp: 0.35, kickSide: 0.15, reloadTime: 0.5, moveSpread: 0,
-      pos: { x: 0.30, y: -0.26, z: -0.46 }, muzzle: { x: 0.16, y: -0.2, z: -0.62 } }
-  ];
+  // silah tanımları weapons/ klasöründeki dosyalardan gelir (index.html'de game.js'ten önce yüklenir)
+  var WEAPON_ORDER = ['rifle', 'pistol', 'sniper', 'rifle2', 'pistol2', 'knife'];
+  var WEAPON_DEFS = window.BS_WEAPONS || {};
+  var WEAPONS = [], RELOAD_SFX = {};
+  for (var wd = 0; wd < WEAPON_ORDER.length; wd++) {
+    var wdef = WEAPON_DEFS[WEAPON_ORDER[wd]];
+    WEAPONS.push(wdef.def);
+    if (wdef.reloadSfx) RELOAD_SFX[wdef.def.id] = wdef.reloadSfx;
+  }
   var ammo = [], reserve = [], curW = 0, scoped = false, wi;
+  function playReloadStage(kind, id) {
+    var heavy = id === 'pistol2' || id === 'sniper';
+    if (kind === 'release') playMagRelease();
+    else if (kind === 'out') playMagOut();
+    else if (kind === 'seat') playMagSeat(heavy);
+    else if (kind === 'bolt' || kind === 'slide') playBoltPull();
+    else if (kind === 'boltSlam') playBoltSlam(heavy);
+    else if (kind === 'slideSlam') playSlideRelease(heavy);
+  }
   for (wi = 0; wi < WEAPONS.length; wi++) { ammo.push(WEAPONS[wi].magSize); reserve.push(WEAPONS[wi].reserveMax); }
   var spawnClass = 'rifle';
   var loadout = { rifle: 0, pistol: 1 };
@@ -2839,16 +1962,23 @@
     x.globalAlpha = 1;
     return new THREE.CanvasTexture(c);
   }
-  var mMat = new THREE.MeshLambertMaterial({ map: gunTex('#3a414b', '#20242a', 26, true) });
-  var wMat = new THREE.MeshLambertMaterial({ map: woodTex() });
-  var bMat = new THREE.MeshLambertMaterial({ map: gunTex('#23272c', '#14171a', 30, false) });
-  var oMat = new THREE.MeshLambertMaterial({ map: gunTex('#49512f', '#333a22', 18, true) });
-  var kMat = new THREE.MeshLambertMaterial({ map: gunTex('#2c3137', '#191d21', 16, false) });
-  var steelMat = new THREE.MeshLambertMaterial({ color: 0x7d838b });
-  var steelDarkMat = new THREE.MeshLambertMaterial({ color: 0x545b64 });
-  var lensMat = new THREE.MeshLambertMaterial({ color: 0x0f1418 });
-  var bladeMat = new THREE.MeshLambertMaterial({ color: 0x9aa0a6 });
-  var bladeEdgeMat = new THREE.MeshLambertMaterial({ color: 0xc9ced4 });
+  var mTex = gunTex('#3a414b', '#20242a', 26, true);
+  var wTex = woodTex();
+  var bTex = gunTex('#23272c', '#14171a', 30, false);
+  var oTex = gunTex('#49512f', '#333a22', 18, true);
+  var kTex = gunTex('#2c3137', '#191d21', 16, false);
+  // parlak metal / lake ahşap: spekülar + yüzey kabartısı gerçekçi ışık kırılması verir
+  var mMat = new THREE.MeshPhongMaterial({ map: mTex, bumpMap: mTex, bumpScale: 0.0016, specular: 0x6d747d, shininess: 48 });
+  var wMat = new THREE.MeshPhongMaterial({ map: wTex, bumpMap: wTex, bumpScale: 0.0012, specular: 0x2a1d10, shininess: 14 });
+  var bMat = new THREE.MeshPhongMaterial({ map: bTex, bumpMap: bTex, bumpScale: 0.0014, specular: 0x4a5058, shininess: 64 });
+  var oMat = new THREE.MeshPhongMaterial({ map: oTex, bumpMap: oTex, bumpScale: 0.0012, specular: 0x2b3020, shininess: 20 });
+  var kMat = new THREE.MeshPhongMaterial({ map: kTex, bumpMap: kTex, bumpScale: 0.0012, specular: 0x353b42, shininess: 28 });
+  var steelMat = new THREE.MeshPhongMaterial({ color: 0x9aa1ab, specular: 0xe9f0f8, shininess: 130 });
+  var steelDarkMat = new THREE.MeshPhongMaterial({ color: 0x646c76, specular: 0xc9d3de, shininess: 96 });
+  var lensMat = new THREE.MeshPhongMaterial({ color: 0x101b22, specular: 0x7fd4ff, shininess: 240 });
+  var bladeMat = new THREE.MeshPhongMaterial({ color: 0x9aa0a6, specular: 0xffffff, shininess: 170 });
+  var bladeEdgeMat = new THREE.MeshPhongMaterial({ color: 0xd9e2ea, specular: 0xffffff, shininess: 220 });
+  var sightMat = new THREE.MeshBasicMaterial({ color: 0xe6edf5 });
   function wp(g, w, h, d, x, y, z, mat) {
     var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
     m.position.set(x, y, z);
@@ -2952,216 +2082,19 @@
     }
   }
 
-  function buildRifle() {
-    var g = new THREE.Group();
-    // alıcı + üst kapak
-    wp(g, 0.086, 0.112, 0.34, 0, 0.005, -0.03, mMat);
-    wp(g, 0.078, 0.026, 0.30, 0, 0.072, -0.04, mMat);
-    wp(g, 0.070, 0.012, 0.26, 0, 0.088, -0.04, kMat);
-    wp(g, 0.062, 0.050, 0.14, 0, -0.045, 0.06, mMat);
-    // namlu + gaz sistemi
-    cylZ(g, 0.021, 0.019, 0.40, 0, 0.022, -0.43, bMat, 10);
-    cylZ(g, 0.013, 0.013, 0.30, 0, 0.056, -0.40, mMat, 8);
-    wp(g, 0.030, 0.070, 0.045, 0, 0.045, -0.61, mMat);       // arpacık kulesi
-    wp(g, 0.008, 0.034, 0.008, 0, 0.088, -0.615, bMat);      // arpacık
-    cylZ(g, 0.026, 0.024, 0.075, 0, 0.022, -0.665, bMat, 10); // namlu freni
-    wp(g, 0.050, 0.022, 0.050, 0, 0.090, -0.16, mMat);       // gez yatağı
-    wp(g, 0.016, 0.030, 0.014, 0, 0.108, -0.16, bMat);       // gez
-    // ahşap el kundağı
-    wp(g, 0.066, 0.062, 0.21, 0, -0.012, -0.33, wMat);
-    wp(g, 0.052, 0.030, 0.13, 0, 0.058, -0.335, wMat);
-    wp(g, 0.070, 0.018, 0.060, 0, -0.055, -0.24, wMat);
-    // dipçik
-    wp(g, 0.066, 0.095, 0.20, 0, -0.028, 0.235, wMat);
-    wp(g, 0.060, 0.040, 0.14, 0, 0.035, 0.235, wMat);
-    wp(g, 0.072, 0.110, 0.028, 0, -0.028, 0.335, bMat);      // taban
-    wp(g, 0.040, 0.030, 0.09, 0, -0.075, 0.16, mMat);        // bağlantı
-    // kabza + tetik düzeneği
-    wpr(g, 0.050, 0.132, 0.062, 0, -0.118, 0.075, 0.30, 0, 0, kMat);
-    wp(g, 0.024, 0.010, 0.110, 0, -0.062, 0.005, mMat);      // korkuluk
-    wp(g, 0.012, 0.030, 0.012, 0, -0.045, -0.005, bMat);     // tetik
-    wp(g, 0.012, 0.032, 0.050, 0.052, 0.020, 0.030, mMat);   // emniyet kolu
-    // kavisli şarjör
-    var mag = new THREE.Group(); mag.position.set(0, -0.10, -0.135); g.add(mag);
-    wpr(mag, 0.052, 0.095, 0.105, 0, -0.030, 0, -0.10, 0, 0, kMat);
-    wpr(mag, 0.052, 0.095, 0.105, 0, -0.105, -0.012, -0.26, 0, 0, kMat);
-    wpr(mag, 0.052, 0.085, 0.100, 0, -0.173, -0.036, -0.44, 0, 0, kMat);
-    mag.userData.baseY = -0.10;
-    g.userData.mag = mag;
-    // sürgü kolu (reload animasyonu)
-    var charge = wp(g, 0.024, 0.024, 0.055, 0.058, 0.030, 0.06, mMat);
-    charge.userData.baseZ = 0.06;
-    charge.userData.baseX = 0.058;
-    g.userData.charge = charge;
-    var mzR = new THREE.Object3D(); mzR.position.set(0, 0.022, -0.71); g.add(mzR); g.userData.muzzle = mzR;
-    return g;
-  }
-  function buildPistol() {
-    var g = new THREE.Group();
-    // çerçeve + kabza
-    wp(g, 0.046, 0.048, 0.160, 0, -0.004, -0.02, kMat);
-    wpr(g, 0.048, 0.120, 0.062, 0, -0.092, 0.035, 0.22, 0, 0, kMat);
-    wp(g, 0.052, 0.010, 0.058, 0, -0.128, 0.050, bMat);
-    wp(g, 0.020, 0.012, 0.095, 0, -0.045, -0.015, kMat);     // korkuluk
-    wp(g, 0.010, 0.026, 0.010, 0, -0.032, -0.020, bMat);     // tetik
-    wp(g, 0.040, 0.020, 0.030, 0, 0.028, 0.075, bMat);       // horoz yatağı
-    wpr(g, 0.014, 0.034, 0.018, 0, 0.040, 0.088, -0.35, 0, 0, bMat); // horoz
-    // sürgü (ateş/reload'da hareket eder)
-    var slide = new THREE.Group(); g.add(slide);
-    wp(slide, 0.050, 0.058, 0.255, 0, 0.040, -0.045, bMat);
-    wp(slide, 0.040, 0.014, 0.255, 0, 0.072, -0.045, mMat);  // üst kaburga
-    wp(slide, 0.034, 0.040, 0.055, 0, 0.034, -0.195, bMat);  // namlu ağzı
-    cylZ(slide, 0.028, 0.028, 0.100, 0, 0.034, -0.255, bMat, 10); // susturucu
-    cylZ(slide, 0.030, 0.030, 0.020, 0, 0.034, -0.310, mMat, 10); // susturucu ucu
-    wp(slide, 0.012, 0.018, 0.020, 0, 0.082, -0.145, bMat);  // arpacık
-    wp(slide, 0.030, 0.014, 0.016, 0, 0.082, 0.055, bMat);   // gez
-    for (var p1 = 0; p1 < 4; p1++) wp(slide, 0.052, 0.036, 0.008, 0, 0.038, 0.048 + p1 * 0.014, kMat);
-    slide.userData.baseZ = 0;
-    slide.userData.travel = 0.045;
-    g.userData.slide = slide;
-    var mag = wp(g, 0.042, 0.110, 0.050, 0, -0.075, 0.035, kMat);
-    mag.userData.baseY = -0.075;
-    g.userData.mag = mag;
-    var mzP = new THREE.Object3D(); mzP.position.set(0, 0.034, -0.36); g.add(mzP); g.userData.muzzle = mzP;
-    return g;
-  }
-  function buildSniper() {
-    var g = new THREE.Group();
-    // dipçik + şasi
-    wp(g, 0.062, 0.105, 0.34, 0, -0.012, 0.200, oMat);
-    wp(g, 0.056, 0.045, 0.18, 0, 0.055, 0.170, oMat);        // yanak dayama
-    wp(g, 0.064, 0.035, 0.05, 0, 0.078, 0.170, kMat);
-    wp(g, 0.066, 0.125, 0.028, 0, -0.025, 0.375, bMat);      // dipçik pedi
-    wp(g, 0.070, 0.070, 0.18, 0, -0.002, 0.060, oMat);
-    wpr(g, 0.052, 0.125, 0.062, 0, -0.115, 0.055, 0.28, 0, 0, kMat);
-    // alıcı
-    wp(g, 0.066, 0.075, 0.30, 0, 0.010, -0.06, mMat);
-    wp(g, 0.010, 0.055, 0.22, 0, 0.058, -0.06, bMat);
-    // namlu
-    cylZ(g, 0.026, 0.024, 0.16, 0, 0.018, -0.26, mMat, 12);
-    cylZ(g, 0.018, 0.018, 0.62, 0, 0.018, -0.56, bMat, 10);
-    cylZ(g, 0.024, 0.022, 0.055, 0, 0.018, -0.90, bMat, 10);
-    wp(g, 0.030, 0.024, 0.050, 0, 0.050, -0.76, mMat);       // namlu bandı
-    // dürbün
-    cylZ(g, 0.030, 0.030, 0.30, 0, 0.115, -0.12, bMat, 14);
-    cylZ(g, 0.042, 0.034, 0.07, 0, 0.115, -0.29, bMat, 14);  // objektif
-    cylZ(g, 0.036, 0.030, 0.05, 0, 0.115, 0.06, bMat, 14);   // göz merceği
-    wp(g, 0.030, 0.030, 0.012, 0, 0.115, -0.325, lensMat);
-    wp(g, 0.020, 0.030, 0.030, 0, 0.075, -0.22, mMat);       // yüzük
-    wp(g, 0.020, 0.030, 0.030, 0, 0.075, -0.02, mMat);       // yüzük
-    // cıvata kolu
-    var bolt = wp(g, 0.050, 0.050, 0.085, 0.042, 0.045, 0.05, mMat);
-    bolt.userData.baseZ = 0.05;
-    bolt.userData.baseRotZ = 0;
-    var knob = new THREE.Mesh(new THREE.SphereGeometry(0.026, 8, 6), bMat);
-    knob.position.set(0.055, 0, 0.045); knob.userData.noHit = true; bolt.add(knob);
-    g.userData.bolt = bolt;
-    // şarjör + tetik
-    var mag = wp(g, 0.052, 0.105, 0.085, 0, -0.095, -0.075, kMat);
-    mag.userData.baseY = -0.095;
-    g.userData.mag = mag;
-    wp(g, 0.020, 0.012, 0.100, 0, -0.060, 0.010, mMat);
-    wp(g, 0.010, 0.028, 0.012, 0, -0.045, 0.005, bMat);
-    var mzS = new THREE.Object3D(); mzS.position.set(0, 0.018, -0.945); g.add(mzS); g.userData.muzzle = mzS;
-    return g;
-  }
-  function buildRifle2() {
-    var g = new THREE.Group();
-    // alıcı + üst ray
-    wp(g, 0.082, 0.098, 0.320, 0, 0.008, -0.02, bMat);
-    wp(g, 0.074, 0.022, 0.300, 0, 0.068, -0.02, mMat);
-    // taşıma kolu
-    wp(g, 0.040, 0.020, 0.240, 0, 0.105, -0.10, bMat);
-    wp(g, 0.034, 0.050, 0.030, 0, 0.082, 0.02, bMat);
-    wp(g, 0.030, 0.062, 0.032, 0, 0.085, -0.24, bMat);
-    wp(g, 0.008, 0.028, 0.008, 0, 0.118, -0.245, mMat);      // arpacık
-    wp(g, 0.026, 0.012, 0.050, 0, 0.090, -0.34, mMat);       // gaz bloğu
-    // namlu
-    cylZ(g, 0.017, 0.016, 0.26, 0, 0.022, -0.46, mMat, 10);
-    cylZ(g, 0.024, 0.022, 0.06, 0, 0.022, -0.60, bMat, 10);  // alev gizleyici
-    // el kundağı + ray
-    wp(g, 0.060, 0.058, 0.220, 0, 0.000, -0.31, bMat);
-    for (var p2 = 0; p2 < 3; p2++) wp(g, 0.062, 0.010, 0.014, 0, 0.028 - p2 * 0.014, -0.31, mMat);
-    wp(g, 0.052, 0.016, 0.120, 0, -0.035, -0.31, bMat);
-    // dipçik
-    cylZ(g, 0.020, 0.020, 0.11, 0, 0.012, 0.19, mMat, 8);    // tampon borusu
-    wp(g, 0.056, 0.082, 0.140, 0, -0.010, 0.300, bMat);
-    wp(g, 0.062, 0.096, 0.022, 0, -0.010, 0.375, kMat);
-    // kabza + tetik
-    wpr(g, 0.048, 0.120, 0.058, 0, -0.108, 0.065, 0.30, 0, 0, bMat);
-    wp(g, 0.022, 0.010, 0.100, 0, -0.055, 0.005, mMat);
-    wp(g, 0.010, 0.026, 0.010, 0, -0.040, -0.005, bMat);
-    wp(g, 0.012, 0.010, 0.030, 0.052, 0.045, -0.02, mMat);   // kovan deflektörü
-    wp(g, 0.020, 0.030, 0.020, 0.045, 0.012, -0.01, mMat);   // forward assist
-    // şarjör
-    var mag = wp(g, 0.048, 0.165, 0.082, 0, -0.125, -0.115, kMat);
-    mag.userData.baseY = -0.125;
-    g.userData.mag = mag;
-    // sürgü kolu
-    var charge = wp(g, 0.046, 0.018, 0.026, 0, 0.060, 0.095, mMat);
-    charge.userData.baseZ = 0.095;
-    charge.userData.baseX = 0;
-    g.userData.charge = charge;
-    var mzR2 = new THREE.Object3D(); mzR2.position.set(0, 0.022, -0.64); g.add(mzR2); g.userData.muzzle = mzR2;
-    return g;
-  }
-  function buildPistol2() {
-    var g = new THREE.Group();
-    // çerçeve + kabza
-    wp(g, 0.048, 0.046, 0.190, 0, -0.002, -0.03, kMat);
-    wpr(g, 0.050, 0.132, 0.068, 0, -0.095, 0.040, 0.20, 0, 0, bMat);
-    wp(g, 0.054, 0.012, 0.062, 0, -0.135, 0.055, kMat);
-    wp(g, 0.022, 0.012, 0.105, 0, -0.048, -0.020, bMat);     // korkuluk
-    wp(g, 0.012, 0.030, 0.012, 0, -0.032, -0.025, bMat);     // tetik
-    wpr(g, 0.016, 0.038, 0.020, 0, 0.048, 0.090, -0.35, 0, 0, bMat); // horoz
-    // sürgü (ateş/reload'da hareket eder)
-    var slide = new THREE.Group(); g.add(slide);
-    wp(slide, 0.056, 0.080, 0.300, 0, 0.045, -0.06, steelMat);
-    wp(slide, 0.026, 0.014, 0.260, 0, 0.090, -0.06, steelDarkMat);
-    wp(slide, 0.040, 0.060, 0.050, 0, 0.030, -0.225, steelDarkMat);
-    cylZ(slide, 0.024, 0.024, 0.100, 0, 0.032, -0.300, steelDarkMat, 8);
-    wp(slide, 0.014, 0.020, 0.022, 0, 0.086, -0.190, bMat);  // arpacık
-    wp(slide, 0.034, 0.016, 0.018, 0, 0.090, 0.065, bMat);   // gez
-    for (var p3 = 0; p3 < 3; p3++) wp(slide, 0.058, 0.046, 0.008, 0, 0.042, 0.055 + p3 * 0.015, steelDarkMat);
-    wp(slide, 0.058, 0.024, 0.024, 0, 0.030, 0.075, bMat);
-    slide.userData.baseZ = 0;
-    slide.userData.travel = 0.052;
-    g.userData.slide = slide;
-    var mag = wp(g, 0.046, 0.120, 0.058, 0, -0.080, 0.040, kMat);
-    mag.userData.baseY = -0.080;
-    g.userData.mag = mag;
-    var mzP2 = new THREE.Object3D(); mzP2.position.set(0, 0.032, -0.37); g.add(mzP2); g.userData.muzzle = mzP2;
-    return g;
-  }
-  function buildKnife() {
-    var g = new THREE.Group();
-    // sap
-    wp(g, 0.034, 0.046, 0.200, 0, 0, 0.030, kMat);
-    wp(g, 0.040, 0.052, 0.020, 0, 0, -0.075, bMat);
-    wp(g, 0.030, 0.040, 0.016, 0, 0, 0.135, mMat);           // topuz
-    for (var p4 = 0; p4 < 3; p4++) wp(g, 0.038, 0.010, 0.014, 0, -0.024, -0.020 + p4 * 0.045, bMat);
-    wp(g, 0.092, 0.020, 0.030, 0, 0.002, -0.105, mMat);      // balçak
-    // bıçak (yukarı açılı)
-    var bladeG = new THREE.Group();
-    bladeG.position.set(0, 0.010, -0.115);
-    bladeG.rotation.x = 0.38;
-    g.add(bladeG);
-    wp(bladeG, 0.014, 0.062, 0.240, 0, 0.030, -0.120, bladeMat);
-    wp(bladeG, 0.012, 0.026, 0.100, 0, 0.045, -0.275, bladeMat);   // uç
-    wp(bladeG, 0.016, 0.012, 0.235, 0, -0.002, -0.120, bladeEdgeMat); // ağız
-    wp(bladeG, 0.016, 0.014, 0.040, 0, 0.058, -0.225, bladeMat);   // sırt çıkıntısı
-    var mzK = new THREE.Object3D(); mzK.position.set(0, 0.045, -0.33); bladeG.add(mzK); g.userData.muzzle = mzK;
-    return g;
-  }
-  weaponGroups.rifle = buildRifle(); weaponGroups.pistol = buildPistol(); weaponGroups.sniper = buildSniper();
-  weaponGroups.rifle2 = buildRifle2(); weaponGroups.pistol2 = buildPistol2(); weaponGroups.knife = buildKnife();
-  addViewArms(weaponGroups.rifle, 'rifle');
-  addViewArms(weaponGroups.pistol, 'pistol');
-  addViewArms(weaponGroups.sniper, 'sniper');
-  addViewArms(weaponGroups.rifle2, 'rifle2');
-  addViewArms(weaponGroups.pistol2, 'pistol2');
-  addViewArms(weaponGroups.knife, 'knife');
+  // --- silah modelleri: her silah kendi dosyasında kurulur ---
+  var WEAPON_KIT = {
+    wp: wp, wpr: wpr, cylZ: cylZ,
+    mMat: mMat, wMat: wMat, bMat: bMat, oMat: oMat, kMat: kMat,
+    steelMat: steelMat, steelDarkMat: steelDarkMat, lensMat: lensMat,
+    bladeMat: bladeMat, bladeEdgeMat: bladeEdgeMat, sightMat: sightMat
+  };
   var wid;
+  for (wid = 0; wid < WEAPON_ORDER.length; wid++) {
+    var wreg = WEAPON_DEFS[WEAPON_ORDER[wid]];
+    weaponGroups[wreg.def.id] = wreg.build(WEAPON_KIT);
+    addViewArms(weaponGroups[wreg.def.id], wreg.viewKind);
+  }
   for (wid in weaponGroups) {
     weaponGroups[wid].scale.set(0.62, 0.62, 0.62);
     weaponGroups[wid].visible = false;
@@ -3199,7 +2132,7 @@
   camera.add(gadgetGroup);
   var gadgetSel = null, gadgetAutoOff = 0;
 
-  var raiseT = 1, gunKick = 0, bloom = 0, reloading = false, reloadEnd = 0;
+  var raiseT = 1, gunKick = 0, bloom = 0, reloading = false, reloadEnd = 0, reloadSfxIdx = 0;
   var nextShotTime = 0, triggerHeld = false, triggerQueued = false, triggerHeavyQueued = false, meleeSwingT = 0, meleeHeavyAnim = false;
   var baseFov = 75, scopeLevel = 0;
   var AWP_BOLT_TIME = 0.9, awpBoltT = 0, awpRescopeLevel = 0, awpRescopePending = false, awpBoltSnd = 0;
@@ -3255,29 +2188,30 @@
     awpBoltSnd = 0;
     scopeLevel = 0;
     applyScope();
-    playTick(360, 0.05, 0.025);
+    playClack(430, 0.06, 0.04);
     updateHudAmmo();
   }
   function setScoped(on) {
-    if (on && !currentWeapon().zoom) on = false;
+    if (on && (player.hp <= 0 || !currentWeapon().zoom)) on = false;
     if (awpBoltT > 0) awpRescopePending = false;
     scopeLevel = on ? 1 : 0;
     applyScope();
   }
   // AWP: 1. basış 1x, 2. basış 2x, 3. basış dürbünden çıkar
   function cycleScope() {
+    if (player.hp <= 0) return;
     if (!currentWeapon().zoom || reloading) return;
     if (awpBoltT > 0) awpRescopePending = false; // kullanıcı müdahale etti
     scopeLevel = (scopeLevel + 1) % 3;
     applyScope();
-    playTick(scopeLevel ? 950 - scopeLevel * 120 : 620, 0.035, 0.02);
+    playClack(scopeLevel ? 1350 - scopeLevel * 120 : 900, 0.032, 0.022);
   }
   function switchWeapon(idx, instant, force) {
     if (idx < 0 || idx >= WEAPONS.length) return;
     if (mapRestricted()) {
       var wid = WEAPONS[idx].id;
       if (wid !== 'sniper' && wid !== 'pistol2' && wid !== 'knife') {
-        playTick(300, 0.03, 0.03);
+        playClack(240, 0.05, 0.05);
         return;
       }
     }
@@ -3296,17 +2230,19 @@
     meleeSwingT = 0;
     slideT = 0;
     triggerHeavyQueued = false;
-    if (!instant) playTick(700, 0.04, 0.03);
+    if (!instant) playEquip(WEAPONS[idx].id);
     updateHudAmmo();
   }
   function startReload() {
+    if (player.hp <= 0) return;
     var w = currentWeapon();
     if (w.melee || reloading || ammo[curW] >= w.magSize || (reserve[curW] <= 0 && !infAmmo)) return;
     cancelSniperBolt();
     reloading = true;
+    reloadSfxIdx = 0;
     reloadEnd = performance.now() / 1000 + w.reloadTime;
     if (scopeLevel) { scopeLevel = 0; applyScope(); }
-    playTick(520, 0.06, 0.03);
+    playMagRelease();
     updateHudAmmo();
   }
   function gadgetColor(type) {
@@ -3318,7 +2254,7 @@
   function equipGadget(type) {
     if (type !== 'smoke' && type !== 'flash' && type !== 'he') return false;
     if (player.hp <= 0) return false;
-    if (!nades[type] || nades[type] <= 0) { playTick(820, 0.06, 0.02); updateHudAmmo(); return false; }
+    if (!nades[type] || nades[type] <= 0) { playClack(240, 0.05, 0.05); updateHudAmmo(); return false; }
     if (gadgetSel === type) { switchWeapon(curW, true, true); return true; }
     cancelSniperBolt();
     reloading = false;
@@ -3331,7 +2267,7 @@
     raiseT = 0;
     triggerQueued = false;
     triggerHeavyQueued = false;
-    playTick(700, 0.04, 0.03);
+    playNoiseSweep(1300, 750, 0.09, 0.03, 1.7);
     updateHudAmmo();
     return true;
   }
@@ -3353,17 +2289,19 @@
   function computeSpread() {
     var w = currentWeapon();
     var crouch = player.crouch || 0;
+    var mv = Math.min(1, Math.max(0, moveAmt));
     if (w.id === 'sniper' && !scoped) {
       // dürbünsüz AWP: cross'a göre belirgin saçılma, hareket/zıplama ile artar
-      var su = 0.048 + Math.min(1, Math.max(0, moveAmt)) * 0.055;
+      var su = 0.048 + mv * 0.075;
       if (!player.grounded) su += 0.05;
       return su * (1 - crouch * 0.3);
     }
-    if (scoped) return w.spread * (scopeLevel === 2 ? 0.12 : 0.25) * (1 - crouch * 0.3);
+    // dürbün açıkken de yürümek isabeti bozar (koşarken AWP ıskalar)
+    if (scoped) return (w.spread * (scopeLevel === 2 ? 0.12 : 0.25) + mv * w.moveSpread * 0.85) * (1 - crouch * 0.3);
     var s = (w.spread + bloom) * (1 - crouch * 0.35);
-    var mv = Math.min(1, Math.max(0, moveAmt));
-    s += mv * w.moveSpread * (keys['shift'] ? 0.45 : 1) * (1 - crouch * 0.45);
-    if (!player.grounded) s += w.moveSpread * 0.9 + 0.012;
+    // hareket cezası: koşarken tüfekler belirgin seker, yürürken hafifler
+    s += mv * w.moveSpread * (keys['shift'] ? 0.8 : 2.4) * (1 - crouch * 0.45);
+    if (!player.grounded) s += w.moveSpread * 1.6 + 0.02;
     return s;
   }
 
@@ -3546,7 +2484,7 @@
   function throwGrenade(type, power) {
     var nowS2 = performance.now() / 1000;
     if (nowS2 < nextThrowTime || player.hp <= 0) return;
-    if (!nades[type] || nades[type] <= 0) { playTick(820, 0.06, 0.02); updateHudNades(); updateHudAmmo(); return; }
+    if (!nades[type] || nades[type] <= 0) { playClack(240, 0.05, 0.05); updateHudNades(); updateHudAmmo(); return; }
     nades[type]--;
     nextThrowTime = nowS2 + 0.65;
     throwAnimT = 0.4;
@@ -4005,7 +2943,8 @@
       target: null, nextThink: 0, burstLeft: 0, nextShot: 0, walkPhase: 0,
       protectUntil: 0, recoil: 0, flashT: 0, stuckT: 0, aimPitch: 0, seed: Math.random() * 10, upper: null,
       crouchAmt: 0, reloadAmt: 0, netReload: 0,
-      lastSeenX: 0, lastSeenZ: 0, lastSeenT: 0, retreatT: 0, stunT: 0, scanA: 0, moveSpread: 0, strafeT: 0 };
+      lastSeenX: 0, lastSeenZ: 0, lastSeenT: 0, retreatT: 0, stunT: 0, scanA: 0, moveSpread: 0, strafeT: 0,
+      huntX: null, huntZ: null, huntT: 0 };
     var g = t.group;
     var teamMat = team === 'red' ? tMatRed : tMatBlue;
     var teamDark = team === 'red' ? tMatRedDark : tMatBlueDark;
@@ -4096,10 +3035,20 @@
     gunPart(0.007, 0.026, 0.007, 0, 0.078, -0.600, bMat);     // arpacık
     gunCyl(0.021, 0.055, 0, 0.015, -0.645, bMat);             // namlu freni
     gunPart(0.042, 0.018, 0.042, 0, 0.070, -0.110, mMat);     // gez
-    // kavisli şarjör
-    var magA = gunPart(0.048, 0.085, 0.095, 0, -0.085, -0.130, kMat); magA.rotation.x = -0.12;
-    var magB = gunPart(0.048, 0.085, 0.095, 0, -0.155, -0.145, kMat); magB.rotation.x = -0.30;
-    var magC = gunPart(0.048, 0.075, 0.090, 0, -0.215, -0.170, kMat); magC.rotation.x = -0.48;
+    // kavisli şarjör (AWP modunda düz kısa şarjör + dürbün + uzun namlu)
+    var awpGun = mapRestricted();
+    if (!awpGun) {
+      var magA = gunPart(0.048, 0.085, 0.095, 0, -0.085, -0.130, kMat); magA.rotation.x = -0.12;
+      var magB = gunPart(0.048, 0.085, 0.095, 0, -0.155, -0.145, kMat); magB.rotation.x = -0.30;
+      var magC = gunPart(0.048, 0.075, 0.090, 0, -0.215, -0.170, kMat); magC.rotation.x = -0.48;
+    } else {
+      gunPart(0.052, 0.075, 0.115, 0, -0.085, -0.125, kMat);
+      gunCyl(0.019, 0.62, 0, 0.015, -0.72, bMat);              // uzun namlu
+      gunCyl(0.032, 0.26, 0, 0.088, -0.185, mMat, 10);         // dürbün gövdesi
+      gunCyl(0.040, 0.05, 0, 0.088, -0.335, bMat, 10);         // dürbün ön camı yuvası
+      gunCyl(0.038, 0.04, 0, 0.088, -0.045, bMat, 10);         // arka mercek
+      gunPart(0.03, 0.05, 0.02, 0.03, 0.045, -0.185, mMat);    // sürgü kolu
+    }
     // dipçik
     gunPart(0.055, 0.080, 0.160, 0, -0.010, 0.215, wMat);
     gunPart(0.060, 0.095, 0.022, 0, -0.015, 0.305, teamDark);
@@ -4192,6 +3141,7 @@
     t.flash.visible = false;
     scene.add(t.flash);
     g.position.set(p0[0], 0, p0[1]);
+    g.rotation.order = 'YXZ';   // ölümde gövde, baktığı yöne göre yan/ön/arka devrilsin
     if (path.length > 1) g.rotation.y = Math.atan2(-(path[1][0] - p0[0]), -(path[1][1] - p0[1]));
     scene.add(g);
     targets.push(t);
@@ -4258,10 +3208,21 @@
     normal: { dmgMin: 8,  dmgMax: 13, spread: 0.014, think: 0.34, pause: 0.55, pauseJitter: 0.9, burst: 3 },
     hard:   { dmgMin: 11, dmgMax: 17, spread: 0.0085, think: 0.20, pause: 0.34, pauseJitter: 0.55, burst: 4 }
   };
-  function botTuning() { return BOT_DIFF[botDifficulty] || BOT_DIFF.normal; }
+  // AWP modu (kısıtlı haritalar): tek isabetli atış, sürgü beklemesi, zırhtan geçen sniper hasarı
+  var BOT_AWP_DIFF = {
+    easy:   { dmgMin: 42, dmgMax: 62, spread: 0.018, think: 0.62, pause: 1.75, pauseJitter: 0.8 },
+    normal: { dmgMin: 58, dmgMax: 80, spread: 0.009, think: 0.42, pause: 1.4, pauseJitter: 0.6 },
+    hard:   { dmgMin: 72, dmgMax: 96, spread: 0.0042, think: 0.26, pause: 1.12, pauseJitter: 0.45 }
+  };
+  function botAwpMode() { return mapRestricted(); }
+  function botTuning() {
+    var tbl = botAwpMode() ? BOT_AWP_DIFF : BOT_DIFF;
+    return tbl[botDifficulty] || tbl.normal;
+  }
+  function botWeaponId() { return botAwpMode() ? 'sniper' : 'rifle'; }
   function botMuzzle(t) {
     var ry = t.group.rotation.y, c = Math.cos(ry), s = Math.sin(ry);
-    var lx = 0.06, lz = -0.93;
+    var lx = 0.06, lz = botAwpMode() ? -1.02 : -0.93;
     return new THREE.Vector3(
       t.group.position.x + lx * c + lz * s,
       1.24,
@@ -4311,13 +3272,21 @@
     t.flashT = 0.06;
     if (t.flash) { t.flash.position.set(mz.x, mz.y, mz.z); t.flash.visible = true; }
     var tx, ty, tz;
-    if (tgt.kind === 'player') { tx = player.x; ty = 1.25; tz = player.z; }
-    else { tx = tgt.bot.group.position.x; ty = 1.2; tz = tgt.bot.group.position.z; }
+    if (tgt.kind === 'player') {
+      tx = player.x; ty = 1.25; tz = player.z;
+      // zor botlar koşan oyuncuyu önceden nişan alır
+      if (botDifficulty === 'hard' && player.hp > 0 && player.grounded) {
+        var dd0 = Math.sqrt((tx - mz.x) * (tx - mz.x) + (tz - mz.z) * (tz - mz.z));
+        var lead = Math.min(0.6, dd0 / 280) * 0.85;
+        tx += player.vx * lead; tz += player.vz * lead;
+      }
+    } else { tx = tgt.bot.group.position.x; ty = 1.2; tz = tgt.bot.group.position.z; }
     var dx = tx - mz.x, dy = ty - mz.y, dz = tz - mz.z;
     var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
     if (dist < 0.1) return;
     var dir = new THREE.Vector3(dx / dist, dy / dist, dz / dist);
     var D = botTuning();
+    var wid = botWeaponId();
     var sp = D.spread + dist * 0.00035 + (t.moveSpread || 0);
     dir.x += (Math.random() - 0.5) * 2 * sp;
     dir.y += (Math.random() - 0.5) * 2 * sp;
@@ -4326,28 +3295,29 @@
     raycaster.set(mz, dir);
     raycaster.far = 90;
     var hits = raycaster.intersectObjects(hittables, false);
-    var wallDist = hits.length ? hits[0].distance : 90;
+    var solid = firstSolidHit(hits);
+    var wallDist = solid ? solid.distance : 90;
     var end = mz.clone().addScaledVector(dir, wallDist);
     var dmg = D.dmgMin + Math.random() * (D.dmgMax - D.dmgMin);
     if (tgt.kind === 'bot') {
-      if (hits.length && hits[0].object.__tgt) {
-        var hitBot = hits[0].object.__tgt;
+      if (solid && solid.object.__tgt) {
+        var hitBot = solid.object.__tgt;
         if (hitBot.state === 'alive' && hitBot.team !== t.team) {
-          var isHead = hits[0].object.userData.part === 'head';
+          var isHead = solid.object.userData.part === 'head';
           if (hitBot.isRemote && hitBot.netId) {
             // karşı oyuncu: ana makine otoriter uygular, konuğa da sonucu bildirir
             var remoteRec = mpGuests[hitBot.netId];
             if (remoteRec) {
-              mpSendAuthPd(remoteRec, dmg * (isHead ? 2.5 : 1), isHead, 'rifle', t.name, t.team, t.id, false, false, t.flashT > 0);
+              mpSendAuthPd(remoteRec, dmg * (isHead ? 2.5 : 1), isHead, wid, t.name, t.team, t.id, false, false, t.flashT > 0);
             } else {
               mpSendTo(hitBot.netId, { t: 'pd', to: hitBot.netId,
-                dmg: dmg * (isHead ? 2.5 : 1), head: isHead, w: 'rifle',
+                dmg: dmg * (isHead ? 2.5 : 1), head: isHead, w: wid,
                 kn: t.name, kt: t.team, kid: t.id });
             }
           } else {
-            damageTarget(hitBot, dmg * (isHead ? 3 : 1), isHead, false, t.team, t.name, 'rifle');
+            damageTarget(hitBot, dmg * (isHead ? 3 : 1), isHead, false, t.team, t.name, wid);
           }
-          end.copy(hits[0].point);
+          end.copy(solid.point);
         }
       }
     } else {
@@ -4359,11 +3329,11 @@
         if (hm < 0.45 && Math.abs(closest.y - 1.2) < 0.95) {
           var headHit = closest.y > 1.45;
           var wasAlive = player.hp > 0;
-          hurtPlayer(dmg * (headHit ? 2.5 : 1), headHit, 'rifle', 'b:' + t.name + '|' + t.team, t.name, t.team);
+          hurtPlayer(dmg * (headHit ? 2.5 : 1), headHit, wid, 'b:' + t.name + '|' + t.team, t.name, t.team);
           if (wasAlive && player.hp <= 0) {
-            addKillFeed(t.name, (userName || 'SEN'), t.team, player.team, headHit, true, 'rifle', false, false, t.stunT > 0);
+            addKillFeed(t.name, (userName || 'SEN'), t.team, player.team, headHit, true, wid, false, false, t.stunT > 0);
             if (mpRole === 'host' && mpConnected) {
-              mpBroadcastKf(t.name, t.team, (userName || 'SEN'), player.team, headHit, null, mpSelfId, 'rifle', false, false, t.stunT > 0);
+              mpBroadcastKf(t.name, t.team, (userName || 'SEN'), player.team, headHit, null, mpSelfId, wid, false, false, t.stunT > 0);
             }
             addTeamScore(t.team, 1);
           }
@@ -4372,7 +3342,7 @@
       }
     }
     var pdist = Math.sqrt(Math.pow(player.x - mz.x, 2) + Math.pow(player.z - mz.z, 2));
-    playShot('rifle', Math.max(0.04, Math.min(1, 1 - pdist / 55)));
+    playShot(wid, Math.max(0.04, Math.min(1, 1 - pdist / 55)));
     spawnTracer(mz, end);
   }
 
@@ -4430,6 +3400,57 @@
       hitmarkerEl.style.opacity = '1';
     }
   }
+  // --- prosedürel ragdoll: düşüş yönü + duvar payı ---
+  function setRagdollFall(t, ax, az, hitPoint) {
+    var px = t.group.position.x, pz = t.group.position.z;
+    var fx = 0, fz = 0;
+    if (typeof ax === 'number' && typeof az === 'number') {
+      fx = px - ax; fz = pz - az;
+      var fl = Math.sqrt(fx * fx + fz * fz);
+      if (fl < 0.01 && hitPoint) { fx = px - hitPoint.x; fz = pz - hitPoint.z; fl = Math.sqrt(fx * fx + fz * fz); }
+      if (fl > 0.01) { fx /= fl; fz /= fl; } else { fx = 0; fz = 0; }
+    }
+    if (!fx && !fz) {
+      // vuruş yönü yoksa: baktığı yönün tersine (geriye) yığılsın
+      fx = Math.sin(t.group.rotation.y); fz = Math.cos(t.group.rotation.y);
+    }
+    var yaw = t.group.rotation.y, c = Math.cos(yaw), s = Math.sin(yaw);
+    var lx = fx * c - fz * s, lz = fx * s + fz * c;
+    var lv = Math.sqrt(lx * lx + lz * lz) || 1;
+    t.fallLX = lx / lv; t.fallLZ = lz / lv;
+    t.fallWX = fx; t.fallWZ = fz;
+    // düşeceği yönde boşluk yoksa düz yatmak yerine duvara yaslanmış gibi eğik kalsın
+    // kafa tepesi ~1.62 m uzağa savrulur + kafa yarıçapı 0.16 m pay
+    var FALL_LEN = 1.62, FALL_R = 0.16, obstacle = 2.4;
+    for (var d = 0.2; d <= 2.4; d += 0.1) {
+      if (!npcClear(px + fx * d, pz + fz * d, 0.28)) { obstacle = Math.max(0.2, d + 0.1); break; }
+    }
+    var sinMax = (obstacle - FALL_R - 0.05) / FALL_LEN;
+    t.fallMaxTilt = Math.max(0.02, Math.min(1.5708, Math.asin(Math.max(0, Math.min(1, sinMax)))));
+    t.fallSlideMax = Math.max(0, Math.min(0.45, obstacle - Math.sin(t.fallMaxTilt) * FALL_LEN - FALL_R - 0.05));
+    t.fallSlideAmt = 0;
+    t.fallBaseY = t.group.position.y || 0;
+    t.fallT = 0;
+  }
+  function ragdollLimp(t, dt) {
+    var k = Math.min(1, dt * 7);
+    // yere yattıkça dizler bükülsün: botlar zemine gömülmesin
+    var tiltNow = Math.sqrt(t.group.rotation.x * t.group.rotation.x + t.group.rotation.z * t.group.rotation.z);
+    var lying = Math.min(1, tiltNow * 1.6);
+    if (t.legL) t.legL.rotation.x += (0.10 - t.legL.rotation.x) * k;
+    if (t.legR) t.legR.rotation.x += (-0.14 - t.legR.rotation.x) * k;
+    if (t.kneeL) t.kneeL.rotation.x += ((0.22 - 1.25 * lying) - t.kneeL.rotation.x) * k;
+    if (t.kneeR) t.kneeR.rotation.x += ((0.34 - 1.30 * lying) - t.kneeR.rotation.x) * k;
+    if (t.aim) {
+      t.aim.rotation.x += (-0.25 - t.aim.rotation.x) * k;
+      t.aim.rotation.z += (0.15 - t.aim.rotation.z) * k;
+    }
+    if (t.armL) { t.armL.rotation.x += (0.20 - t.armL.rotation.x) * k; t.armL.rotation.z += (0.85 - t.armL.rotation.z) * k; }
+    if (t.armR) { t.armR.rotation.x += (0.16 - t.armR.rotation.x) * k; t.armR.rotation.z += (-0.85 - t.armR.rotation.z) * k; }
+    if (t.elbowL) t.elbowL.rotation.x += (0.30 - t.elbowL.rotation.x) * k;
+    if (t.elbowR) t.elbowR.rotation.x += (0.45 - t.elbowR.rotation.x) * k;
+    if (t.upper) t.upper.rotation.x += (0.06 - t.upper.rotation.x) * k;
+  }
   function damageTarget(t, dmg, head, byPlayer, attackerTeam, attackerName, weaponId, noScope, throughSmoke, attackerKey, hitPoint) {
     if (!t || t.state !== 'alive') return;
     var nowS = performance.now() / 1000;
@@ -4457,6 +3478,15 @@
       t.protectUntil = 0;
       t.flashT = 0;
       if (t.flash) t.flash.visible = false;
+      var fAx = null, fAz = null;
+      if (byPlayer) { fAx = player.x; fAz = player.z; }
+      else {
+        for (var fa = 0; fa < targets.length; fa++) {
+          var fb = targets[fa];
+          if (fb !== t && fb.name === attackerName && fb.team === attackerTeam) { fAx = fb.group.position.x; fAz = fb.group.position.z; break; }
+        }
+      }
+      setRagdollFall(t, fAx, fAz, hitPoint);
       spawnBlood({ x: t.group.position.x, y: t.group.position.y + (head ? 1.45 : 1.0), z: t.group.position.z }, head, true);
       if (byPlayer) { stats.kills++; if (head) stats.headshots++; playKill(); showHitmarker(head, true); updateHudScore(); }
       if (!byPlayer && attackerName) {
@@ -4741,6 +3771,7 @@
     t.target = null; t.burstLeft = 0; t.nextShot = nowS + 1.2;
     t.recoil = 0; t.flashT = 0; t.aimPitch = 0; t.stuckT = 0;
     t.lastSeenT = 0; t.retreatT = 0; t.stunT = 0; t.scanA = 0; t.moveSpread = 0; t.strafeT = 0;
+    t.huntX = null; t.huntZ = null; t.huntT = 0;
     if (t.flash) t.flash.visible = false;
     t.legL.rotation.x = 0; t.legR.rotation.x = 0;
     if (t.kneeL) t.kneeL.rotation.x = 0;
@@ -4848,8 +3879,8 @@
           } else {
             t.fleeX = 0; t.fleeZ = 0;
             t.moveSpread = 0;
-            // zor botlar çatışma sırasında yan adım atar
-            if (botDifficulty === 'hard' && Math.abs(dy2) < 0.5) {
+            // zor botlar çatışma sırasında yan adım atar (AWP modunda durup nişan alır)
+            if (botDifficulty === 'hard' && !botAwpMode() && Math.abs(dy2) < 0.5) {
               if (!t.strafeT || t.strafeT <= 0) {
                 t.strafeT = 0.25 + Math.random() * 0.5;
                 t.strafeDir = Math.random() < 0.5 ? 1 : -1;
@@ -4866,7 +3897,14 @@
             }
           }
           if (Math.abs(dy2) < 0.28) {
-            if (t.burstLeft > 0) {
+            if (botAwpMode()) {
+              // AWP: sürgü ritmiyle tek isabetli atış, tarama yok
+              if (nowS >= t.nextShot) {
+                var tAwp = botTuning();
+                t.nextShot = nowS + tAwp.pause + Math.random() * tAwp.pauseJitter;
+                botShoot(t, tgt);
+              }
+            } else if (t.burstLeft > 0) {
               if (nowS >= t.nextShot) {
                 t.burstLeft--;
                 var tune = botTuning();
@@ -4910,7 +3948,7 @@
               while (dyh > Math.PI) dyh -= Math.PI * 2;
               while (dyh < -Math.PI) dyh += Math.PI * 2;
               t.group.rotation.y += dyh * Math.min(1, dt * 8);
-              if (hard && nowS >= t.nextShot) {
+              if (hard && !botAwpMode() && nowS >= t.nextShot) {
                 // bastırma ateşi: ilerlerken geniş saçılmalı atış
                 t.nextShot = nowS + 0.7 + Math.random() * 0.8;
                 t.recoil = 1; t.flashT = 0.06;
@@ -4930,22 +3968,38 @@
               while (dyh2 > Math.PI) dyh2 -= Math.PI * 2;
               while (dyh2 < -Math.PI) dyh2 += Math.PI * 2;
               t.group.rotation.y += dyh2 * Math.min(1, dt * 3.2);
-              if (nowS >= t.nextShot && Math.random() < 0.004) {
+              if (nowS >= t.nextShot && Math.random() < (botAwpMode() ? 0.0015 : 0.004)) {
                 // uyarı atışı: köşeye doğru tek el
-                t.nextShot = nowS + 2 + Math.random() * 3;
+                t.nextShot = nowS + (botAwpMode() ? 3 : 2) + Math.random() * 3;
                 t.recoil = 1; t.flashT = 0.06;
                 var mzs3 = botMuzzle(t);
                 if (t.flash) { t.flash.position.set(mzs3.x, mzs3.y, mzs3.z); t.flash.visible = true; }
                 var dirW = new THREE.Vector3(dxh, 0.2, dzh).normalize();
                 var endW = mzs3.clone().addScaledVector(dirW, 60);
                 spawnTracer(mzs3, endW);
-                playShot('rifle', Math.max(0.04, Math.min(1, 1 - dh / 55)));
+                playShot(botWeaponId(), Math.max(0.04, Math.min(1, 1 - dh / 55)));
               }
             }
             held = 1;
           }
+          // --- serbest dolaşma: arada devriyeyi bırakıp rakip bölgesine sark ---
+          if (!held && t.huntX != null) {
+            var hdx = t.huntX - t.group.position.x, hdz = t.huntZ - t.group.position.z;
+            var hdist = Math.sqrt(hdx * hdx + hdz * hdz);
+            t.huntT = (t.huntT || 0) + dt;
+            if (hdist < 0.7 || t.huntT > 12) {
+              t.huntX = null; t.huntT = 0; t.dwell = 0.2 + Math.random() * 0.6; t.stuckT = 0;
+            } else if (botMoveTo(t, t.huntX, t.huntZ, t.speed * 0.9 * dt, dt)) {
+              moving = true;
+              var wantYawHn = Math.atan2(-hdx, -hdz);
+              var dyHn = wantYawHn - t.group.rotation.y;
+              while (dyHn > Math.PI) dyHn -= Math.PI * 2;
+              while (dyHn < -Math.PI) dyHn += Math.PI * 2;
+              t.group.rotation.y += dyHn * Math.min(1, dt * 8);
+            } else if (t.stuckT > 2.5) { t.huntX = null; t.huntT = 0; t.route = null; }
+          }
           // --- devriye hareketi ---
-          if (!held && t.stunT <= 0 && t.path && t.path.length > 1) {
+          if (!held && t.huntX == null && t.stunT <= 0 && t.path && t.path.length > 1) {
             if (t.dwell > 0) t.dwell -= dt;
             else {
               var wp = t.path[t.wp % t.path.length];
@@ -4953,9 +4007,22 @@
               var dist = Math.sqrt(dx * dx + dz * dz);
               if (dist < 0.25) {
                 t.wp = (t.wp + 1) % t.path.length;
-                t.dwell = 0.25 + Math.random() * t.dwellTime;
+                t.dwell = 0.2 + Math.random() * t.dwellTime;
                 t.stuckT = 0;
                 t.route = null; t.routeI = 0;
+                // ara sıra rotayı bırakıp rakibin bölgesine doğru serbest dolaş
+                if (Math.random() < 0.35) {
+                  var foe = t.team === 'blue' ? 'red' : 'blue';
+                  var fb = (currentMap && currentMap.spawns[foe]) || { x: 0, z: 0 };
+                  for (var ha = 0; ha < 6; ha++) {
+                    var hx2 = fb.x + (Math.random() - 0.5) * 14;
+                    var hz2 = fb.z + (Math.random() - 0.5) * 14;
+                    if (walkable(Math.floor(hx2), Math.floor(hz2))) {
+                      t.huntX = hx2; t.huntZ = hz2; t.huntT = 0; t.dwell = 0;
+                      break;
+                    }
+                  }
+                }
               } else {
                 var step = Math.min(dist, t.speed * dt);
                 var ox = t.group.position.x, oz = t.group.position.z;
@@ -5030,13 +4097,27 @@
       }
       if (t.state === 'falling') {
         t.upper.position.y = 0.78;
-        t.upper.rotation.x = 0;
         if (t.gunG) t.gunG.visible = false;
-        t.fallT += dt / 0.35;
-        var k = Math.min(1, t.fallT);
-        t.group.rotation.x = -1.5708 * (k * k * (3 - 2 * k));
-        if (k >= 1) { t.state = 'down'; t.downUntil = nowS + 4.0; }
+        ragdollLimp(t, dt);
+        t.fallT += dt / 0.42;
+        var kf = Math.min(1, t.fallT);
+        var ease = kf * kf * (3 - 2 * kf);
+        var maxA = t.fallMaxTilt || 1.5708;
+        t.group.rotation.order = 'YXZ';
+        t.group.rotation.x = maxA * ease * (t.fallLZ || 0);
+        t.group.rotation.z = -maxA * ease * (t.fallLX || 0);
+        // yere yatarken gövde kalınlığı kadar yükselt: kafa/kask zemine gömülmesin
+        t.group.position.y = (t.fallBaseY || 0) + Math.sin(maxA * ease) * 0.20;
+        // hafif savrulma: düşerken vuruş yönüne kay, engel/pay bitince dur
+        if (ease < 0.85 && (t.fallWX || t.fallWZ) && t.fallSlideAmt < (t.fallSlideMax || 0)) {
+          var slide = Math.min(1.2 * dt * (1 - ease), (t.fallSlideMax || 0) - t.fallSlideAmt);
+          var nxF = t.group.position.x + t.fallWX * slide;
+          var nzF = t.group.position.z + t.fallWZ * slide;
+          if (npcClear(nxF, nzF, 0.42)) { t.group.position.x = nxF; t.group.position.z = nzF; t.fallSlideAmt += slide; }
+        }
+        if (kf >= 1) { t.state = 'down'; t.downUntil = nowS + 4.0; }
       } else if (t.state === 'down') {
+        ragdollLimp(t, dt);
         if (nowS >= t.downUntil) {
           if (t.isRemote || t.isGhost) {
             // ceset 4 sn sonra tamamen kaldırılır; ağdan "canlı" gelince doğuşta geri gelir
@@ -5075,7 +4156,7 @@
     if (!w.melee && ammo[curW] <= 0) {
       nextShotTime = nowS + 0.35;
       if (reserve[curW] > 0) startReload();
-      else playTick(820, 0.06, 0.02);
+      else playClack(240, 0.05, 0.05);
       return;
     }
     if (!w.melee) heavy = false;
@@ -5114,8 +4195,8 @@
     raycaster.far = w.melee ? 2.0 : 220;
     var hits = raycaster.intersectObjects(hittables, false);
     var end = camera.position.clone().addScaledVector(dir, w.melee ? 2.0 : 90);
-    if (hits.length) {
-      var hit = hits[0];
+    var hit = firstSolidHit(hits);
+    if (hit) {
       end.copy(hit.point);
       var nrm = hit.face ? hit.face.normal.clone().transformDirection(hit.object.matrixWorld).normalize() : dir.clone().negate();
       var tgt = hit.object.__tgt;
@@ -5161,7 +4242,7 @@
           }
         }
       } else if (w.melee) {
-        playTick(340, 0.045, 0.03);
+        playNoiseSweep(520, 170, 0.1, 0.05, 1.1);
       } else {
         addDecal(hit.point, nrm);
         spawnPuff(hit.point, nrm);
@@ -5465,6 +4546,7 @@
       ? duelCountdownText()
       : ('Yeniden doğuş: ' + Math.ceil(deathT) + ' sn · ' + teamSpawnDef(player.team).name);
     cancelSniperBolt();
+    reloading = false;
     scopeLevel = 0; applyScope();
     if (typeof syncSpawnPick === 'function') syncSpawnPick();
     updateHudHealth();
@@ -5472,6 +4554,22 @@
     if (duelMap()) duelNoteDeath();
   }
 
+  // birinci şahıs modeli duvara/kutuya girmesin: kameranın önünde kısa bir ışın
+  var _viewRay = new THREE.Raycaster();
+  var _viewFwd = new THREE.Vector3();
+  function viewWallPush() {
+    camera.updateMatrixWorld(true);
+    camera.getWorldDirection(_viewFwd);
+    _viewRay.set(camera.position, _viewFwd);
+    _viewRay.far = 1.35;
+    var hh = _viewRay.intersectObjects(hittables, false);
+    for (var i = 0; i < hh.length; i++) {
+      var o = hh[i].object;
+      if (o && o.__tgt) continue;           // canlı/ölü gövde silahı geri itmesin
+      return Math.max(0, 1.35 - hh[i].distance);
+    }
+    return 0;
+  }
   function updateWeapon(dt) {
     if (raiseT < 1) raiseT = Math.min(1, raiseT + dt / 0.28);
     gunKick = Math.max(0, gunKick - dt * 7);
@@ -5505,6 +4603,13 @@
       gd.rotation.x = -throwP * 0.85 + sprintG * 0.10 + gunKick * 0.05;
       gd.rotation.y = swayX * 2.5 + throwP * 0.15;
       gd.rotation.z = throwP * 0.42 - sprintG * 0.08;
+      var gPush = viewWallPush();
+      if (gPush > 0) {
+        var gp = Math.min(0.4, gPush * 0.9);
+        gd.position.z += gp;
+        gd.position.y += gp * 0.2;
+        gd.rotation.x -= gp * 0.7;
+      }
       gd.userData.can.visible = throwAnimT <= 0.03;
       return;
     }
@@ -5521,14 +4626,14 @@
         bolt.rotation.z = bolt.userData.baseRotZ - pull * 0.72;
       }
       boltAnim = Math.sin(Math.PI * Math.max(0, Math.min(1, q)));
-      if (!paused && awpBoltSnd === 0 && q > 0.18) { awpBoltSnd = 1; playTick(330, 0.045, 0.022); }
-      if (!paused && awpBoltSnd === 1 && q > 0.64) { awpBoltSnd = 2; playTick(520, 0.04, 0.018); }
+      if (!paused && awpBoltSnd === 0 && q > 0.18) { awpBoltSnd = 1; playBoltPull(); }
+      if (!paused && awpBoltSnd === 1 && q > 0.64) { awpBoltSnd = 2; playBoltSlam(true); }
       if (awpBoltT <= 0) {
         resetBoltHandle();
         if (awpRescopePending && player.hp > 0 && !reloading && currentWeapon().id === 'sniper') {
           scopeLevel = awpRescopeLevel;
           applyScope();
-          playTick(980, 0.035, 0.02);
+          playClack(1300, 0.028, 0.02);
         }
         awpRescopePending = false;
         awpRescopeLevel = 0;
@@ -5542,7 +4647,6 @@
       var take = infAmmo ? need : Math.min(need, reserve[curW]);
       ammo[curW] += take;
       if (!infAmmo) reserve[curW] -= take;
-      playTick(660, 0.06, 0.03);
       updateHudAmmo();
     }
     if (!reloading && !gadgetSel && player.hp > 0 && !w.melee && awpBoltT <= 0 &&
@@ -5560,6 +4664,13 @@
     if (gw) {
       var nowS = performance.now() / 1000;
       var rl = reloading ? Math.max(0, Math.min(1, 1 - (reloadEnd - nowS) / w.reloadTime)) : 0;
+      if (reloading && !paused) {
+        var stg = RELOAD_SFX[w.id];
+        while (stg && reloadSfxIdx < stg.length && rl >= stg[reloadSfxIdx][0]) {
+          playReloadStage(stg[reloadSfxIdx][1], w.id);
+          reloadSfxIdx++;
+        }
+      }
       var dip = Math.sin(Math.PI * rl);
       var sprint = (!scoped && !reloading && player.grounded && !paused)
         ? Math.min(1, moveAmt) * (keys['shift'] ? 0.35 : 0.75) : 0;
@@ -5579,7 +4690,33 @@
       gw.rotation.x = gunKick * 0.09 + dip * 0.55 + sprint * 0.1 + throwDip * 0.7 + boltAnim * 0.33 + swing * 0.35 * swingH;
       gw.rotation.y = -swing * 0.85 * swingH;
       gw.rotation.z = -0.4 * dip + sprint * 0.09 + swayX * sw * 2.5 - boltAnim * 0.2 - swing * 0.45 * swingH;
-      if (gw.userData.mag) gw.userData.mag.position.y = gw.userData.mag.userData.baseY - dip * 0.16;
+      // duvara/kutuya yaklaşınca silahı kameraya çek, namlu içeri girmesin
+      if (!scoped) {
+        var wPush = viewWallPush();
+        if (wPush > 0) {
+          var wp2 = Math.max(0, Math.min(0.62, wPush - 0.28));
+          gw.position.z += wp2;
+          gw.position.y += wp2 * 0.16;
+          gw.rotation.x -= wp2 * 0.55;
+          gw.rotation.z += wp2 * 0.22;
+        }
+      }
+      if (gw.userData.mag) {
+        var mg = gw.userData.mag;
+        if (mg.userData.baseZ === undefined) mg.userData.baseZ = mg.position.z;
+        if (mg.userData.drop === undefined) mg.userData.drop = w.cls === 'pistol' ? 0.115 : 0.16;
+        // önce şarjör yuvasından aşağı kayar, sonra yeni şarjör yukarı itilir
+        var mOut = 0;
+        if (reloading) {
+          if (rl < 0.36) mOut = rl / 0.36;
+          else if (rl < 0.62) mOut = 1;
+          else if (rl < 0.84) mOut = 1 - (rl - 0.62) / 0.22;
+          if (mOut > 0) mOut = mOut * mOut * (3 - 2 * mOut);
+        }
+        mg.position.y = mg.userData.baseY - mOut * mg.userData.drop;
+        mg.position.z = mg.userData.baseZ - mOut * 0.02;
+        mg.rotation.x = -mOut * 0.30;
+      }
       // tabanca sürgüsü: ateşte geri tepip öne döner, reload'da geride kilitli kalır
       if (gw.userData.slide) {
         var sl = gw.userData.slide;
@@ -6600,7 +5737,7 @@
       mpRefreshAvatars();
       respawn();
     } else {
-      var sp = teamSpawnDef(team);
+      var sp = teamSpawnSpot(team, 0);
       player.x = sp.x; player.y = 0; player.z = sp.z;
       player.yaw = sp.yaw || 0; player.pitch = 0;
     }
@@ -8178,7 +7315,13 @@
     if (duelMap()) duelNoteDeath();
     if (rec.avatar) {
       rec.avatar.hp = 0;
-      if (rec.avatar.state === 'alive') { rec.avatar.state = 'falling'; rec.avatar.fallT = 0; rec.avatar.dead = true; }
+      if (rec.avatar.state === 'alive') {
+        rec.avatar.state = 'falling'; rec.avatar.fallT = 0; rec.avatar.dead = true;
+        var fAx2 = null, fAz2 = null;
+        if (kid === mpSelfId) { fAx2 = player.x; fAz2 = player.z; }
+        else if (kid && mpGuests[kid] && mpGuests[kid].last) { fAx2 = mpGuests[kid].last.x; fAz2 = mpGuests[kid].last.z; }
+        setRagdollFall(rec.avatar, fAx2, fAz2, null);
+      }
       spawnBlood({ x: rec.avatar.group.position.x, y: rec.avatar.group.position.y + 1.2, z: rec.avatar.group.position.z }, !!head, true);
     }
     var aw = assistWinner(rec.id, aKey);
@@ -8683,17 +7826,25 @@
     var sp = teamSpawnDef(team);
     var n = 0;
     for (var k in mpAvatars) n++;
-    var ang = n * 1.9;
-    var ax = sp.x + Math.cos(ang) * 1.15, az = sp.z + Math.sin(ang) * 1.15;
+    var ax = sp.x, az = sp.z, ayaw = sp.yaw || 0;
+    var spots = mapSpawns[team];
+    if (spots && spots.length) {
+      // yerel oyuncu 0. sırada; konuklar bölge ızgarasında sırayla yan yana doğar
+      var sp2 = spots[Math.min(spots.length - 1, n + 1)];
+      ax = sp2.x; az = sp2.z; ayaw = sp2.yaw || 0;
+    } else {
+      var ang = n * 1.9;
+      ax = sp.x + Math.cos(ang) * 1.15; az = sp.z + Math.sin(ang) * 1.15;
+    }
     if (typeof npcClear === 'function' && !npcClear(ax, az, 0.4)) { ax = sp.x; az = sp.z; }
     var av = makeNPC([[ax, az]], 1.6, team);
     av.isRemote = true;
     av.netId = id;
     av.id = 'p_' + id;
     av.name = name || 'OYUNCU';
-    av.spawnPos = { x: sp.x, z: sp.z };
-    av.spawnYaw = sp.yaw || 0;
-    av.nx = ax; av.nz = az; av.nyaw = sp.yaw || 0;
+    av.spawnPos = { x: ax, z: az };
+    av.spawnYaw = ayaw;
+    av.nx = ax; av.nz = az; av.nyaw = ayaw;
     av.netCrouch = 0; av.netPitch = 0;
     av.hp = 100; av.armor = 100; av.kills = 0; av.deaths = 0; av.assists = 0;
     av.protectUntil = duelMap() ? 0 : performance.now() / 1000 + SPAWN_PROTECT;
@@ -8790,11 +7941,12 @@
     av.hp = p.hp; av.armor = p.ar;
     var alive = av.state === 'alive';
     if (p.hp <= 0) {
-      if (alive) { av.state = 'falling'; av.fallT = 0; av.dead = true; }
+      if (alive) { av.state = 'falling'; av.fallT = 0; av.dead = true; setRagdollFall(av, null, null, null); }
     } else if (!alive) {
       var wasGone = av.state === 'gone';
       av.state = 'alive'; av.fallT = 0; av.dead = false;
       av.group.rotation.x = 0;
+      av.group.rotation.z = 0;
       av.group.position.set(p.x, av.netY || 0, p.z);
       av.group.rotation.y = p.ya || 0;
       if (av.gunG) av.gunG.visible = true;
@@ -9112,7 +8264,9 @@
         climbDir = (cup && player.y < climb.y1 - 0.04 ? 1 : 0) - (cdn && player.y > climb.y0 + 0.04 ? 1 : 0);
       }
     }
-    var speed = (keys['shift'] ? WALK : RUN) * (1 - player.crouch * 0.62) * (currentWeapon().speedMul || 1);
+    // dürbün açık AWP ile yürürken %30 yavaşla
+    var scopeSlow = (scoped && currentWeapon().zoom) ? 0.7 : 1;
+    var speed = (keys['shift'] ? WALK : RUN) * (1 - player.crouch * 0.62) * (currentWeapon().speedMul || 1) * scopeSlow;
     var wx = 0, wz = 0;
     var len = Math.sqrt(f * f + s * s);
     if (len > 0) {

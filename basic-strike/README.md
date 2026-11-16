@@ -21,8 +21,8 @@ olabilir (ana makine + birden fazla katılımcı).
 
 Açılışta maç otomatik başlamaz; önce lobi gelir:
 
-- **Harita seç:** Dust II Flat, Aim Redline (depo), AWP Lego 2, Meydan Köy,
-  Banana 1v1 (2 kişilik turlu düello).
+- **Harita seç:** Dust II Flat, Aim Redline (depo), AWP Lego 2, Köy,
+  Banana 1v1 (2 kişilik turlu düello), Kaldrix (tuğla arena).
 - **Takım seç:** Mavi Takım (güney) veya Kırmızı Takım (kuzey).
 - **Bot sayısı:** 0–15 arası. Toplam takım mevcudu 15'i geçemez; kendi
   takımında en fazla 14 bot olabilir (15. kişi sensin), karşı takımda 15 bot
@@ -287,8 +287,9 @@ Kurallar:
 | **Dust II Flat** | Radar düzeninin düz zeminli yeniden yapımı: T/CT doğuşları işaretli yeşil alanlarda, turuncu A/B bölgeleri, Long A, Mid/Catwalk, A Short, tüneller, B kapıları ve Pit hattı. |
 | **Aim Redline** | Depo salonu: beyaz tuğla duvarlar, yüksek pencereler, çelik makaslı tavan ve asma lambalar; kasa/konteyner siperleri, zeminde silah siluetleri ve sarı-siyah yükleme şeridi. |
 | **AWP Lego 2** | Lego kalesi arenası: altın üs, iki yönlü rampa, güvertede yürünebilir platform, tam ortada deliğin üzerinde dört kapılı kule, kemerli doğu-batı tüneli, delikten güverteye çıkan ve dış cephelerdeki tırmanılabilir kırmızı merdivenler, mavi/kırmızı/yeşil baseplate doğuş alanları; **yalnızca AWP + Deagle** (bıçak ve bombalar dahil). |
-| **Meydan Köy** | Özel tasarım köy meydanı: çeşme, pazar tezgâhları, ağaçlar ve iki savunulabilir avlu. |
+| **Köy** | Büyük köy TDM haritası (~160 × 192 m): iki doğuşu bağlayan ana cadde, doğu/batı bulvarları, çarşı sokakları, çeşmeli merkez alanı, değirmen ve çan avluları, ahır ve meyve bahçesi. Ev cepheleri sokak duvarlarında; çeşme, kuyu, araba, saman balyası, tezgâh, çit, bahçe ve yapıların hepsi çarpışmalıdır. Doğuşlar çapraz yanlarda ~171 m arayla durur; ana caddenin merkezinde iki ev ve yüksek saman yığınları doğuşlar arasındaki düz görüş hattını keser. Arka sokaklarla kuşatma rotaları açılır. |
 | **Banana 1v1** | 2 kişilik muz sokağı düellosu: mavi doğuş sağ üstte, kırmızı doğuş sol altta; taş duvarlı dar sokak, paletler, kasalar ve variller. Çevrimdışı 1v1 bot, çok oyunculuda 1'e 1. Doğuş koruması yoktur; taraflardan biri ölünce tur yeniden başlar ve turlar ilerledikçe doğuş noktaları yer değiştirir. |
+| **Kaldrix** | Tuğla duvarlı kapalı arena (~88 × 116 m): kırmızı tuğla çevre duvarı ve gri harç bandı, ortada iki yandan merdivenle çıkılan, altından kemerli geçit veren tuğla köprü/teras, beton siper duvarları, L köşeler, kademeli beton basamaklar, kırmızı tuğla bloklar ve kasa yığınları. İki takım da beşer doğuş pedinde başlar. |
 
 Her harita kendi temasını, dokularını, doğuş noktalarını, bot rotalarını ve mini
 haritasını getirir. Oyuncu ve bot doğuşları takıma göre ayrıdır.
