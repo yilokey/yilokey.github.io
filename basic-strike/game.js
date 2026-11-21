@@ -3817,7 +3817,7 @@
               var stepN = Math.min(dd, Math.max(dd * 0.4, 5 * dt));
               t.group.position.x += (ddx / dd) * stepN;
               t.group.position.z += (ddz / dd) * stepN;
-              // ağ paketleri 50 ms'de bir geldiği için dd çoğu karede eşiğin altında kalıyor;
+              // ağ paketleri ~33 ms'de bir geldiği için dd çoğu karede eşiğin altında kalıyor;
               // yürüme animasyonu kısa bir süre "hareket ediyor" sayılsın ki bacaklar donsun diye beklemesin
               t.netMoveT = 0.24;
             }
@@ -8081,14 +8081,14 @@
     if (!mpConnected || !mpRole || !startedOnce || matchEnded) return;
     if (mpRole === 'guest') {
       mpStateAcc += dt;
-      if (mpStateAcc < 0.05) return;
+      if (mpStateAcc < 0.03) return;
       mpStateAcc = 0;
       var st = mpPlayerState();
       st.t = 'st';
       mpSendHost(st);
     } else {
       mpWorldAcc += dt;
-      if (mpWorldAcc < 0.085) return;
+      if (mpWorldAcc < 0.03) return;
       mpWorldAcc = 0;
       var bots = [];
       for (var wi = 0; wi < targets.length; wi++) {
