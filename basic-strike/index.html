@@ -101,6 +101,9 @@
   #chathint{font-size:8.5px;letter-spacing:.8px;color:#8a8b84;white-space:nowrap}
 
   /* ================= MENÜ KABUĞU ================= */
+  /* lobi/menü katmanı: çözünürlük büyüdükçe otomatik ölçek — oyun içi HUD etkilenmez */
+  #lobbyUI{position:fixed;left:0;top:0;z-index:20;width:calc(100vw / var(--lobbyUi,1));height:calc(100vh / var(--lobbyUi,1));transform:scale(var(--lobbyUi,1));transform-origin:0 0;pointer-events:none}
+  #lobbyUI #overlay,#lobbyUI #mpTeamPick,#lobbyUI #mpAsk{pointer-events:auto}
   #overlay{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:var(--bg);overflow:hidden}
   #card,#endcard{position:relative;z-index:1}
   #card{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
@@ -651,6 +654,7 @@
   </div>
 </div>
 
+<div id="lobbyUI">
 <div id="overlay" class="mode-lobby">
   <div id="card">
     <div class="menu-bg">
@@ -782,7 +786,7 @@
           <div class="loadout-stage">
             <div class="wshow">
               <div class="wshow-top"><div class="section-title" style="margin:0"><span>SEÇİLİ SİLAH</span><span>CANLI ÖNİZLEME</span></div><span class="chip gold" id="loadoutChipStage">AK-47 · USP</span></div>
-              <div class="wshow-img"><img id="wshowImage" src="previews/weapons/ak47.png?v=20261124f" alt="AK-47"></div>
+              <div class="wshow-img"><img id="wshowImage" src="previews/weapons/ak47.png?v=20261124g" alt="AK-47"></div>
               <div class="ldtop"><b id="loadoutName">AK-47</b><span id="loadoutTag">BİRİNCİL · TÜFEK</span></div>
               <div class="ldgrid">
                 <div class="ldstat"><small>HASAR</small><b id="loadoutDmg">36</b></div>
@@ -796,7 +800,7 @@
               <div class="section-title"><span>BİRİNCİL TÜFEK — BİR ADET SEÇ</span><span><kbd>1</kbd> OYUN İÇİ</span></div>
               <div class="weapons">
                 <button class="wcard" data-w="0">
-                  <span class="wthumb"><img src="previews/weapons/ak47.png?v=20261124f" alt="AK-47"></span>
+                  <span class="wthumb"><img src="previews/weapons/ak47.png?v=20261124g" alt="AK-47"></span>
                   <div class="wmeta"><span class="wname">AK-47</span><span class="wkey">1</span></div>
                   <div class="wtag">Tüfek · Tam otomatik · 36 hasar</div>
                   <div class="wstats">
@@ -807,7 +811,7 @@
                   </div>
                 </button>
                 <button class="wcard" data-w="2">
-                  <span class="wthumb"><img src="previews/weapons/awp.png?v=20261124f" alt="AWP"></span>
+                  <span class="wthumb"><img src="previews/weapons/awp.png?v=20261124g" alt="AWP"></span>
                   <div class="wmeta"><span class="wname">AWP</span><span class="wkey">1</span></div>
                   <div class="wtag">Keskin nişancı · Dürbünlü · 115 hasar</div>
                   <div class="wstats">
@@ -818,7 +822,7 @@
                   </div>
                 </button>
                 <button class="wcard" data-w="3">
-                  <span class="wthumb"><img src="previews/weapons/m4a4.png?v=20261124f" alt="M4A4"></span>
+                  <span class="wthumb"><img src="previews/weapons/m4a4.png?v=20261124g" alt="M4A4"></span>
                   <div class="wmeta"><span class="wname">M4A4</span><span class="wkey">1</span></div>
                   <div class="wtag">Tüfek · Tam otomatik · 33 hasar</div>
                   <div class="wstats">
@@ -833,7 +837,7 @@
               <div class="section-title" style="margin-top:15px"><span>YEDEK TABANCA — BİR ADET SEÇ</span><span><kbd>2</kbd> OYUN İÇİ</span></div>
               <div class="weapons pistols">
                 <button class="wcard" data-w="1">
-                  <span class="wthumb"><img src="previews/weapons/usp.png?v=20261124f" alt="USP"></span>
+                  <span class="wthumb"><img src="previews/weapons/usp.png?v=20261124g" alt="USP"></span>
                   <div class="wmeta"><span class="wname">USP</span><span class="wkey">2</span></div>
                   <div class="wtag">Tabanca · Tek tek · 25 hasar</div>
                   <div class="wstats">
@@ -844,7 +848,7 @@
                   </div>
                 </button>
                 <button class="wcard" data-w="4">
-                  <span class="wthumb"><img src="previews/weapons/deagle.png?v=20261124f" alt="Deagle"></span>
+                  <span class="wthumb"><img src="previews/weapons/deagle.png?v=20261124g" alt="Deagle"></span>
                   <div class="wmeta"><span class="wname">Deagle</span><span class="wkey">2</span></div>
                   <div class="wtag">Ağır tabanca · Tek tek · 53 hasar</div>
                   <div class="wstats">
@@ -1124,6 +1128,7 @@ Durum: Lobi</div>
     <div class="actions"><button class="btn primary" id="mpAskOk">ODA AÇ</button><button class="btn ghost" id="mpAskCancel">VAZGEÇ</button></div>
   </div>
 </div>
+</div>
 
 <div id="devpanel">
   <div class="dcbar"><b>GELİŞTİRİCİ KONSOLU</b><span>kapat: Esc · geçmiş: ↑/↓</span></div>
@@ -1134,18 +1139,18 @@ Durum: Lobi</div>
 
 <script src="libs/three.min.js"></script>
 <script>window.THREE || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');</script>
-<script src="maps/dust2_flat.js?v=20261124f"></script>
-<script src="maps/redline.js?v=20261124f"></script>
-<script src="maps/awp_lego_2.js?v=20261124f"></script>
-<script src="maps/village.js?v=20261124f"></script>
-<script src="maps/banana_1v1.js?v=20261124f"></script>
-<script src="maps/kaldrix.js?v=20261124f"></script>
-<script src="weapons/rifle.js?v=20261124f"></script>
-<script src="weapons/pistol.js?v=20261124f"></script>
-<script src="weapons/sniper.js?v=20261124f"></script>
-<script src="weapons/rifle2.js?v=20261124f"></script>
-<script src="weapons/pistol2.js?v=20261124f"></script>
-<script src="weapons/knife.js?v=20261124f"></script>
-<script src="game.js?v=20261124f"></script>
+<script src="maps/dust2_flat.js?v=20261124g"></script>
+<script src="maps/redline.js?v=20261124g"></script>
+<script src="maps/awp_lego_2.js?v=20261124g"></script>
+<script src="maps/village.js?v=20261124g"></script>
+<script src="maps/banana_1v1.js?v=20261124g"></script>
+<script src="maps/kaldrix.js?v=20261124g"></script>
+<script src="weapons/rifle.js?v=20261124g"></script>
+<script src="weapons/pistol.js?v=20261124g"></script>
+<script src="weapons/sniper.js?v=20261124g"></script>
+<script src="weapons/rifle2.js?v=20261124g"></script>
+<script src="weapons/pistol2.js?v=20261124g"></script>
+<script src="weapons/knife.js?v=20261124g"></script>
+<script src="game.js?v=20261124g"></script>
 </body>
 </html>

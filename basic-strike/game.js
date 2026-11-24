@@ -8301,10 +8301,22 @@
   });
   window.addEventListener('auxclick', function (e) { e.preventDefault(); });
 
+  // lobi/menü arayüzü ölçeği: 1080p üstünde metin ve düzen büyür, oyun içi HUD sabit kalır
+  function applyLobbyUiScale(w, h) {
+    var vw = w || window.innerWidth, vh = h || window.innerHeight;
+    var s = Math.min(vw / 1920, vh / 1080);
+    if (!isFinite(s) || s < 1) s = 1;
+    if (s > 2.2) s = 2.2;
+    document.documentElement.style.setProperty('--lobbyUi', s.toFixed(3));
+    return s;
+  }
+  applyLobbyUiScale();
+
   window.addEventListener('resize', function () {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    applyLobbyUiScale();
   });
 
   /* ================= GÜNCELLEME ================= */
@@ -8670,6 +8682,7 @@
     chooseSpawnClass: chooseSpawnClass, syncSpawnPick: syncSpawnPick,
     chooseSlot: chooseSlot, equipGadget: equipGadget,
     fov: function () { return camera.fov; },
+    lobbyUiScale: applyLobbyUiScale,
     spawnPick: function () { return { cls: spawnClass, rifle: loadout.rifle, pistol: loadout.pistol, chosen: { rifle: rifleChosen, pistol: pistolChosen } }; },
     setName: function (v) { setUserName(v, true); syncLobbyUI(); },
     getName: function () { return userName; },
