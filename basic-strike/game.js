@@ -1622,8 +1622,46 @@
     }
     return teamSpawnDef(team);
   }
+  var lastSpawnIdx = { blue: -1, red: -1 };
+  // doğuş noktası canlı bir birimle çakışıyor mu? takım arkadaşı yakınsa engelle,
+  // rakip üsse kadar girmişse o noktayı mümkünse atla
+  function spawnSpotBlocked(team, sp, includePlayer) {
+    if (includePlayer && player.hp > 0) {
+      var pdx = player.x - sp.x, pdz = player.z - sp.z;
+      if (pdx * pdx + pdz * pdz < 1.7 * 1.7) return true;
+    }
+    for (var i = 0; i < targets.length; i++) {
+      var t = targets[i];
+      if (!t || t.state !== 'alive') continue;
+      var dx = t.group.position.x - sp.x, dz = t.group.position.z - sp.z;
+      var d2 = dx * dx + dz * dz;
+      if (t.team === team ? d2 < 1.7 * 1.7 : d2 < 7 * 7) return true;
+    }
+    return false;
+  }
+  // kendi üs bölgesindeki noktalardan rastgele seç; oyuncu için son doğduğu noktayı tekrarlama
+  function pickSpawnSpot(team, forPlayer, includePlayer) {
+    var spots = mapSpawns[team];
+    if (duelMap() || !spots || spots.length < 2) return teamSpawnSpot(team, 0);
+    var last = forPlayer ? lastSpawnIdx[team] : -1;
+    var order = [], i;
+    for (i = 0; i < spots.length; i++) if (i !== last) order.push(i);
+    for (i = order.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1)), tmp = order[i];
+      order[i] = order[j]; order[j] = tmp;
+    }
+    for (i = 0; i < order.length; i++) {
+      if (!spawnSpotBlocked(team, spots[order[i]], includePlayer)) {
+        if (forPlayer) lastSpawnIdx[team] = order[i];
+        return spots[order[i]];
+      }
+    }
+    var fallback = order.length ? order[0] : 0;
+    if (forPlayer) lastSpawnIdx[team] = fallback;
+    return spots[fallback];
+  }
   function respawn() {
-    var sp = teamSpawnSpot(player.team, 0);
+    var sp = pickSpawnSpot(player.team, true, false);
     player.x = sp.x; player.y = 0; player.z = sp.z;
     player.vx = player.vy = player.vz = 0;
     player.yaw = sp.yaw || 0; player.pitch = 0;
@@ -7885,8 +7923,8 @@
     var ax = sp.x, az = sp.z, ayaw = sp.yaw || 0;
     var spots = mapSpawns[team];
     if (spots && spots.length) {
-      // yerel oyuncu 0. sırada; konuklar bölge ızgarasında sırayla yan yana doğar
-      var sp2 = spots[Math.min(spots.length - 1, n + 1)];
+      // konuklar da üs bölgesinde boş/rastgele bir noktaya doğar (yerel oyuncuyla çakışmasın)
+      var sp2 = pickSpawnSpot(team, false, true);
       ax = sp2.x; az = sp2.z; ayaw = sp2.yaw || 0;
     } else {
       var ang = n * 1.9;
