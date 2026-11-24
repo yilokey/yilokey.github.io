@@ -5858,7 +5858,10 @@
     updateHudHealth(); updateMapHud(); updateHudAmmo();
     updateTeamScoreHud();
     updateMatchHudVisibility();
-    if (mpRole === 'host' && mpConnected) mpHostStartAll();
+    // ana makine maçı her durumda "başladı" işaretler: henüz hello göndermemiş / sonradan
+    // kodla katılan konuklar da otomatik takım + start paketi alsın
+    if (mpRole === 'host') mpHostStartAll();
+    if (mpRole === 'guest') mpMatchEntered = true;
     resumeGame();
     return true;
   }
@@ -5895,6 +5898,7 @@
       if (mpRole === 'host') mpHostLobbyAll();
       mpStarted = false;
     }
+    mpMatchEntered = false;
     paused = true;
     menuOpen = false;
     triggerHeld = false; triggerQueued = false;
@@ -6587,6 +6591,7 @@
   var mpRosterCache = [];          // konukta son alınan lobi listesi
   var mpBalance = false;           // yalnız ana makine değiştirir
   var mpStarted = false;           // ağ maçı başladı mı
+  var mpMatchEntered = false;      // konukta: bu ağ maçına zaten girildi mi (tekrar start'ta sıfırlanmasın)
   var mpAssignedTeam = null;       // konukta atanan takım
   var mpAllowGuestStart = false;   // start mesajıyla gelen maç başlatma izni
   var mpKicked = false;            // kick/ban sonrası otomatik geri dönüşü engelle
@@ -6910,6 +6915,7 @@
     mpRoomLockedView = false;
     mpRole = null;
     mpStarted = false;
+    mpMatchEntered = false;
     mpAllowGuestStart = false;
     mpPingMs = null;
     mpPingMap = {};
@@ -6997,6 +7003,7 @@
     mpRole = 'guest';
     mpName = userName;
     mpKicked = false;
+    mpMatchEntered = false;
     mpSetStatus('Bağlanılıyor, cevap kodu hazırlanıyor…');
     mpPeer = new RTCPeerConnection({ iceServers: [] });
     mpPeer.ondatachannel = function (e) { mpGuestAttach(e.channel); };
@@ -7526,6 +7533,8 @@
       mpKicked = false;
       mpHostLastSeen = performance.now();
       mpHelloSent = false;
+      // yerel maç açıksa kapat: bağlanılan ana makinenin maçı temiz bir lobiden başlasın
+      if (startedOnce && !mpMatchEntered) toLobby();
       if (mpProbeTimer) clearTimeout(mpProbeTimer);
       // önce lobi şifreli mi diye sor; şifresizse hiç şifre istemeden gir
       mpSendHost({ t: 'probe' });
@@ -7594,10 +7603,10 @@
       var lbl = (mpRoomNameView ? '"' + mpRoomNameView + '" lobisine' : 'Lobiye') + (mpRoomLockedView ? ' (şifreli)' : '');
       if (!mpAssignedTeam) {
         mpShowTeamPick(true);
-        mpSetStatus(lbl + ' bağlandın. Kartlardan takımını seç.');
+        mpSetStatus(lbl + ' bağlandın. ' + (mpStarted ? 'Maç sürüyor, takımın atanıyor…' : 'Kartlardan takımını seç.'));
       } else {
         mpShowTeamPick(false);
-        mpSetStatus(lbl + ' bağlandın. Ana makine maçı başlatacak.');
+        mpSetStatus(lbl + ' bağlandın. ' + (mpStarted ? 'Maç sürüyor; doğrudan katılıyorsun…' : 'Ana makine maçı başlatacak.'));
       }
       return;
     }
@@ -7802,6 +7811,8 @@
         mpPeer.on('open', function () {
           opened = true;
           mpConnected = false;
+          // oda, ana makine maçtayken açıldıysa: sonradan kodla gelenler lobide beklemeden bu maça alınır
+          mpStarted = startedOnce && !matchEnded;
           var lbl = mpRoomLabelText();
           mpSetStatus('Oda açık: ' + code + (lbl ? ' · ' + lbl : ' (şifresiz)') + '. ' + (mpRoomPass ? 'Şifreyi yalnızca girmesini istediklerine ver. ' : '') + 'Aynı kodu birden fazla arkadaşın kullanabilir; her biri takım kartından seçim yapar. Hazır olunca MAÇI BAŞLAT.');
           mpRenderRoster(); mpApplyMpLocks();
@@ -7844,6 +7855,7 @@
       mpRole = 'guest';
       mpName = userName;
       mpKicked = false;
+      mpMatchEntered = false;
       mpAssignedTeam = null;
       mpRosterCache = [];
       mpSetStatus('"' + raw + '" odasına bağlanılıyor…');
@@ -7926,7 +7938,9 @@
     rebuildHittables();
   }
   function mpStartNetMatch() {
-    if (startedOnce && overlayMode === 'playing') return true;
+    // aynı ağ maçına zaten girildiyse yeniden başlatma (istatistik/doğuş sıfırlanmasın);
+    // maç bittiyse ya da bu oturumda henüz girilmediyse (yerel maç dahil) temiz başlat
+    if (startedOnce && !matchEnded && mpMatchEntered) return true;
     return startMatch();
   }
   function mpMakeGhost(b) {
