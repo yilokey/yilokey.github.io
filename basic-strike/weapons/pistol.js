@@ -41,7 +41,7 @@
 
   W.pistol = {
     def: { id: 'pistol', name: 'USP', cls: 'pistol', speedMul: 1.1, auto: false, dmg: 25, headMul: 4, rpm: 380, magSize: 12, reserveMax: 60,
-      spread: 0.009, bloom: 0.011, bloomMax: 0.055, kickUp: 0.8, kickSide: 0.35, reloadTime: 2.1, moveSpread: 0.026,
+      spread: 0.007, bloom: 0.006, bloomMax: 0.03, kickUp: 0.45, kickSide: 0.16, reloadTime: 2.1, moveSpread: 0.024,
       pos: { x: 0.30, y: -0.23, z: -0.52 }, muzzle: { x: 0.16, y: -0.17, z: -0.62 } },
     viewKind: 'pistol',
     reloadSfx: [[0.06, 'release'], [0.18, 'out'], [0.44, 'seat'], [0.66, 'slide'], [0.78, 'slideSlam']],

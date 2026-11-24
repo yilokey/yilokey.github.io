@@ -40,7 +40,7 @@
 
   W.pistol2 = {
     def: { id: 'pistol2', name: 'Deagle', cls: 'pistol', speedMul: 1.1, auto: false, dmg: 53, headMul: 4, rpm: 267, magSize: 7, reserveMax: 35,
-      spread: 0.011, bloom: 0.021, bloomMax: 0.1, kickUp: 1.7, kickSide: 0.55, reloadTime: 2.3, moveSpread: 0.033,
+      spread: 0.008, bloom: 0.011, bloomMax: 0.055, kickUp: 0.95, kickSide: 0.26, reloadTime: 2.3, moveSpread: 0.03,
       pos: { x: 0.3, y: -0.23, z: -0.54 }, muzzle: { x: 0.16, y: -0.16, z: -0.68 } },
     viewKind: 'pistol2',
     reloadSfx: [[0.06, 'release'], [0.18, 'out'], [0.46, 'seat'], [0.68, 'slide'], [0.80, 'slideSlam']],

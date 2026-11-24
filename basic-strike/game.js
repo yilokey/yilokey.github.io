@@ -2304,7 +2304,12 @@
       return su * (1 - crouch * 0.3);
     }
     // dürbün açıkken de yürümek isabeti bozar (koşarken AWP ıskalar)
-    if (scoped) return (w.spread * (scopeLevel === 2 ? 0.12 : 0.25) + mv * w.moveSpread * 0.85) * (1 - crouch * 0.3);
+    if (scoped) {
+      var sc = (w.spread * (scopeLevel === 2 ? 0.12 : 0.25) + mv * w.moveSpread * 0.85) * (1 - crouch * 0.3);
+      // havadayken dürbünlü AWP de ıskalar: zıplayarak dürbünlü vuruş imkansız
+      if (!player.grounded) sc += 0.045 + Math.abs(player.vy) * 0.012;
+      return sc;
+    }
     var s = (w.spread + bloom) * (1 - crouch * 0.35);
     // hareket cezası: koşarken tüfekler belirgin seker, yürürken hafifler
     s += mv * w.moveSpread * (keys['shift'] ? 0.8 : 2.4) * (1 - crouch * 0.45);
@@ -4580,7 +4585,8 @@
   function updateWeapon(dt) {
     if (raiseT < 1) raiseT = Math.min(1, raiseT + dt / 0.28);
     gunKick = Math.max(0, gunKick - dt * 7);
-    bloom = Math.max(0, bloom - dt * 0.09);
+    // tabancalarda nişan bloom'u daha çabuk toparlanır (tekli/seri atışta isabet hissi)
+    bloom = Math.max(0, bloom - dt * (currentWeapon().cls === 'pistol' ? 0.2 : 0.09));
     if (throwAnimT > 0) throwAnimT = Math.max(0, throwAnimT - dt);
     if (meleeSwingT > 0 && !paused) {
       meleeSwingT = Math.max(0, meleeSwingT - dt * (meleeHeavyAnim ? 2.6 : 4.5));
@@ -6585,7 +6591,7 @@
   var mpAllowGuestStart = false;   // start mesajıyla gelen maç başlatma izni
   var mpKicked = false;            // kick/ban sonrası otomatik geri dönüşü engelle
   var mpBanned = {};               // host: cid -> 1
-  var mpStateAcc = 0, mpWorldAcc = 0;
+  var mpStateAcc = 0, mpWorldAcc = 0, mpPlayAcc = 0;
   var mpPingMs = null;             // konukta: ana makineye gidiş-dönüş (ms)
   var mpPingMap = {};              // konukta: cid -> ms (ana makinenin ping tablosu)
   var mpPingAcc = 1.2;             // ilk ping kısa sürede gitsin
@@ -7207,6 +7213,11 @@
     chatAddSystem(rec.name + ' oyuna katıldı');
     mpBroadcast({ t: 'sys', m: rec.name + ' oyuna katıldı' });
     mpSetStatus(rec.name + ' lobiye katıldı. Takım kartından seçim yapması bekleniyor…');
+    // maç sürerken kodla katılan oyuncu takım kartı beklemeden doğrudan maça alınır
+    if (mpStarted && startedOnce) {
+      var jc = mpHostTeamCounts(rec);
+      mpHostAssignTeam(rec, jc.blue <= jc.red ? 'blue' : 'red');
+    }
     mpApplyMpLocks();
     mpSyncLobbyInfo();
   }
@@ -7284,11 +7295,12 @@
       rec.hp = m.hp; rec.ar = typeof m.ar === 'number' ? m.ar : 0;
       rec.dead = m.hp <= 0; rec.deadAt = rec.dead ? now : 0; rec.hpAt = now;
     }
-    var prevHp = rec.hp, revived = false;
     if (rec.dead) {
-      // ölü konuğun bayat can paketi ölümü geri almasın: yeniden doğuş ~5 sn sonra gelir
-      if (m.hp > 0 && now - (rec.deadAt || 0) > 4000) { rec.dead = false; rec.hp = m.hp; rec.hpAt = now; revived = true; }
-      else if (m.hp > 0 && now - (rec.deadPokeAt || 0) > 500) {
+      // ölü konuğun bayat can paketi ölümü geri almasın: ölümü yalnızca gerçek yeniden doğuş kaldırır
+      if (m.hp >= 90 && now - (rec.deadAt || 0) > 1200) {
+        rec.dead = false; rec.hp = m.hp; rec.hpAt = now;
+        rec.ar = typeof m.ar === 'number' ? m.ar : 0;
+      } else if (m.hp > 0 && now - (rec.deadPokeAt || 0) > 500) {
         // donmuş istemci ölümü kaçırmış: dönünce ölümü uygulasın diye tekrar bildir
         rec.deadPokeAt = now;
         mpSendTo(rec.id, { t: 'pd', dmg: 0, head: false, kn: '', kt: rec.team === 'blue' ? 'red' : 'blue',
@@ -7299,9 +7311,13 @@
       if (duelMap()) duelNoteDeath();
     } else if (m.hp < rec.hp) {
       rec.hp = m.hp;                                  // istemcinin kendi uyguladığı hasar
+    } else if (m.hp > rec.hp + 1 && (!rec.hpFixAt || now - rec.hpFixAt > 500)) {
+      // istemcide can fazla görünüyor (bayat paket): doğuş korumasını yenileme, otoriter canı dayat
+      rec.hpFixAt = now;
+      mpSendTo(rec.id, { t: 'pd', dmg: 0, head: false, kn: '', kt: rec.team === 'blue' ? 'red' : 'blue',
+        kid: 'force', w: 'rifle', ahp: rec.hp, aar: typeof rec.ar === 'number' ? rec.ar : 0 });
     }
-    if (m.hp > prevHp + 1) rec.hpAt = now;            // can doldu: doğuş koruması başlar
-    if (typeof m.ar === 'number' && (revived || typeof rec.ar !== 'number' || m.ar < rec.ar)) rec.ar = m.ar;
+    if (typeof m.ar === 'number' && (typeof rec.ar !== 'number' || m.ar < rec.ar)) rec.ar = m.ar;
     m.hp = rec.hp;
     m.ar = rec.ar;
   }
@@ -7447,10 +7463,7 @@
     }
     if (m.t === 'play') {
       // Konuk maça girmek istiyor: maç sürüyorsa başlatma paketini yeniden gönder
-      if (!mpStarted || !startedOnce) {
-        mpSetStatus(rec.name + ' maça girmek istiyor; önce maçı başlat.', true);
-        return;
-      }
+      if (!mpStarted) return;
       if (!rec.team) mpHostAssignTeam(rec, 'blue');
       if (!rec.avatar) rec.avatar = mpMakePlayerAvatar(rec.id, rec.name, rec.team);
       mpSendTo(rec.id, { t: 'start', map: selectedMapId, bots: { blue: matchBots.blue, red: matchBots.red },
@@ -7693,17 +7706,21 @@
     if (m.t === 'pd') {
       if (!m.kid || m.kid === mpSelfId) return;
       if (typeof m.ahp === 'number') {
-        // ana makine otoriter can yolladı: hasarı yeniden uygulama
-        if (player.hp <= 0) return;
-        if (performance.now() / 1000 < player.protectUntil) return;
+        // ana makine otoriter can yolladı: hasarı yeniden uygulama, canı birebir eşitle
+        // (doğuş koruması yalnızca ana makinede tutulur; buradaki yerel koruma pencere farkı yüzünden
+        //  paketi yutarsa senkron kayar ve oyuncu ana makinede ölümsüz görünür)
+        if (player.hp <= 0 && deathT > 0 && m.ahp > 0) return;   // ölüm sonrası gelen bayat paket
+        var prevAhp = player.hp;
         player.hp = Math.max(0, m.ahp);
         if (typeof m.aar === 'number') player.armor = Math.max(0, m.aar);
-        spawnBlood({ x: player.x, y: player.y + 1.05, z: player.z }, !!m.head, false);
-        dmgFlashT = 0.55;
-        if (dmgFlashEl) dmgFlashEl.style.opacity = '0.5';
-        playHurt();
+        if (player.hp < prevAhp) {
+          spawnBlood({ x: player.x, y: player.y + 1.05, z: player.z }, !!m.head, false);
+          dmgFlashT = 0.55;
+          if (dmgFlashEl) dmgFlashEl.style.opacity = '0.5';
+          playHurt();
+        }
         updateHudHealth();
-        if (player.hp <= 0) {
+        if (player.hp <= 0 && prevAhp > 0) {
           spawnBlood({ x: player.x, y: player.y + 1.2, z: player.z }, !!m.head, true);
           playerDie();
         }
@@ -7769,32 +7786,50 @@
     if (mpRole) mpCleanup();
     mpRoomName = mpSanitizeRoomName(name);
     mpRoomPass = mpSanitizePass(pass);
-    var code = mpGenCode();
-    if (mpRoomCodeEl) mpRoomCodeEl.value = code;
     loadPeerJS(function (err) {
       if (err) { mpSetStatus('Buluşma sunucusuna ulaşılamadı. İnternet yoksa aşağıdaki "Manuel kod değişimi"ni kullan.', true); return; }
       mpRole = 'host';
       mpName = userName;
       mpSelfId = mpSelfId || mpGetClientId();
-      mpSetStatus('Oda açılıyor…');
-      try { mpPeer = new Peer('d2arena-' + code, { debug: 0 }); }
-      catch (e3) { mpSetStatus('Oda açılamadı: ' + e3.message, true); mpRole = null; return; }
-      mpPeer.on('open', function () {
-        mpConnected = false;
-        var lbl = mpRoomLabelText();
-        mpSetStatus('Oda açık: ' + code + (lbl ? ' · ' + lbl : ' (şifresiz)') + '. ' + (mpRoomPass ? 'Şifreyi yalnızca girmesini istediklerine ver. ' : '') + 'Aynı kodu birden fazla arkadaşın kullanabilir; her biri takım kartından seçim yapar. Hazır olunca MAÇI BAŞLAT.');
-        mpRenderRoster(); mpApplyMpLocks();
-      });
-      mpPeer.on('connection', function (conn) { mpHostAttach(conn); });
-      mpPeer.on('error', function (e5) {
-        if (!mpConnected && e5 && e5.type === 'unavailable-id') {
-          mpCleanup();
-          mpSetStatus('Bu kod şu an dolu. Tekrar ODA AÇ — yeni kod üretilir.', true);
-        }
-      });
-      mpPeer.on('disconnected', function () {
-        if (!mpConnected) { mpCleanup(); mpSetStatus('Buluşma sunucusuyla bağlantı koptu. Tekrar dene.', true); }
-      });
+      var triesLeft = 2;
+      var tryOpen = function () {
+        var code = mpGenCode();
+        if (mpRoomCodeEl) mpRoomCodeEl.value = code;
+        mpSetStatus(triesLeft < 2 ? 'Kod çakıştı, yeni kod deneniyor…' : 'Oda açılıyor…');
+        try { mpPeer = new Peer('d2arena-' + code, { debug: 0 }); }
+        catch (e3) { mpSetStatus('Oda açılamadı: ' + e3.message, true); mpRole = null; return; }
+        var opened = false;
+        mpPeer.on('open', function () {
+          opened = true;
+          mpConnected = false;
+          var lbl = mpRoomLabelText();
+          mpSetStatus('Oda açık: ' + code + (lbl ? ' · ' + lbl : ' (şifresiz)') + '. ' + (mpRoomPass ? 'Şifreyi yalnızca girmesini istediklerine ver. ' : '') + 'Aynı kodu birden fazla arkadaşın kullanabilir; her biri takım kartından seçim yapar. Hazır olunca MAÇI BAŞLAT.');
+          mpRenderRoster(); mpApplyMpLocks();
+        });
+        mpPeer.on('connection', function (conn) { mpHostAttach(conn); });
+        mpPeer.on('error', function (e5) {
+          if (opened || !e5 || !e5.type) return;
+          if (e5.type === 'unavailable-id' && !mpConnected) {
+            if (triesLeft > 0) {
+              triesLeft--;
+              try { if (mpPeer) mpPeer.destroy(); } catch (e6) {}
+              mpPeer = null;
+              setTimeout(tryOpen, 350);
+              return;
+            }
+            mpCleanup();
+            mpSetStatus('Oda kodu buluşma sunucusunda dolu kaldı. Tekrar ODA AÇ dene.', true);
+            return;
+          }
+          if (!opened && !mpConnected && (e5.type === 'network' || e5.type === 'server-error' || e5.type === 'socket-error' || e5.type === 'socket-closed')) {
+            mpSetStatus('Buluşma sunucusu yanıt vermedi (' + e5.type + '). Tekrar dene; internet yoksa manuel kod değişimini kullan.', true);
+          }
+        });
+        mpPeer.on('disconnected', function () {
+          if (!opened && !mpConnected) { mpCleanup(); mpSetStatus('Buluşma sunucusuyla bağlantı koptu. Tekrar dene.', true); }
+        });
+      };
+      tryOpen();
     });
     mpApplyMpLocks(); mpRenderRoster();
   }
@@ -8078,8 +8113,17 @@
     mpBroadcast({ t: 'pings', p: pings });
   }
   function mpNetTick(dt) {
-    if (!mpConnected || !mpRole || !startedOnce || matchEnded) return;
+    if (!mpConnected || !mpRole || matchEnded) return;
+    if (mpRole === 'guest' && !startedOnce) {
+      // maç başladıysa ya da takım atandıysa ana makineden başlatma paketini düzenli olarak iste:
+      // tek bir 'start' paketi kaçarsa konuk lobide mahsur kalmasın
+      mpPlayAcc += dt;
+      if ((mpStarted || mpAssignedTeam) && mpPlayAcc >= 4) { mpPlayAcc = 0; mpSendHost({ t: 'play' }); }
+      return;
+    }
+    if (!startedOnce) return;
     if (mpRole === 'guest') {
+      mpPlayAcc = 0;
       mpStateAcc += dt;
       if (mpStateAcc < 0.03) return;
       mpStateAcc = 0;
