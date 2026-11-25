@@ -1739,14 +1739,16 @@
     o.connect(g2); g2.connect(masterGain);
     o.start(t0); o.stop(t0 + 0.14);
   }
-  function playSwing(heavy) {
+  function playSwing(heavy, vol) {
     if (!actx) return;
+    vol = vol === undefined ? 1 : Math.max(0, Math.min(1, vol));
+    if (vol <= 0.02) return;
     var t0 = actx.currentTime;
     var src = actx.createBufferSource(); src.buffer = noiseBuffer(heavy ? 0.32 : 0.22);
     var bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = heavy ? 0.8 : 1.1;
     bp.frequency.setValueAtTime(heavy ? 420 : 700, t0);
     bp.frequency.exponentialRampToValueAtTime(heavy ? 1700 : 2600, t0 + (heavy ? 0.24 : 0.16));
-    var g = env(t0, heavy ? 0.22 : 0.16, heavy ? 0.02 : 0.012, heavy ? 0.26 : 0.17);
+    var g = env(t0, (heavy ? 0.22 : 0.16) * vol, heavy ? 0.02 : 0.012, heavy ? 0.26 : 0.17);
     src.connect(bp); bp.connect(g); g.connect(masterGain);
     src.start(t0); src.stop(t0 + (heavy ? 0.36 : 0.26));
   }
@@ -2251,6 +2253,27 @@
     applyScope();
     playClack(scopeLevel ? 1350 - scopeLevel * 120 : 900, 0.032, 0.022);
   }
+  var VALID_HELD_ITEMS = { rifle: 1, pistol: 1, sniper: 1, rifle2: 1, pistol2: 1, knife: 1, smoke: 1, flash: 1, he: 1 };
+  function heldItemId() {
+    if (gadgetSel && VALID_HELD_ITEMS[gadgetSel]) return gadgetSel;
+    var w = currentWeapon();
+    return w ? w.id : 'rifle';
+  }
+  function resolveHeldItemId(v) {
+    if (typeof v === 'number' && WEAPONS[v]) return WEAPONS[v].id;
+    if (typeof v === 'string') {
+      if (VALID_HELD_ITEMS[v]) return v;
+      var num = parseInt(v, 10);
+      if (!isNaN(num) && String(num) === v && WEAPONS[num]) return WEAPONS[num].id;
+    }
+    return mapRestricted() ? 'sniper' : 'rifle';
+  }
+  function mpNotifyWeaponSwitch(instant) {
+    if (!startedOnce || !mpConnected || !mpRole || player.hp <= 0) return;
+    var msg = { t: 'sw', frm: mpSelfId, w: heldItemId(), inst: instant ? 1 : 0 };
+    if (mpRole === 'host') mpBroadcast(msg);
+    else mpSendHost(msg);
+  }
   function switchWeapon(idx, instant, force) {
     if (idx < 0 || idx >= WEAPONS.length) return;
     if (mapRestricted()) {
@@ -2261,6 +2284,7 @@
       }
     }
     if (idx === curW && !force && !gadgetSel) return;   // zaten elde: kaldırma animasyonu yok
+    var wasGadget = !!gadgetSel;
     cancelSniperBolt();
     reloading = false;
     if (gadgetSel) {
@@ -2277,6 +2301,7 @@
     triggerHeavyQueued = false;
     if (!instant) playEquip(WEAPONS[idx].id);
     updateHudAmmo();
+    mpNotifyWeaponSwitch(instant && !wasGadget);
   }
   function startReload() {
     if (player.hp <= 0) return;
@@ -2314,6 +2339,7 @@
     triggerHeavyQueued = false;
     playNoiseSweep(1300, 750, 0.09, 0.03, 1.7);
     updateHudAmmo();
+    mpNotifyWeaponSwitch(false);
     return true;
   }
   function chooseSlot(slot) {
@@ -2556,7 +2582,7 @@
       fuse: type === 'he' ? 1.55 : 1.35, spin: (Math.random() - 0.5) * 8 };
     grenades.push(gr);
     if (mpConnected && mpRole) {
-      mpSend({ t: 'gn', ty: type, kt: player.team, x: pos.x, y: pos.y, z: pos.z, vx: gr.vel.x, vy: gr.vel.y, vz: gr.vel.z });
+      mpSend({ t: 'gn', frm: mpSelfId, ty: type, kt: player.team, x: pos.x, y: pos.y, z: pos.z, vx: gr.vel.x, vy: gr.vel.y, vz: gr.vel.z });
     }
     updateHudNades();
     updateHudAmmo();
@@ -2984,6 +3010,178 @@
     var bend = Math.acos(Math.max(-1, Math.min(1, _ikV1.dot(_ikV2))));
     elbow.rotation.set(bend, 0, 0);
   }
+  // --- üçüncü şahıs silah modelleri ve tutuş pozları ---
+  var WEAPON_POSES_3P = {
+    rifle:   { gx: 0.06, gy:  0.00, gz: -0.24, rx: 0,    ry: -0.06, rz: 0,    rh: [ 0.020, -0.075,  0.055], lh: [-0.045, -0.020, -0.240], freeL: false },
+    rifle2:  { gx: 0.06, gy:  0.00, gz: -0.24, rx: 0,    ry: -0.06, rz: 0,    rh: [ 0.020, -0.075,  0.055], lh: [-0.045, -0.020, -0.240], freeL: false },
+    sniper:  { gx: 0.06, gy:  0.00, gz: -0.22, rx: 0,    ry: -0.06, rz: 0,    rh: [ 0.020, -0.075,  0.055], lh: [-0.045, -0.020, -0.230], freeL: false },
+    pistol:  { gx: 0.04, gy:  0.02, gz: -0.40, rx: 0,    ry: -0.04, rz: 0,    rh: [ 0.014, -0.058,  0.042], lh: [-0.038, -0.064,  0.032], freeL: false },
+    pistol2: { gx: 0.04, gy:  0.02, gz: -0.40, rx: 0,    ry: -0.04, rz: 0,    rh: [ 0.014, -0.058,  0.042], lh: [-0.038, -0.064,  0.032], freeL: false },
+    knife:   { gx: 0.16, gy: -0.04, gz: -0.29, rx: 0.18, ry:  0.16, rz: 0.12, rh: [ 0.000, -0.010,  0.060], lh: null,                     freeL: true  },
+    smoke:   { gx: 0.09, gy:  0.02, gz: -0.35, rx: 0.10, ry:  0.06, rz: 0,    rh: [ 0.020, -0.035,  0.020], lh: [-0.055, -0.030, -0.020], freeL: false },
+    flash:   { gx: 0.09, gy:  0.02, gz: -0.35, rx: 0.10, ry:  0.06, rz: 0,    rh: [ 0.020, -0.035,  0.020], lh: [-0.055, -0.030, -0.020], freeL: false },
+    he:      { gx: 0.09, gy:  0.02, gz: -0.35, rx: 0.10, ry:  0.06, rz: 0,    rh: [ 0.020, -0.035,  0.020], lh: [-0.055, -0.030, -0.020], freeL: false }
+  };
+  var NADE_MATS_3P = {
+    smoke: { body: new THREE.MeshLambertMaterial({ color: 0x3b4449 }), band: new THREE.MeshLambertMaterial({ color: 0xc2c8cc }) },
+    flash: { body: new THREE.MeshLambertMaterial({ color: 0x90a4b0 }), band: new THREE.MeshLambertMaterial({ color: 0xeaf6ff }) },
+    he:    { body: new THREE.MeshLambertMaterial({ color: 0x4d5b34 }), band: new THREE.MeshLambertMaterial({ color: 0xd87a38 }) }
+  };
+  function build3rdPersonGun(id) {
+    var g = new THREE.Group();
+    function gp(w, h, d, x, y, z, mat) {
+      var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+      m.position.set(x, y, z); m.userData.noHit = true; g.add(m); return m;
+    }
+    function gc(r, len, x, y, z, mat, seg, r2) {
+      var m = new THREE.Mesh(new THREE.CylinderGeometry(r, r2 != null ? r2 : r, len, seg || 8), mat);
+      m.rotation.x = Math.PI / 2; m.position.set(x, y, z); m.userData.noHit = true; g.add(m); return m;
+    }
+    if (id === 'pistol') {
+      gp(0.042, 0.044, 0.150, 0, 0.004, -0.025, kMat);
+      var gr1 = gp(0.044, 0.110, 0.056, 0, -0.062, 0.035, kMat); gr1.rotation.x = 0.22;
+      gp(0.046, 0.052, 0.230, 0, 0.042, -0.045, bMat);
+      gp(0.034, 0.012, 0.220, 0, 0.070, -0.045, mMat);
+      gc(0.025, 0.140, 0, 0.036, -0.235, bMat, 10);
+      gc(0.027, 0.018, 0, 0.036, -0.310, mMat, 10);
+      g.userData.muzzle = new THREE.Vector3(0, 0.036, -0.325);
+    } else if (id === 'pistol2') {
+      gp(0.046, 0.046, 0.175, 0, 0.002, -0.035, bMat);
+      var gr2 = gp(0.048, 0.120, 0.062, 0, -0.065, 0.038, kMat); gr2.rotation.x = 0.20;
+      gp(0.054, 0.074, 0.280, 0, 0.046, -0.060, steelMat);
+      gp(0.024, 0.014, 0.240, 0, 0.088, -0.060, steelDarkMat);
+      gp(0.042, 0.056, 0.095, 0, 0.034, -0.245, steelDarkMat);
+      g.userData.muzzle = new THREE.Vector3(0, 0.040, -0.300);
+    } else if (id === 'sniper') {
+      gp(0.058, 0.095, 0.300, 0, -0.010, 0.185, oMat);
+      gp(0.050, 0.032, 0.140, 0, 0.050, 0.155, oMat);
+      gp(0.060, 0.105, 0.025, 0, -0.015, 0.340, bMat);
+      gp(0.062, 0.064, 0.340, 0, -0.005, -0.110, oMat);
+      gp(0.062, 0.072, 0.280, 0, 0.012, -0.040, mMat);
+      gp(0.048, 0.085, 0.085, 0, -0.080, -0.090, kMat);
+      var grS = gp(0.048, 0.115, 0.058, 0, -0.095, 0.055, kMat); grS.rotation.x = 0.26;
+      gp(0.036, 0.040, 0.022, 0.036, 0.042, 0.020, mMat);
+      gc(0.017, 0.660, 0, 0.018, -0.580, bMat, 10);
+      gc(0.022, 0.055, 0, 0.018, -0.920, bMat, 10);
+      gp(0.020, 0.028, 0.026, 0, 0.068, -0.180, mMat);
+      gp(0.020, 0.028, 0.026, 0, 0.068, -0.020, mMat);
+      gc(0.028, 0.280, 0, 0.098, -0.110, bMat, 10);
+      gc(0.038, 0.060, 0, 0.098, -0.270, bMat, 10);
+      gp(0.026, 0.026, 0.010, 0, 0.098, -0.302, lensMat);
+      gc(0.034, 0.050, 0, 0.098, 0.045, bMat, 10);
+      g.userData.muzzle = new THREE.Vector3(0, 0.018, -0.955);
+    } else if (id === 'rifle2') {
+      gp(0.064, 0.082, 0.300, 0, 0.000, -0.020, bMat);
+      gp(0.056, 0.018, 0.280, 0, 0.050, -0.020, mMat);
+      gp(0.036, 0.034, 0.190, 0, 0.076, -0.060, bMat);
+      gp(0.056, 0.056, 0.230, 0, 0.004, -0.280, bMat);
+      gp(0.058, 0.014, 0.210, 0, 0.034, -0.280, mMat);
+      gp(0.024, 0.052, 0.032, 0, 0.052, -0.420, bMat);
+      gc(0.015, 0.250, 0, 0.018, -0.490, mMat, 10);
+      gc(0.020, 0.060, 0, 0.018, -0.625, bMat, 10);
+      gp(0.044, 0.155, 0.074, 0, -0.108, -0.115, kMat);
+      gc(0.018, 0.140, 0, 0.008, 0.180, mMat, 8);
+      gp(0.052, 0.086, 0.140, 0, -0.010, 0.280, bMat);
+      gp(0.056, 0.096, 0.022, 0, -0.010, 0.355, kMat);
+      var grM4 = gp(0.044, 0.115, 0.052, 0, -0.088, 0.055, bMat); grM4.rotation.x = 0.26;
+      g.userData.muzzle = new THREE.Vector3(0, 0.018, -0.665);
+    } else if (id === 'knife') {
+      gp(0.030, 0.046, 0.140, 0, 0.000, 0.060, kMat);
+      gp(0.034, 0.052, 0.022, 0, 0.000, 0.138, steelMat);
+      gp(0.044, 0.068, 0.024, 0, 0.002, -0.018, steelMat);
+      gp(0.012, 0.046, 0.240, 0, 0.016, -0.145, bladeMat);
+      gp(0.006, 0.016, 0.240, 0, -0.010, -0.145, bladeEdgeMat);
+      var tip = gp(0.010, 0.028, 0.070, 0, 0.014, -0.290, bladeEdgeMat); tip.rotation.x = 0.24;
+      g.userData.muzzle = new THREE.Vector3(0, 0.015, -0.320);
+    } else if (NADE_MATS_3P[id]) {
+      var nm = NADE_MATS_3P[id];
+      var can = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.044, 0.145, 12), nm.body);
+      can.position.set(0, 0.042, -0.020); can.userData.noHit = true; g.add(can);
+      var bnd = new THREE.Mesh(new THREE.CylinderGeometry(0.046, 0.046, 0.024, 12), nm.band);
+      bnd.position.set(0, 0.060, -0.020); bnd.userData.noHit = true; g.add(bnd);
+      gp(0.034, 0.024, 0.040, 0, 0.125, -0.020, bMat);
+      var pin = new THREE.Mesh(new THREE.TorusGeometry(0.018, 0.0045, 6, 10), steelMat);
+      pin.position.set(0.018, 0.132, -0.020); pin.userData.noHit = true; g.add(pin);
+      g.userData.muzzle = new THREE.Vector3(0, 0.080, -0.060);
+    } else {
+      gp(0.065, 0.085, 0.340, 0, 0, -0.040, mMat);
+      gp(0.058, 0.022, 0.300, 0, 0.054, -0.040, mMat);
+      gp(0.055, 0.055, 0.180, 0, -0.008, -0.260, wMat);
+      gp(0.045, 0.030, 0.120, 0, 0.048, -0.260, wMat);
+      gc(0.017, 0.340, 0, 0.015, -0.470, bMat, 8);
+      gc(0.011, 0.260, 0, 0.044, -0.440, mMat, 8);
+      gp(0.026, 0.055, 0.040, 0, 0.040, -0.600, mMat);
+      gp(0.007, 0.026, 0.007, 0, 0.078, -0.600, bMat);
+      gc(0.021, 0.055, 0, 0.015, -0.645, bMat, 8);
+      gp(0.042, 0.018, 0.042, 0, 0.070, -0.110, mMat);
+      var magA = gp(0.048, 0.085, 0.095, 0, -0.085, -0.130, kMat); magA.rotation.x = -0.12;
+      var magB = gp(0.048, 0.085, 0.095, 0, -0.155, -0.145, kMat); magB.rotation.x = -0.30;
+      var magC = gp(0.048, 0.075, 0.090, 0, -0.215, -0.170, kMat); magC.rotation.x = -0.48;
+      gp(0.055, 0.080, 0.160, 0, -0.010, 0.215, wMat);
+      gp(0.060, 0.095, 0.022, 0, -0.015, 0.305, bMat);
+      gp(0.020, 0.020, 0.050, 0.040, 0.025, 0.055, mMat);
+      gp(0.010, 0.026, 0.045, 0.042, 0.005, 0.035, mMat);
+      var grAK = gp(0.050, 0.120, 0.060, 0, -0.090, 0.055, mMat); grAK.rotation.x = 0.26;
+      g.userData.muzzle = new THREE.Vector3(0, 0.015, -0.695);
+    }
+    return g;
+  }
+  function setAvatarGunVisible(t, vis) {
+    if (!t) return;
+    if (t.gunG) t.gunG.visible = !!vis;
+    if (t.handL) t.handL.visible = !!vis || !t.freeLeftArm;
+    if (t.knuckleL) t.knuckleL.visible = !!vis || !t.freeLeftArm;
+  }
+  function setAvatarWeapon(t, id, animate) {
+    if (!t || !t.gunG) return;
+    id = resolveHeldItemId(id);
+    var changed = t.curGunId !== id;
+    if (!t.gunModels) t.gunModels = {};
+    for (var k in t.gunModels) t.gunModels[k].visible = false;
+    var gm = t.gunModels[id];
+    if (!gm) {
+      gm = build3rdPersonGun(id);
+      t.gunModels[id] = gm;
+      t.gunG.add(gm);
+    }
+    gm.visible = true;
+    t.curGunId = id;
+    var pose = WEAPON_POSES_3P[id] || WEAPON_POSES_3P.rifle;
+    t.gunBase = pose;
+    t.gunG.position.set(pose.gx, pose.gy, pose.gz);
+    t.gunG.rotation.set(pose.rx, pose.ry, pose.rz);
+    if (t.handR) t.handR.position.set(pose.rh[0], pose.rh[1], pose.rh[2]);
+    if (t.knuckleR) t.knuckleR.position.set(pose.rh[0], pose.rh[1] + 0.052, pose.rh[2]);
+    t.freeLeftArm = !!pose.freeL;
+    if (t.freeLeftArm) {
+      if (t.elbowL && t.handL) {
+        t.elbowL.add(t.handL);
+        t.handL.position.set(0, -0.255, 0);
+        t.handL.visible = t.state === 'alive';
+      }
+      if (t.elbowL && t.knuckleL) {
+        t.elbowL.add(t.knuckleL);
+        t.knuckleL.position.set(0, -0.255, -0.048);
+        t.knuckleL.visible = t.state === 'alive';
+      }
+      t.handLBase = null;
+    } else if (pose.lh) {
+      if (t.handL) {
+        t.gunG.add(t.handL);
+        t.handL.position.set(pose.lh[0], pose.lh[1], pose.lh[2]);
+        t.handL.visible = true;
+      }
+      if (t.knuckleL) {
+        t.gunG.add(t.knuckleL);
+        t.knuckleL.position.set(pose.lh[0], pose.lh[1] + 0.052, pose.lh[2]);
+        t.knuckleL.visible = true;
+      }
+      t.handLBase = { x: pose.lh[0], y: pose.lh[1], z: pose.lh[2] };
+    }
+    if (animate && changed) t.switchT = 0;
+    else if (t.switchT === undefined) t.switchT = 1;
+  }
+
   function makeNPC(path, speed, team) {
     var p0 = path[0];
     var t = { id: 'b' + (botIdSeq++), hp: 100, maxHp: 100, armor: 100, maxArmor: 100, dead: false, state: 'alive', fallT: 0, downUntil: 0,
@@ -2992,7 +3190,7 @@
       kills: 0, deaths: 0,
       target: null, nextThink: 0, burstLeft: 0, nextShot: 0, walkPhase: 0,
       protectUntil: 0, recoil: 0, flashT: 0, stuckT: 0, aimPitch: 0, seed: Math.random() * 10, upper: null,
-      crouchAmt: 0, reloadAmt: 0, netReload: 0,
+      crouchAmt: 0, reloadAmt: 0, netReload: 0, switchT: 1, meleeT: 0, meleeHeavy: false, throwT: 0, freeLeftArm: false,
       lastSeenX: 0, lastSeenZ: 0, lastSeenT: 0, retreatT: 0, stunT: 0, scanA: 0, moveSpread: 0, strafeT: 0,
       huntX: null, huntZ: null, huntT: 0 };
     var g = t.group;
@@ -3058,58 +3256,9 @@
     var aim = new THREE.Group();
     aim.position.set(0, 0.46, -0.06);
     up.add(aim); t.aim = aim;
-    // --- tüfek silüeti ---
+    // --- üçüncü şahıs silah kapsayıcısı ve başlangıç silahı ---
     var gunG = new THREE.Group();
-    function gunPart(w, h, d, x, y, z, mat) {
-      var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
-      m.position.set(x, y, z); m.userData.noHit = true; gunG.add(m); return m;
-    }
-    function gunCyl(r, len, x, y, z, mat, seg) {
-      var m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, seg || 8), mat);
-      m.rotation.x = Math.PI / 2;
-      m.position.set(x, y, z);
-      m.userData.noHit = true;
-      gunG.add(m);
-      return m;
-    }
-    // gövde + üst kapak
-    gunPart(0.065, 0.085, 0.340, 0, 0, -0.040, mMat);
-    gunPart(0.058, 0.022, 0.300, 0, 0.054, -0.040, mMat);
-    // ahşap el kundağı
-    gunPart(0.055, 0.055, 0.180, 0, -0.008, -0.260, wMat);
-    gunPart(0.045, 0.030, 0.120, 0, 0.048, -0.260, wMat);
-    // namlu + gaz borusu
-    gunCyl(0.017, 0.34, 0, 0.015, -0.470, bMat);
-    gunCyl(0.011, 0.26, 0, 0.044, -0.440, mMat);
-    gunPart(0.026, 0.055, 0.040, 0, 0.040, -0.600, mMat);     // arpacık kulesi
-    gunPart(0.007, 0.026, 0.007, 0, 0.078, -0.600, bMat);     // arpacık
-    gunCyl(0.021, 0.055, 0, 0.015, -0.645, bMat);             // namlu freni
-    gunPart(0.042, 0.018, 0.042, 0, 0.070, -0.110, mMat);     // gez
-    // kavisli şarjör (AWP modunda düz kısa şarjör + dürbün + uzun namlu)
-    var awpGun = mapRestricted();
-    if (!awpGun) {
-      var magA = gunPart(0.048, 0.085, 0.095, 0, -0.085, -0.130, kMat); magA.rotation.x = -0.12;
-      var magB = gunPart(0.048, 0.085, 0.095, 0, -0.155, -0.145, kMat); magB.rotation.x = -0.30;
-      var magC = gunPart(0.048, 0.075, 0.090, 0, -0.215, -0.170, kMat); magC.rotation.x = -0.48;
-    } else {
-      gunPart(0.052, 0.075, 0.115, 0, -0.085, -0.125, kMat);
-      gunCyl(0.019, 0.62, 0, 0.015, -0.72, bMat);              // uzun namlu
-      gunCyl(0.032, 0.26, 0, 0.088, -0.185, mMat, 10);         // dürbün gövdesi
-      gunCyl(0.040, 0.05, 0, 0.088, -0.335, bMat, 10);         // dürbün ön camı yuvası
-      gunCyl(0.038, 0.04, 0, 0.088, -0.045, bMat, 10);         // arka mercek
-      gunPart(0.03, 0.05, 0.02, 0.03, 0.045, -0.185, mMat);    // sürgü kolu
-    }
-    // dipçik
-    gunPart(0.055, 0.080, 0.160, 0, -0.010, 0.215, wMat);
-    gunPart(0.060, 0.095, 0.022, 0, -0.015, 0.305, teamDark);
-    // sürgü kolu + emniyet
-    gunPart(0.020, 0.020, 0.050, 0.040, 0.025, 0.055, mMat);
-    gunPart(0.010, 0.026, 0.045, 0.042, 0.005, 0.035, mMat);
-    var gunGrip = gunPart(0.05, 0.12, 0.06, 0, -0.09, 0.055, mMat);
-    gunGrip.rotation.x = 0.26;
-    gunG.position.set(0.06, 0.0, -0.24);
-    gunG.rotation.y = -0.06;
-    aim.add(gunG); t.gunG = gunG;
+    aim.add(gunG); t.gunG = gunG; t.gunModels = {};
     // --- iki eklemli kollar: omuz -> dirsek -> ön kol, silah tutuşu ---
     function makeArm(side) {
       var sh = new THREE.Group();
@@ -3133,17 +3282,16 @@
     armL.elbow.rotation.x = 0.50;
     armR.sh.rotation.set(0.98, -0.30, -0.06);
     armR.elbow.rotation.x = 1.05;
-    // taktik eldivenler silahın üzerinde: silahla birlikte hareket eder
+    t.armL = armL.sh; t.armR = armR.sh;
+    t.elbowL = armL.elbow; t.elbowR = armR.elbow;
+    // taktik eldivenler: silaha göre konumlanır
     var handL = part(new THREE.Mesh(new THREE.BoxGeometry(0.105, 0.095, 0.13), nMatGlove), 'body', gunG);
-    handL.position.set(-0.045, -0.020, -0.240);
     var handR = part(new THREE.Mesh(new THREE.BoxGeometry(0.105, 0.095, 0.13), nMatGlove), 'body', gunG);
-    handR.position.set(0.02, -0.075, 0.055);
     var knuckleL = part(new THREE.Mesh(new THREE.BoxGeometry(0.085, 0.03, 0.08), nMatKnee), 'body', gunG);
-    knuckleL.position.set(-0.045, 0.032, -0.240);
     var knuckleR = part(new THREE.Mesh(new THREE.BoxGeometry(0.085, 0.03, 0.08), nMatKnee), 'body', gunG);
-    knuckleR.position.set(0.02, -0.022, 0.055);
-    t.handL = handL; t.handLBase = { x: -0.045, y: -0.020, z: -0.240 };
-    t.handR = handR;
+    t.handL = handL; t.handR = handR;
+    t.knuckleL = knuckleL; t.knuckleR = knuckleR;
+    setAvatarWeapon(t, mapRestricted() ? 'sniper' : 'rifle', false);
     // takım bandı (sol üst kol, kolla birlikte hareket eder) + omuz arma
     var band = part(new THREE.Mesh(new THREE.BoxGeometry(0.145, 0.065, 0.15), teamMat), 'body', armL.upper);
     band.position.set(0, -0.13, 0);
@@ -3808,15 +3956,17 @@
     t.group.visible = true;
     t.group.position.set(sp.x, 0, sp.z);
     t.group.rotation.set(0, t.spawnYaw !== undefined ? t.spawnYaw : 0, 0);
-    if (t.gunG) t.gunG.visible = true;
+    setAvatarGunVisible(t, true);
     t.upper.position.y = 0.78; t.upper.rotation.x = 0;
     if (t.aim) { t.aim.rotation.set(0, 0, 0); t.aim.position.z = -0.06; }
     if (t.gunG) {
-      t.gunG.rotation.set(0, -0.06, 0);
-      t.gunG.position.set(0.06, 0, -0.24);
+      var gbR = t.gunBase || WEAPON_POSES_3P.rifle;
+      t.gunG.rotation.set(gbR.rx, gbR.ry, gbR.rz);
+      t.gunG.position.set(gbR.gx, gbR.gy, gbR.gz);
     }
-    if (t.handL && t.handLBase) t.handL.position.set(t.handLBase.x, t.handLBase.y, t.handLBase.z);
+    if (t.handL && t.handLBase && !t.freeLeftArm) t.handL.position.set(t.handLBase.x, t.handLBase.y, t.handLBase.z);
     t.crouchAmt = 0; t.reloadAmt = 0; t.netReload = 0;
+    t.switchT = 1; t.meleeT = 0; t.meleeHeavy = false; t.throwT = 0;
     t.protectUntil = duelMap() ? 0 : nowS + SPAWN_PROTECT;
     t.target = null; t.burstLeft = 0; t.nextShot = nowS + 1.2;
     t.recoil = 0; t.flashT = 0; t.aimPitch = 0; t.stuckT = 0;
@@ -4123,31 +4273,61 @@
           desiredPitch = Math.max(-0.55, Math.min(0.55, desiredPitch));
         }
         t.aimPitch += (desiredPitch - t.aimPitch) * Math.min(1, dt * 6);
-        // reload: sol el şarjöre iner, silah hafif yana yatar
-        var reloadT = (t.isRemote && (t.netReload || 0) && t.state === 'alive') ? 1 : 0;
+        // reload / silah değiştirme / bıçak / bomba fırlatma animasyonları
+        var canRl = t.curGunId !== 'knife' && t.curGunId !== 'smoke' && t.curGunId !== 'flash' && t.curGunId !== 'he';
+        var reloadT = (t.isRemote && canRl && (t.netReload || 0) && t.state === 'alive') ? 1 : 0;
         t.reloadAmt += (reloadT - t.reloadAmt) * Math.min(1, dt * 7);
-        var rl = t.reloadAmt;
+        var rl = canRl ? t.reloadAmt : 0;
+        if (t.switchT === undefined) t.switchT = 1;
+        if (t.switchT < 1) t.switchT = Math.min(1, t.switchT + dt / 0.28);
+        var swRaw = 1 - t.switchT;
+        var sw = swRaw * swRaw * (3 - 2 * swRaw);
+        if (t.meleeT > 0) {
+          t.meleeT = Math.max(0, t.meleeT - dt * (t.meleeHeavy ? 2.6 : 4.5));
+          if (t.meleeT <= 0) t.meleeHeavy = false;
+        }
+        var ms = t.meleeT > 0 ? Math.sin(Math.PI * (1 - t.meleeT)) * (t.meleeHeavy ? 1.35 : 1) : 0;
+        if (t.throwT > 0) t.throwT = Math.max(0, t.throwT - dt / 0.36);
+        var th = t.throwT > 0 ? Math.sin(Math.PI * (1 - t.throwT)) : 0;
+        var gb = t.gunBase || WEAPON_POSES_3P.rifle;
         if (t.aim) {
-          t.aim.rotation.x = t.aimPitch - t.recoil * 0.05 + rl * 0.12;
+          t.aim.rotation.x = t.aimPitch - t.recoil * 0.05 + rl * 0.12 - sw * 0.26 + th * 0.42;
+          t.aim.rotation.y = sw * 0.12 - ms * 0.16;
           t.aim.rotation.z = rl * 0.22;
           t.aim.position.z = -0.06 - t.recoil * 0.03;
         }
         if (t.gunG) {
-          t.gunG.rotation.z = -rl * 0.55;
-          t.gunG.position.z = -0.24 - t.recoil * 0.05;
+          t.gunG.position.set(
+            gb.gx - ms * 0.09 + sw * 0.04,
+            gb.gy - sw * 0.16 + th * 0.08,
+            gb.gz - t.recoil * 0.05 + sw * 0.08 - ms * 0.14 - th * 0.12
+          );
+          t.gunG.rotation.set(
+            gb.rx - sw * 0.42 - ms * 0.35 - th * 0.30,
+            gb.ry + ms * 0.55,
+            gb.rz - rl * 0.55 - sw * 0.28 + ms * 0.35
+          );
         }
-        if (t.handL && t.handLBase) {
+        if (t.handL && t.handLBase && !t.freeLeftArm) {
           t.handL.position.x = t.handLBase.x - rl * 0.02;
           t.handL.position.y = t.handLBase.y - rl * 0.11;
           t.handL.position.z = t.handLBase.z + rl * 0.09;
         }
-        // iki eklemli kol IK: eller silahın üzerinde kalsın, dirsekler dışa bükülsün
-        if (t.armL && t.elbowL && t.handL) poseArmIK(t.armL, t.elbowL, t.handL, t.gunG, -1);
+        // iki eklemli kol IK: eller silahın üzerinde kalsın; bıçakta sol kol serbest salınsın
+        if (t.freeLeftArm) {
+          if (t.armL && t.elbowL) {
+            var kSwing = moving ? Math.sin(t.walkPhase) * 0.42 : Math.sin(nowS * 1.8 + t.seed) * 0.04;
+            t.armL.rotation.set(0.28 + kSwing - cr * 0.18, 0.08, -0.16);
+            t.elbowL.rotation.set(0.62 + (moving ? 0.18 : 0), 0, 0);
+          }
+        } else if (t.armL && t.elbowL && t.handL) {
+          poseArmIK(t.armL, t.elbowL, t.handL, t.gunG, -1);
+        }
         if (t.armR && t.elbowR && t.handR) poseArmIK(t.armR, t.elbowR, t.handR, t.gunG, 1);
       }
       if (t.state === 'falling') {
         t.upper.position.y = 0.78;
-        if (t.gunG) t.gunG.visible = false;
+        setAvatarGunVisible(t, false);
         ragdollLimp(t, dt);
         t.fallT += dt / 0.42;
         var kf = Math.min(1, t.fallT);
@@ -4299,11 +4479,17 @@
       }
     }
     if (!w.melee) spawnTracer(muzzleWorld, end);
-    if (mpConnected && mpRole && !w.melee) {
-      var pfMsg = { t: 'pf', frm: mpSelfId, x: muzzleWorld.x, y: muzzleWorld.y, z: muzzleWorld.z,
-        dx: dir.x, dy: dir.y, dz: dir.z, w: w.id };
-      if (mpRole === 'host') mpBroadcast(pfMsg);
-      else mpSendHost(pfMsg);
+    if (mpConnected && mpRole) {
+      if (w.melee) {
+        var meMsg = { t: 'me', frm: mpSelfId, hv: heavy ? 1 : 0 };
+        if (mpRole === 'host') mpBroadcast(meMsg);
+        else mpSendHost(meMsg);
+      } else {
+        var pfMsg = { t: 'pf', frm: mpSelfId, x: muzzleWorld.x, y: muzzleWorld.y, z: muzzleWorld.z,
+          dx: dir.x, dy: dir.y, dz: dir.z, w: w.id };
+        if (mpRole === 'host') mpBroadcast(pfMsg);
+        else mpSendHost(pfMsg);
+      }
     }
     if (w.id === 'sniper' && !matchEnded) beginSniperBolt(wasScoped);
   }
@@ -7443,6 +7629,20 @@
       if (mpRole === 'host') mpBroadcast(m, rec.id);
       return;
     }
+    if (m.t === 'sw') {
+      var swId = resolveHeldItemId(m.w);
+      rec.pendingW = swId;
+      if (rec.last) rec.last.w = swId;
+      if (rec.avatar) mpApplyRemoteWeapon(rec.avatar, swId, !m.inst && rec.avatar.state === 'alive');
+      mpBroadcast({ t: 'sw', frm: rec.id, w: swId, inst: m.inst ? 1 : 0 }, rec.id);
+      return;
+    }
+    if (m.t === 'me') {
+      m.frm = rec.id;
+      mpBroadcast(m, rec.id);
+      mpShowRemoteMelee(m, rec.avatar);
+      return;
+    }
     if (m.t === 'pf') {
       m.frm = rec.id;
       mpBroadcast(m, rec.id);
@@ -7450,8 +7650,8 @@
       return;
     }
     if (m.t === 'gn') {
-      mpApplyGrenade(m);
       m.frm = rec.id;
+      mpApplyGrenade(m);
       mpBroadcast(m, rec.id);
       return;
     }
@@ -7737,7 +7937,7 @@
         duAv.state = 'alive'; duAv.dead = false; duAv.fallT = 0;
         duAv.group.visible = true;
         duAv.hp = 100; duAv.armor = 100;
-        if (duAv.gunG) duAv.gunG.visible = true;
+        setAvatarGunVisible(duAv, true);
         drawBotBar(duAv);
       }
       respawn();
@@ -7745,6 +7945,12 @@
       return;
     }
     if (m.t === 'wd') { mpWorldUpdate(m); return; }
+    if (m.t === 'sw') {
+      var swAv = m.frm ? mpAvatars[m.frm] : null;
+      if (swAv) mpApplyRemoteWeapon(swAv, m.w, !m.inst && swAv.state === 'alive');
+      return;
+    }
+    if (m.t === 'me') { mpShowRemoteMelee(m, m.frm ? mpAvatars[m.frm] : null); return; }
     if (m.t === 'hs') { mpHeadshotCue(m.x, m.y, m.z); return; }
     if (m.t === 'as') { if (typeof m.n === 'number') stats.assists = m.n; return; }
     if (m.t === 'pf') { mpShowRemoteShot(m, m.frm ? mpAvatars[m.frm] : null); return; }
@@ -7942,6 +8148,14 @@
     av.netCrouch = 0; av.netPitch = 0;
     av.hp = 100; av.armor = 100; av.kills = 0; av.deaths = 0; av.assists = 0;
     av.protectUntil = duelMap() ? 0 : performance.now() / 1000 + SPAWN_PROTECT;
+    var gRec = mpGuests && mpGuests[id];
+    if (gRec && gRec.last && gRec.last.w !== undefined) {
+      av.hasNetW = true;
+      setAvatarWeapon(av, gRec.last.w, false);
+    } else if (gRec && gRec.pendingW) {
+      av.hasNetW = true;
+      setAvatarWeapon(av, gRec.pendingW, false);
+    }
     drawBotBar(av);
     mpAvatars[id] = av;
     if (!mpRemote) mpRemote = av;
@@ -8011,7 +8225,7 @@
         gh.group.rotation.x = 0;
         gh.group.position.set(b.x, 0, b.z);
         gh.group.rotation.y = b.ya || 0;
-        if (gh.gunG) gh.gunG.visible = true;
+        setAvatarGunVisible(gh, true);
         if (wasGone) { scene.add(gh.group); rebuildHittables(); }
       }
     }
@@ -8022,10 +8236,16 @@
         var mzg = botMuzzle(gh);
         if (gh.flash) { gh.flash.position.set(mzg.x, mzg.y, mzg.z); gh.flash.visible = true; }
         var pdg = Math.sqrt(Math.pow(mzg.x - player.x, 2) + Math.pow(mzg.z - player.z, 2));
-        playShot('rifle', Math.max(0.04, Math.min(1, 1 - pdg / 55)));
+        playShot(botWeaponId(), Math.max(0.04, Math.min(1, 1 - pdg / 55)));
       }
     } else gh.netFiring = false;
     drawBotBar(gh);
+  }
+  function mpApplyRemoteWeapon(av, w, animate) {
+    if (!av || w === undefined || w === null) return;
+    var wid = resolveHeldItemId(w);
+    av.hasNetW = true;
+    if (av.curGunId !== wid) setAvatarWeapon(av, wid, !!animate);
   }
   function mpRemoteUpdate(av, p) {
     if (!av || !p) return;
@@ -8036,17 +8256,22 @@
     av.netReload = p.rl ? 1 : 0;
     av.hp = p.hp; av.armor = p.ar;
     var alive = av.state === 'alive';
+    var respawned = false;
     if (p.hp <= 0) {
       if (alive) { av.state = 'falling'; av.fallT = 0; av.dead = true; setRagdollFall(av, null, null, null); }
     } else if (!alive) {
       var wasGone = av.state === 'gone';
       av.state = 'alive'; av.fallT = 0; av.dead = false;
+      respawned = true;
       av.group.rotation.x = 0;
       av.group.rotation.z = 0;
       av.group.position.set(p.x, av.netY || 0, p.z);
       av.group.rotation.y = p.ya || 0;
-      if (av.gunG) av.gunG.visible = true;
+      setAvatarGunVisible(av, true);
       if (wasGone) { scene.add(av.group); rebuildHittables(); }
+    }
+    if (p.w !== undefined && p.w !== null) {
+      mpApplyRemoteWeapon(av, p.w, alive && !respawned && !!av.hasNetW);
     }
     drawBotBar(av);
   }
@@ -8056,8 +8281,12 @@
     var d2 = new THREE.Vector3(m.dx, m.dy, m.dz);
     // efekt, göz hizasındaki birinci şahıs noktasından değil, görünen modelin namlu ucundan çıksın
     if (avatar && avatar.gunG && avatar.gunG.visible && avatar.state === 'alive') {
+      if (m.w) mpApplyRemoteWeapon(avatar, m.w, false);
       avatar.group.updateMatrixWorld(true);
-      mz.set(0, 0.015, -0.695);
+      var gm = avatar.gunModels && avatar.gunModels[avatar.curGunId];
+      var mOff = gm && gm.userData.muzzle;
+      if (mOff) mz.copy(mOff);
+      else mz.set(0, 0.015, -0.695);
       avatar.gunG.localToWorld(mz);
     }
     spawnTracer(mz, mz.clone().addScaledVector(d2, 60));
@@ -8068,8 +8297,18 @@
       if (avatar.flash) { avatar.flash.position.copy(mz); avatar.flash.visible = true; }
     }
   }
+  function mpShowRemoteMelee(m, avatar) {
+    if (!startedOnce || !avatar || avatar.state !== 'alive') return;
+    mpApplyRemoteWeapon(avatar, 'knife', false);
+    avatar.meleeT = 1;
+    avatar.meleeHeavy = !!(m && m.hv);
+    var pd = Math.sqrt(Math.pow(avatar.group.position.x - player.x, 2) + Math.pow(avatar.group.position.z - player.z, 2));
+    playSwing(!!(m && m.hv), Math.max(0, Math.min(1, 1 - pd / 24)));
+  }
   function mpApplyGrenade(m) {
     if (!startedOnce) return;
+    var gAv = m.frm ? mpAvatars[m.frm] : null;
+    if (gAv && gAv.state === 'alive') gAv.throwT = 1;
     var colsG = { smoke: 0x3b4449, flash: 0x9aa4ab, he: 0x59623e };
     var meshG = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8),
       new THREE.MeshLambertMaterial({ color: colsG[m.ty] || 0x3b4449 }));
@@ -8134,7 +8373,7 @@
   function mpPlayerState() {
     return { x: +player.x.toFixed(2), y: +player.y.toFixed(2), z: +player.z.toFixed(2),
       ya: +player.yaw.toFixed(3), pi: +player.pitch.toFixed(3), c: +player.crouch.toFixed(2),
-      hp: Math.round(player.hp), ar: Math.round(player.armor), w: curW, g: scopeLevel, rl: reloading ? 1 : 0,
+      hp: Math.round(player.hp), ar: Math.round(player.armor), w: heldItemId(), g: scopeLevel, rl: reloading ? 1 : 0,
       fb: flashBlindT > 0 ? 1 : 0 };
   }
   function mpPingTick(dt) {
@@ -8202,16 +8441,17 @@
       for (var id in mpGuests) {
         var g = mpGuests[id];
         if (!g.team) continue;
+        var defW = g.pendingW || (g.avatar && g.avatar.curGunId) || (mapRestricted() ? 'sniper' : 'rifle');
         var gs = g.last ? g.last : (g.avatar ? {
           x: +g.avatar.group.position.x.toFixed(2), y: +g.avatar.group.position.y.toFixed(2),
           z: +g.avatar.group.position.z.toFixed(2),
           ya: +g.avatar.group.rotation.y.toFixed(3), c: 0, pi: 0,
-          hp: Math.round(g.avatar.hp), ar: Math.round(g.avatar.armor), w: 'rifle', g: 0
-        } : { x: 0, y: 0, z: 0, ya: 0, c: 0, pi: 0, hp: 100, ar: 100, w: 'rifle', g: 0 });
+          hp: Math.round(g.avatar.hp), ar: Math.round(g.avatar.armor), w: defW, g: 0, rl: 0
+        } : { x: 0, y: 0, z: 0, ya: 0, c: 0, pi: 0, hp: 100, ar: 100, w: defW, g: 0, rl: 0 });
         players.push({ id: id, name: g.name, team: g.team, x: gs.x, y: gs.y || 0, z: gs.z,
           ya: gs.ya || 0, pi: gs.pi || 0, c: gs.c || 0,
           hp: typeof g.hp === 'number' ? g.hp : gs.hp, ar: typeof g.ar === 'number' ? g.ar : gs.ar,
-          w: gs.w, g: gs.g || 0, as: g.assists || 0 });
+          w: resolveHeldItemId(gs.w !== undefined ? gs.w : defW), g: gs.g || 0, rl: gs.rl ? 1 : 0, as: g.assists || 0 });
       }
       var wd = { t: 'wd', bots: bots, players: players,
         sc: { blue: matchScore.blue, red: matchScore.red },
@@ -8677,7 +8917,8 @@
       var remoteInfo = null;
       if (mpRemote) remoteInfo = { id: mpRemote.netId || mpRemote.id, name: mpRemote.name,
         x: +mpRemote.group.position.x.toFixed(2), z: +mpRemote.group.position.z.toFixed(2),
-        hp: mpRemote.hp, st: mpRemote.state };
+        hp: mpRemote.hp, st: mpRemote.state, w: mpRemote.curGunId || null,
+        switchT: +(mpRemote.switchT !== undefined ? mpRemote.switchT : 1).toFixed(2) };
       return { role: mpRole, connected: mpConnected, name: mpName, selfId: mpSelfId,
         hostId: mpHostId, started: mpStarted, balance: mpBalance, assignedTeam: mpAssignedTeam,
         banned: Object.keys(mpBanned), guests: guests, roster: mpRosterCache,
@@ -8788,6 +9029,7 @@
     npcInfo: function () {
       return targets.map(function (t) {
         return { x: +t.group.position.x.toFixed(2), z: +t.group.position.z.toFixed(2), st: t.state, hp: Math.round(t.hp), armor: Math.round(t.armor), team: t.team, name: t.name,
+          w: t.curGunId || null, switchT: +(t.switchT !== undefined ? t.switchT : 1).toFixed(2),
           tgt: t.target ? (t.target.kind === 'player' ? 'player' : 'bot') : null,
           tgtTeam: t.target ? (t.target.kind === 'player' ? player.team : t.target.bot.team) : null,
           prot: +Math.max(0, t.protectUntil - performance.now() / 1000).toFixed(2),
